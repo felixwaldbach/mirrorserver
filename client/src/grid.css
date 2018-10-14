@@ -1,0 +1,47 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: black;
+  color: white;
+  font-size: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  align-items: start;
+  height: 100%;
+  width: 100%;
+  display: inline-block;
+  float: left;
+}
+
+.container:after {
+  display: table;
+}
+
+.upper-row {
+  position:fixed;
+  top: 0;
+  height: 25%;
+  width: 100%;
+  margin-top: 1%;
+}
+
+.lower-row {
+  position: fixed;
+  bottom: 0;
+  height: 25%;
+  width: 100%;
+  margin-bottom: 1%;
+}
+
+#widget {
+  border: 0.5px solid white;
+  padding: 1%;
+  height: 100%;
+  width: 25%;
+  float: left;
+}

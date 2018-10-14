@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
-import './App.css';
 
-import Horizontal from "./layouts/Horizontal";
-import Vertical from "./layouts/Vertical";
+import Grid from "./layouts/Grid";
 import ClockWidget from "./widgets/ClockWidget";
 import NewsFeed from "./widgets/NewsFeed";
 
@@ -31,13 +29,17 @@ class App extends Component {
 
     render() {
 
+        // Reihenfolge der pushes bzw. Stelle wo es uebersprungen ist, wird in der App festgelegt
         this.state.widgets = [];
-        this.state.widgets.push(<ClockWidget style={{color: 'blue', fontFamily: 'italic'}}/>);
+        this.state.widgets.push(<ClockWidget style={{color: 'white'}}/>);
         this.state.widgets.push(<NewsFeed />);
 
         return (
             <div>
-                {this.state.horizontal ? <Horizontal widgets={this.state.widgets} />: <Vertical widgets={this.state.widgets}/>}
+                {this.state.horizontal ?
+                  <Grid widgets={this.state.widgets} />
+                  : null
+                }
             </div>
         );
     }

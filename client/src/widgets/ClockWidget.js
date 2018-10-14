@@ -7,7 +7,7 @@ class ClockWidget extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            style: props.style
+          style: props.style
         }
     }
 
@@ -17,7 +17,9 @@ class ClockWidget extends Component {
 
     render() {
         return (
-            <Clock style={this.state.style}/>
+            <div>
+              <Clock style={this.state.style}/>
+            </div>
         );
     }
 }
