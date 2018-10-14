@@ -14,14 +14,13 @@ app.get('/api/hello', (req, res) => {
 
 io.on('connection', function (socket) {
     console.log('a user connected: ' + socket.id);
+
+    socket.on('message', function (data) {
+      console.log(data);
+    });
 });
 
 io.on('test', function (message) {
-    console.log("Message received");
-    console.log(message);
-});
-
-io.on('message', function (message) {
     console.log("Message received");
     console.log(message);
 });
