@@ -19,10 +19,6 @@ class ClockWidget extends Component {
         }
     }
 
-    state = {
-        response: ''
-    };
-
     componentDidMount() {
       this.intervalID = setInterval(
         () => this.tick(),
@@ -48,7 +44,7 @@ class ClockWidget extends Component {
     render() {
         return (
             <div className="clock-container">
-              <h1><Clock style={this.state.style} /></h1>
+              <h1><Clock /></h1>
               <h2>{weekdays[this.state.weekday]}, {this.state.date}.{this.state.month}.{this.state.year}</h2>
             </div>
         );
