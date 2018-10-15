@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 
 import Clock from 'clock-react';
+import '../custom.css';
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thurdsay", "Friday", "Saturday"];
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -46,7 +47,7 @@ class ClockWidget extends Component {
 
     render() {
         return (
-            <div>
+            <div className="clock-container">
               <h1><Clock style={this.state.style} /></h1>
               <h2>{weekdays[this.state.weekday]}, {this.state.date}.{this.state.month}.{this.state.year}</h2>
             </div>
