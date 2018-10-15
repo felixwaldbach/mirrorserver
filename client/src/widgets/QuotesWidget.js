@@ -12,10 +12,22 @@ class QuotesWidget extends Component {
   }
 
   componentDidMount() {
-      this.callApi()
+    this.callApi()
+        .then(res => this.setState({response: res}))
+        .catch(err => console.log(err));
+
+    this.intervalID = setInterval(
+      () => this.callApi()
           .then(res => this.setState({response: res}))
-          .catch(err => console.log(err));
+          .catch(err => console.log(err)),
+      3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
+    );
   }
+
+  componentWillUnmount() {
+    clearInterval(this.intervalID);
+  }
+
 
   callApi = async () => {
     //https://talaikis.com/random_quotes_api/
