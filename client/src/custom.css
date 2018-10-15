@@ -1,3 +1,7 @@
 .clock-container {
   text-align: center;
 }
+
+.news-container li {
+  list-style-type: square;
+}

@@ -9,8 +9,12 @@ class NewsFeed extends Component {
     render() {
 
         return (
-            <div>
-                Feed
+            <div className="news-container">
+              <h2>Current News:</h2>
+              <li>Barcaaaaa</li>
+              <li>Lets go..</li>
+              <li>Morgen 23 Grad</li>
+              <li>Nice</li>
             </div>
         );
     }

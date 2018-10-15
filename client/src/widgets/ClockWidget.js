@@ -12,7 +12,6 @@ class ClockWidget extends Component {
         super(props);
         this.state = {
           style: props.style,
-          time: new Date().toLocaleString(),
           weekday: weekdays[new Date().getDay()],
           month: new Date().getMonth(),
           year: new Date().getFullYear()
