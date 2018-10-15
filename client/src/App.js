@@ -3,6 +3,7 @@ import React, {Component} from 'react';
 import Grid from "./layouts/Grid";
 import ClockWidget from "./widgets/ClockWidget";
 import NewsFeed from "./widgets/NewsFeed";
+import WeatherWidget from "./widgets/WeatherWidget";
 
 class App extends Component {
 
@@ -33,6 +34,7 @@ class App extends Component {
         this.state.widgets = [];
         this.state.widgets.push(<ClockWidget style={{color: 'white'}}/>);
         this.state.widgets.push(<NewsFeed />);
+        this.state.widgets.push(<WeatherWidget />);
 
         return (
             <div>
