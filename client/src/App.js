@@ -6,18 +6,26 @@ import NewsFeed from "./widgets/NewsFeed";
 import WeatherWidget from "./widgets/WeatherWidget";
 import QuotesWidget from "./widgets/QuotesWidget";
 
+import socketIOClient from "socket.io-client";
+import frontendConfig from './frontendConfig';
+
 class App extends Component {
 
     state = {
         response: '',
         horizontal: true,
-        widgets: []
+        widgets: [],
+        endpoint: frontendConfig.server_address + ':' + frontendConfig.socket_server_port
     };
 
     componentDidMount() {
         this.callApi()
             .then(res => this.setState({response: res.express}))
             .catch(err => console.log(err));
+        const socket = socketIOClient(this.state.endpoint);
+        socket.emit('message', {
+            message: 'Hello World'
+        });
     }
 
     callApi = async () => {
