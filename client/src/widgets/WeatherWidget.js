@@ -2,6 +2,9 @@
 // api.openweathermap.org/data/2.5/weather?q=Stuttgart&APPID=ba26397fa9d26d3655feda1b51d4b79d
 // Please, always use your API keys as &APPID=ba26397fa9d26d3655feda1b51d4b79d in any queries.
 
+// 5 day forecast api: api.openweathermap.org/data/2.5/forecast?q=Stuttgart,DE&APPID=ba26397fa9d26d3655feda1b51d4b79d
+//       https://openweathermap.org/forecast5
+
 import React, {Component} from 'react';
 import $ from 'jquery';
 import kelvinToCelsius from 'kelvin-to-celsius';
