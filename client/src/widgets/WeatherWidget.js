@@ -8,8 +8,12 @@
 import React, {Component} from 'react';
 import $ from 'jquery';
 import kelvinToCelsius from 'kelvin-to-celsius';
+import socketIOClient from "socket.io-client";
+import frontendConfig from '../frontendConfig';
 import '../css/weather-icons.css';
 import '../font/css/custom.css';
+
+var five_day_forecast = [];
 
 class WeatherWidget extends Component {
 
@@ -17,21 +21,35 @@ class WeatherWidget extends Component {
         super(props);
         this.state = {
             current_indoor_temperature: 0,
-            current_outdoor_temperature: 0
+            current_outdoor_temperature: 0,
+            five_day_forecast: [],
+            endpoint: frontendConfig.server_address + ':' + frontendConfig.socket_server_port
         }
     }
 
     componentDidMount() {
-      this.callApi()
-          .then(res => this.setState({response: res}))
-          .catch(err => console.log(err));
+        // WebSockets
+        this.socket = socketIOClient(this.state.endpoint);
+        this.socket.emit('send_weather_forecast', {
+            message: "send me forecast please!"
+        });
 
-      this.intervalID = setInterval(
-        () => this.callApi()
-            .then(res => this.setState({response: res}))
-            .catch(err => console.log(err)),
-        3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
-      );
+        this.socket.on('five_day_forecast', function (data) {
+            addWeatherForecastToUI(data);
+        });
+
+        this.intervalID = setInterval( () => {
+            this.socket.emit('send_weather_forecast', {
+                message: "send me forecast please!"
+            })},
+            3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
+        );
+
+        const addWeatherForecastToUI = data => {
+            if(data) {
+                console.log(JSON.parse(data.forecast));
+            }
+        };
     }
 
     componentWillUnmount() {
@@ -39,29 +57,9 @@ class WeatherWidget extends Component {
     }
 
 
-    callApi = async () => {
-      //https://talaikis.com/random_quotes_api/
-      //reload quote every 2 hour
-
-      $.ajax({
-        url: "https://api.openweathermap.org/data/2.5/weather?q=Stuttgart&APPID=ba26397fa9d26d3655feda1b51d4b79d",
-        dataType: 'json',
-        cache: false,
-        type: "GET",
-        success: function(data) {
-          let temperature = kelvinToCelsius(data.main.temp);
-          console.log(data.main.temp);
-          console.log(kelvinToCelsius(data.main.temp));
-          this.setState({current_indoor_temperature: temperature});
-        }.bind(this),
-        error: function(xhr, status, err){
-          console.log(err);
-        }
-      });
-
-    }
 
     render() {
+        five_day_forecast = this.state.five_day_forecast;
 
         return (
             <div className="weather-container">
