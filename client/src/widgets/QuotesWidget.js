@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import $ from 'jquery';
 import socketIOClient from "socket.io-client";
 import frontendConfig from '../frontendConfig';
 
@@ -34,7 +33,7 @@ class QuotesWidget extends Component {
         const addQuotesToUI = data => {
             if(data) {
                 let quote = JSON.parse(data.randomQuote).quote + " - " + JSON.parse(data.randomQuote).author;
-                this.setState({quote: quote});    
+                this.setState({quote: quote});
             }
         };
     }

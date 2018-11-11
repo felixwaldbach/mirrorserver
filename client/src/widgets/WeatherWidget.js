@@ -6,7 +6,6 @@
 //       https://openweathermap.org/forecast5
 
 import React, {Component} from 'react';
-import $ from 'jquery';
 import kelvinToCelsius from 'kelvin-to-celsius';
 import socketIOClient from "socket.io-client";
 import frontendConfig from '../frontendConfig';
