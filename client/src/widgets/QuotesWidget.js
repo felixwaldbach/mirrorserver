@@ -9,7 +9,6 @@ class QuotesWidget extends Component {
       super(props);
         this.state = {
             quote: "",
-            author: "",
             endpoint: frontendConfig.server_address + ':' + frontendConfig.socket_server_port
         }
     }
@@ -33,8 +32,10 @@ class QuotesWidget extends Component {
         );
 
         const addQuotesToUI = data => {
-            this.setState({quote: JSON.parse(data.randomQuote).quote});
-            this.setState({author: JSON.parse(data.randomQuote).author});
+            if(data) {
+                let quote = JSON.parse(data.randomQuote).quote + " - " + JSON.parse(data.randomQuote).author;
+                this.setState({quote: quote});    
+            }
         };
     }
 
@@ -45,7 +46,7 @@ class QuotesWidget extends Component {
     render() {
         return (
             <div className="quotes-container">
-              <span>{this.state.quote} - {this.state.author}</span>
+              <span>{this.state.quote}</span>
             </div>
         );
     }
