@@ -6,6 +6,8 @@ const port = process.env.PORT || 5000;
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
+const currentUser = "Emre";
+
 app.get('/api/hello', (req, res) => {
     res.send({express: 'Hello From Express'});
 });
