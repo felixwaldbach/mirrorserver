@@ -7,12 +7,12 @@
 }
 
 .weather-container {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .weather-container table {
   width: 100%;
-
+  color: white;
 }
 
 .weather-container td, th {

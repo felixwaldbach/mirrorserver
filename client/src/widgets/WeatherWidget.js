@@ -8,6 +8,8 @@
 import React, {Component} from 'react';
 import $ from 'jquery';
 import kelvinToCelsius from 'kelvin-to-celsius';
+import '../css/weather-icons.css';
+import '../font/css/custom.css';
 
 class WeatherWidget extends Component {
 
@@ -74,11 +76,11 @@ class WeatherWidget extends Component {
                     <th>Fri</th>
                   </tr>
                   <tr>
-                      <td>logo</td>
-                      <td>logo</td>
-                      <td>logo</td>
-                      <td>logo</td>
-                      <td>logo</td>
+                      <td><i className="wi wi-day-sunny"></i></td>
+                      <td><i className="wi wi-day-storm-showers"></i></td>
+                      <td><i className="wi wi-solar-eclipse"></i></td>
+                      <td><i className="wi wi-day-light-wind"></i></td>
+                      <td><i className="wi wi-day-cloudy-high"></i></td>
                   </tr>
                   <tr>
                     <td>22° C</td>
@@ -88,7 +90,6 @@ class WeatherWidget extends Component {
                     <td>24° C</td>
                   </tr>
                 </table>
-
             </div>
         );
     }
