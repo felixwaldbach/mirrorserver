@@ -1,56 +1,48 @@
 import React, {Component} from 'react';
 import $ from 'jquery';
+import socketIOClient from "socket.io-client";
+import frontendConfig from '../frontendConfig';
 
 class QuotesWidget extends Component {
 
-  constructor(props) {
+    constructor(props) {
       super(props);
-      this.state = {
-        quote: "",
-        author: ""
-      }
-  }
+        this.state = {
+            quote: "",
+            author: "",
+            endpoint: frontendConfig.server_address + ':' + frontendConfig.socket_server_port
+        }
+    }
 
-  componentDidMount() {
-    this.callApi()
-        .then(res => this.setState({response: res}))
-        .catch(err => console.log(err));
+    componentDidMount() {
+        // WebSockets
+        this.socket = socketIOClient(this.state.endpoint);
+        this.socket.emit('send_quotes', {
+            message: "send me quotes please!"
+        });
 
-    this.intervalID = setInterval(
-      () => this.callApi()
-          .then(res => this.setState({response: res}))
-          .catch(err => console.log(err)),
-      3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
-    );
-  }
+        this.socket.on('new_quotes', function (data) {
+            addQuotesToUI(data);
+        });
 
-  componentWillUnmount() {
-    clearInterval(this.intervalID);
-  }
+        this.intervalID = setInterval( () =>
+            this.socket.on('new_quotes', function (data) {
+                addQuotesToUI(data);
+            }),
+            3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
+        );
 
+        const addQuotesToUI = data => {
+            this.setState({quote: JSON.parse(data.randomQuote).quote});
+            this.setState({author: JSON.parse(data.randomQuote).author});
+        };
+    }
 
-  callApi = async () => {
-    //https://talaikis.com/random_quotes_api/
-    //reload quote every 2 hour
-
-    $.ajax({
-      url: "https://talaikis.com/api/quotes/random",
-      dataType: 'json',
-      cache: false,
-      type: "GET",
-      success: function(data) {
-        this.setState({quote: JSON.stringify(data.quote)});
-        this.setState({author: JSON.stringify(data.author)});
-      }.bind(this),
-      error: function(xhr, status, err){
-        console.log(err);
-      }
-    });
-
-  }
+    componentWillUnmount() {
+        clearInterval(this.intervalID);
+    }
 
     render() {
-
         return (
             <div className="quotes-container">
               <span>{this.state.quote} - {this.state.author}</span>

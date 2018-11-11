@@ -5,6 +5,7 @@ const port = process.env.PORT || 5000;
 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var shell = require('shelljs');
 
 const currentUser = "Emre";
 
@@ -19,7 +20,16 @@ io.on('connection', function (socket) {
     });
 
     socket.on('message', function (data) {
-      console.log(data);
+        console.log(data);
+    });
+
+    // QuotesWidget.js
+    // Send random quotes to UI. Use CURL and GET
+    socket.on('send_quotes', function (data) {
+        console.log(data);
+        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET https://talaikis.com/api/quotes/random/", function (code, stdout, stderr) {
+            io.emit('new_quotes', { randomQuote: stdout});
+        });
     });
 });
 
