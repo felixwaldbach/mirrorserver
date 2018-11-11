@@ -14,7 +14,8 @@ class WeatherWidget extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          current_temperature: 0
+            current_indoor_temperature: 0,
+            current_outdoor_temperature: 0
         }
     }
 
@@ -49,7 +50,7 @@ class WeatherWidget extends Component {
           let temperature = kelvinToCelsius(data.main.temp);
           console.log(data.main.temp);
           console.log(kelvinToCelsius(data.main.temp));
-          this.setState({current_temperature: temperature});
+          this.setState({current_indoor_temperature: temperature});
         }.bind(this),
         error: function(xhr, status, err){
           console.log(err);
@@ -62,9 +63,31 @@ class WeatherWidget extends Component {
 
         return (
             <div className="weather-container">
-              <h1>Current: {this.state.current_temperature}° C</h1>
-              <span>Weather Forecast:</span>
-              <li>20.10.2018 - 99° C</li>
+                <h2>Indoor: {this.state.current_indoor_temperature}° C <br /> Outdoor: {this.state.current_indoor_temperature}° C</h2>
+
+                <table>
+                  <tr id="head-border">
+                    <th>Mon</th>
+                    <th>Tue</th>
+                    <th>Wed</th>
+                    <th>Thur</th>
+                    <th>Fri</th>
+                  </tr>
+                  <tr>
+                      <td>logo</td>
+                      <td>logo</td>
+                      <td>logo</td>
+                      <td>logo</td>
+                      <td>logo</td>
+                  </tr>
+                  <tr>
+                    <td>22° C</td>
+                    <td>33° C</td>
+                    <td>45° C</td>
+                    <td>23° C</td>
+                    <td>24° C</td>
+                  </tr>
+                </table>
 
             </div>
         );

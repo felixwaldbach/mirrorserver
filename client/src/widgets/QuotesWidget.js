@@ -25,10 +25,10 @@ class QuotesWidget extends Component {
             addQuotesToUI(data);
         });
 
-        this.intervalID = setInterval( () =>
-            this.socket.on('new_quotes', function (data) {
-                addQuotesToUI(data);
-            }),
+        this.intervalID = setInterval( () => {
+            this.socket.emit('send_quotes', {
+                message: "send me quotes please!"
+            })},
             3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
         );
 

@@ -10,6 +10,19 @@
   font-size: 12px;
 }
 
+.weather-container table {
+  width: 100%;
+
+}
+
+.weather-container td, th {
+  text-align: center;
+}
+
+#head-border {
+    color: red;
+}
+
 .todo-container {
   font-size: 12px;
 }
