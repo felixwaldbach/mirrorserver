@@ -9,7 +9,7 @@ import React, {Component} from 'react';
 import kelvinToCelsius from 'kelvin-to-celsius';
 import socketIOClient from "socket.io-client";
 import frontendConfig from '../frontendConfig';
-import '../css/weather-icons.css';
+import '../font/css/weather-icons.css';
 import '../font/css/custom.css';
 
 var five_day_forecast = [];
