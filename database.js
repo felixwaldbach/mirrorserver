@@ -17,7 +17,7 @@ const funcall = module.exports = {
           if (err) throw err;
           if (docs) {
             res.send(JSON.stringify({
-                state: false,
+                status: false,
                 message: "This username is not available. Please try another one."
             }));
             client.close();
@@ -33,13 +33,13 @@ const funcall = module.exports = {
                 if(err) {
                   console.log(err);
                   res.send(JSON.stringify({
-                    state: false,
+                    status: false,
                     message: "Something went wrong registering this user. Please try again!"
                   }));
                 } else {
                     console.log("User created: " + username);
                     res.send(JSON.stringify({
-                      state: true,
+                      status: true,
                       message: "Your user registration was successful. Please go to Login!"
                     }));
                 }
@@ -49,11 +49,72 @@ const funcall = module.exports = {
 
     } else {
         res.send(JSON.stringify({
-            state: false,
+            status: false,
             message: "User data can't be empty."
         }));
         client.close();
       }
+  },
+
+  signInUser: function(db, userData, res, client) {
+    let username = userData.username;
+    let password = userData.password;
+
+    // Check for empty fields
+    if (!username.trim() || !password) {
+        res.send(JSON.stringify({
+          status: false,
+          message: "All fields are required."
+        }));
+    } else {
+        // Check for blank fields
+        if (username != null && password != null) {
+            db.collection('users').findOne({"username": username}, (err, docs) => {
+                if (err) {
+                  console.log(username + " failed to login.");
+                  res.send(JSON.stringify({
+                      status: false,
+                      message: "Sorry, your password is incorrect. Please check again!"
+                  }));
+                  client.close();
+                  throw err;
+                }
+                if (docs) {
+                  // Check if account password of username is right
+                  if (JSON.stringify(password.words) === JSON.stringify(docs.password.words)) {
+                    jwt.sign({
+                      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 60 * 60 * 24),
+                      userid: docs._id,
+                      username: docs.username
+                  }, process.env.secretkey, (err, token) => {
+                      console.log(docs.username + " has logged in successfully.");
+                      res.send(JSON.stringify({
+                          status: true,
+                          token: token,
+                          message : "Correct credentials",
+                      }));
+                      client.close();
+                    });
+                  } else {
+                      console.log(username + " failed to login.")
+                      res.send(JSON.stringify({
+                          status: false,
+                          message: "Sorry, your password is incorrect. Please check again."
+                      }));
+                      client.close();
+                  }
+                }
+                else {
+                  console.log(username + " failed to login.");
+                  res.send(JSON.stringify({
+                      status: false,
+                      message: "Sorry, your password is incorrect. Please check again."
+                  }));
+                  client.close();
+                }
+            });
+        }
+    }
   },
 
 }

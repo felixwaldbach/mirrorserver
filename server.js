@@ -38,7 +38,14 @@ app.post('/native/signup', (req, res)  => {
 
 // Login, check if credentials are correct and send back access_token
 app.post('/native/signin', (req, res) => {
-  res.send("ok");
+  MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
+    if (err) {
+      console.log('Unable to connect to MongoDB');
+      throw err;
+    } else {
+        database.signInUser(client.db('smartmirror'), req.body, res, client);
+    }
+  });
 });
 
 
