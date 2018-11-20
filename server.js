@@ -11,7 +11,7 @@ var io = require('socket.io')(http);
 var shell = require('shelljs');
 
 const currentUser = "Emre";
-const mongoURL = 'mongodb://127.0.0.1:27017/';
+const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
 
 require('dotenv').load();
 
