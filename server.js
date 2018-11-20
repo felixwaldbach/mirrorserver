@@ -3,6 +3,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const database = require('./database');
+const jwt = require('jsonwebtoken');
 
 const port = process.env.PORT || 5000;
 
@@ -14,6 +15,21 @@ const currentUser = "Emre";
 const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
 
 require('dotenv').load();
+
+// for jsonwebtoken and session, verifies session token
+function verifyToken(req, res, next) {
+    const bearerHeader = req.headers.authorization;
+    if(typeof bearerHeader !== 'undefined') {
+        const bearer = bearerHeader.split(' ');
+        const bearerToken = bearer[1];
+        req.token = bearerToken;
+        next();
+    } else {
+        res.json({
+            message: "User is not authorized"
+        });
+    }
+}
 
 // Body parser to decode incoming json
 app.use(bodyParser.json());
@@ -44,6 +60,26 @@ app.post('/native/signin', (req, res) => {
       throw err;
     } else {
         database.signInUser(client.db('smartmirror'), req.body, res, client);
+    }
+  });
+});
+
+// Get user data
+app.get('/native/getUserData', verifyToken, (req, res) => {
+  MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
+    if (err) {
+      console.log('Unable to connect to MongoDB');
+      throw err;
+    } else {
+        jwt.verify(req.token, process.env.secretkey, (err, authData) => {
+            if(err) {
+                res.json({});
+            } else {
+                console.log("User verified...");
+                const userid = authData.userid;
+                database.getUserDataForCurrentUser(client.db('smartmirror'), res, userid, client);
+            }
+        });
     }
   });
 });

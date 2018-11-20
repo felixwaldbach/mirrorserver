@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const uuid = require('uuid/v4');
 const SHA256 = require('crypto-js/sha256');
+const ObjectId = require('mongodb').ObjectId;
 
 const funcall = module.exports = {
 
@@ -115,6 +116,35 @@ const funcall = module.exports = {
             });
         }
     }
+  },
+
+  //----------------------Get Current User----------------------//
+  getUserDataForCurrentUser: function(db, res, userid, client) {
+    // Return logged in user information with token of jwt
+    db.collection('users').findOne({"_id": new ObjectId(userid)}, (err, res_find_user) => {
+        if (err) {
+          res.send(JSON.stringify({
+            message: "User not found"
+          }));
+          client.close();
+          throw err;
+        }
+        if (res_find_user) {
+          res.send(JSON.stringify({
+            status: true,
+            username: res_find_user.username,
+            face_image: res_find_user.face_image
+          }));
+          client.close();
+        }
+        else {
+          res.send(JSON.stringify({
+            status: false,
+            message: "User not found"
+          }));
+          client.close();
+        }
+    })
   },
 
 }
