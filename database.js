@@ -81,8 +81,10 @@ const funcall = module.exports = {
                   throw err;
                 }
                 if (docs) {
+                  //console.log(SHA256(password).words);
+                  //console.log(docs.password);
                   // Check if account password of username is right
-                  if (JSON.stringify(password.words) === JSON.stringify(docs.password.words)) {
+                  if (JSON.stringify(SHA256(password).words) === JSON.stringify(docs.password)) {
                     jwt.sign({
                       exp: Math.floor(Date.now() / 1000) + (60 * 60 * 60 * 60 * 24),
                       userid: docs._id,
