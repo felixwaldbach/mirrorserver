@@ -4,6 +4,8 @@ const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const database = require('./database');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const uuid = require('uuid/v4');
 
 const port = process.env.PORT || 5000;
 
@@ -15,6 +17,21 @@ const currentUser = "Emre";
 const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
 
 require('dotenv').load();
+
+//Setup Multer for uploading images
+const storage = multer.diskStorage({
+    destination: 'public/uploads/',
+    filename: function (req, file, callback) {
+        switch (file.mimetype) {
+            case 'image/jpeg': ext = '.jpeg'; break;
+            case 'image/png': ext = '.png'; break;
+            default: ext = '';
+        }
+        callback(null, uuid() + ext);
+    }
+});
+const upload = multer({ storage: storage});
+
 
 // for jsonwebtoken and session, verifies session token
 function verifyToken(req, res, next) {
@@ -85,7 +102,39 @@ app.get('/native/getUserData', verifyToken, (req, res) => {
 });
 
 
+// Uploading Image for Open CV
+app.post('/native/uploadImage', verifyToken, upload.single('file'), (req, res) => {
+  if (!req.file) {
+    res.send(JSON.stringify({
+      status: false,
+      message: "Image could not be uploaded. Please try again!"
+    }));
+  } else {
+      jwt.verify(req.token, process.env.secretkey, (err, authData) => {
+          if(err) {
+              res.json({
+                status: false,
+                message: "User is not authorized uploading images. Please reload the application and try again!"
+              });
+          } else {
+            MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
+              if (err) {
+                console.log('Unable to connect to MongoDB');
+                res.send(JSON.stringify({
+                  status: false,
+                  message: "Database error! Please contact administrator or try again!"
+                }));
+              } else {
+                  const fileData = req.file;
+                  const userId = authData.userid;
+                  database.uploadImageToServer(client.db('smartmirror'), res, fileData, userId, client);
+              }
+            });
 
+          }
+      });
+    }
+});
 
 //
 //

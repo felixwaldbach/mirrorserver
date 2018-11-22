@@ -28,7 +28,6 @@ const funcall = module.exports = {
             db.collection('users').insertOne({
                 "username": username,
                 "password": SHA256(password).words,
-                "access_token": "",
                 "face_image": ""
             }, function (err, result) {
                 if(err) {
@@ -147,6 +146,33 @@ const funcall = module.exports = {
           client.close();
         }
     })
+  },
+
+  //----------------------Update user face image----------------------//
+  uploadImageToServer: function (db, res, fileData, userId, client) {
+    db.collection("users").updateOne({ _id : new ObjectId(userId) },
+        {
+            $set: { face_image: fileData.filename }
+        }, (err, response) => {
+          if (err) {
+            throw err;
+          } else {
+            if(response.result.ok === 1) {
+              console.log("Image uploaded successfully for user: " + userId);
+              res.send(JSON.stringify({
+                status: true,
+                message: "Image uploaded successfully!"
+              }));
+            } else {
+              console.log("Updating image failed!");
+              res.send(JSON.stringify({
+                status: false,
+                message: "Updating image failed. Please try again!"
+              }));
+            }
+            client.close();
+          }
+    });
   },
 
 }
