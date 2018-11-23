@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
 import Clock from 'clock-react';
-import '../custom.css';
+import '../font/css/custom.css';
 
 const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thurdsay", "Friday", "Saturday"];
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
