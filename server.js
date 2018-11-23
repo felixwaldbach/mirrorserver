@@ -57,6 +57,26 @@ app.get('/api/hello', (req, res) => {
 
 
 // HTTP Requests
+// check if token is authorized
+app.post('/native/authizeToken', verifyToken, (req, res) => {
+  jwt.verify(req.token, process.env.secretkey, (err, authData) => {
+      console.log("Checking auth token");
+      if(err) {
+        console.log("User not verified");
+        res.send(JSON.stringify({
+          authorized: false,
+          message: "Token not authorized. Please login!"
+        }));
+      } else {
+        console.log("User is verified");
+        res.send(JSON.stringify({
+          authorized: true,
+          message: "Token is authorized. All good!"
+        }));
+      }
+  });
+});
+
 // Register, check user credentials and create user with jwt
 app.post('/native/signup', (req, res)  => {
   MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
