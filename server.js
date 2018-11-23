@@ -23,20 +23,25 @@ const storage = multer.diskStorage({
     destination: 'public/uploads/',
     filename: function (req, file, callback) {
         switch (file.mimetype) {
-            case 'image/jpeg': ext = '.jpeg'; break;
-            case 'image/png': ext = '.png'; break;
-            default: ext = '';
+            case 'image/jpeg':
+                ext = '.jpeg';
+                break;
+            case 'image/png':
+                ext = '.png';
+                break;
+            default:
+                ext = '';
         }
         callback(null, uuid() + ext);
     }
 });
-const upload = multer({ storage: storage});
+const upload = multer({storage: storage});
 
 
 // for jsonwebtoken and session, verifies session token
 function verifyToken(req, res, next) {
     const bearerHeader = req.headers.authorization;
-    if(typeof bearerHeader !== 'undefined') {
+    if (typeof bearerHeader !== 'undefined') {
         const bearer = bearerHeader.split(' ');
         const bearerToken = bearer[1];
         req.token = bearerToken;
@@ -56,12 +61,12 @@ app.get('/api/hello', (req, res) => {
 });
 
 app.get('/api/user/getUserWidgetIds', (req, res) => {
-    MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
+    MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
         if (err) {
             console.log('Unable to connect to MongoDB');
             throw err;
         } else {
-            database.getUserWidgetIds(client.db('smartmirror'), req.query.user_id, res, client);
+            database.processGetUserWidgetIds(client.db('smartmirror'), req.query.user_id, res, client);
         }
     });
 });
@@ -69,81 +74,94 @@ app.get('/api/user/getUserWidgetIds', (req, res) => {
 
 // HTTP Requests
 // Register, check user credentials and create user with jwt
-app.post('/native/signup', (req, res)  => {
-  MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
-    if (err) {
-      console.log('Unable to connect to MongoDB');
-      throw err;
-    } else {
-        database.registerUser(client.db('smartmirror'), req.body, res, client);
-    }
-  });
+app.post('/native/signup', (req, res) => {
+    MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
+        if (err) {
+            console.log('Unable to connect to MongoDB');
+            throw err;
+        } else {
+            database.registerUser(client.db('smartmirror'), req.body, res, client);
+        }
+    });
 });
 
 // Login, check if credentials are correct and send back access_token
 app.post('/native/signin', (req, res) => {
-  MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
-    if (err) {
-      console.log('Unable to connect to MongoDB');
-      throw err;
-    } else {
-        database.signInUser(client.db('smartmirror'), req.body, res, client);
-    }
-  });
+    MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
+        if (err) {
+            console.log('Unable to connect to MongoDB');
+            throw err;
+        } else {
+            database.signInUser(client.db('smartmirror'), req.body, res, client);
+        }
+    });
+});
+
+// Login, check if credentials are correct and send back access_token
+app.post('/api/user/setUserWidgetIds', (req, res) => {
+    console.log("Receiving set user widget id post request");
+    MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
+        if (err) {
+            console.log('Unable to connect to MongoDB');
+            throw err;
+        } else {
+            database.setUserWidgetIds(client.db('smartmirror'), req.body, res, client);
+        }
+    });
 });
 
 // Get user data
 app.get('/native/getUserData', verifyToken, (req, res) => {
-  MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
-    if (err) {
-      console.log('Unable to connect to MongoDB');
-      throw err;
-    } else {
-        jwt.verify(req.token, process.env.secretkey, (err, authData) => {
-            if(err) {
-                res.json({});
-            } else {
-                console.log("User verified...");
-                const userid = authData.userid;
-                database.getUserDataForCurrentUser(client.db('smartmirror'), res, userid, client);
-            }
-        });
-    }
-  });
+    MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
+        if (err) {
+            console.log('Unable to connect to MongoDB');
+            throw err;
+        } else {
+            jwt.verify(req.token, process.env.secretkey, (err, authData) => {
+                if (err) {
+                    res.json({});
+                } else {
+                    console.log("User verified...");
+                    const userid = authData.userid;
+                    database.getUserDataForCurrentUser(client.db('smartmirror'), res, userid, client);
+                }
+            });
+        }
+    });
 });
 
 
 // Uploading Image for Open CV
 app.post('/native/uploadImage', verifyToken, upload.single('file'), (req, res) => {
-  if (!req.file) {
-    res.send(JSON.stringify({
-      status: false,
-      message: "Image could not be uploaded. Please try again!"
-    }));
-  } else {
-      jwt.verify(req.token, process.env.secretkey, (err, authData) => {
-          if(err) {
-              res.json({
-                status: false,
-                message: "User is not authorized uploading images. Please reload the application and try again!"
-              });
-          } else {
-            MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
-              if (err) {
-                console.log('Unable to connect to MongoDB');
-                res.send(JSON.stringify({
-                  status: false,
-                  message: "Database error! Please contact administrator or try again!"
-                }));
-              } else {
-                  const fileData = req.file;
-                  const userId = authData.userid;
-                  database.uploadImageToServer(client.db('smartmirror'), res, fileData, userId, client);
-              }
-            });
+    if (!req.file) {
+        res.send(JSON.stringify({
+            status: false,
+            message: "Image could not be uploaded. Please try again!"
+        }));
+    } else {
+        jwt.verify(req.token, process.env.secretkey, (err, authData) => {
+            if (err) {
+                res.json({
+                    status: false,
+                    message: "User is not authorized uploading images. Please reload the application and try again!"
+                });
+            } else {
+                MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
+                    if (err) {
+                        console.log('Unable to connect to MongoDB');
+                        res.send(JSON.stringify({
+                            status: false,
+                            message: "Database error! Please contact administrator or try again!"
+                        }));
+                    } else {
+                        const fileData = req.file;
+                        const userId = authData.userid;
+                        database.uploadImageToServer(client.db('smartmirror'), res, fileData, userId, client);
+                    }
+                });
 
-          }
-      });
+            }
+        });
     }
 });
 
@@ -172,7 +190,7 @@ io.on('connection', function (socket) {
             let list = JSON.parse(stdout);
             console.log(list);
             console.log(typeof list);
-            io.emit('five_day_forecast', { forecast: stdout});
+            io.emit('five_day_forecast', {forecast: stdout});
         });
     });
 
@@ -180,8 +198,12 @@ io.on('connection', function (socket) {
     // Send random quotes to UI. Use CURL and GET
     socket.on('send_quotes', function (data) {
         shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET https://talaikis.com/api/quotes/random/", function (code, stdout, stderr) {
-            io.emit('new_quotes', { randomQuote: stdout});
+            io.emit('new_quotes', {randomQuote: stdout});
         });
+    });
+
+    socket.on('app_drop_event', function (data) {
+        io.emit('web_drop_event', data);
     });
 });
 

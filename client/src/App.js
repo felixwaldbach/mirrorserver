@@ -30,6 +30,16 @@ class App extends Component {
         socket.emit('message', {
             message: 'Hello World'
         });
+        const app = this;
+        socket.on('web_drop_event', function (data) {
+            app.setUserWidgetIds(data)
+                .then(res => app.getUserWidgetIds())
+                .then(res => {
+                    console.log(res.data);
+                    app.setState({widget_ids: res.data})
+                })
+                .catch(err => console.log(err));
+        })
     }
 
     callApi = async () => {
@@ -42,7 +52,27 @@ class App extends Component {
     };
 
     getUserWidgetIds = async () => {
+        console.log('getting user widgets id');
         const response = await fetch('/api/user/getUserWidgetIds?user_id=felix');
+        const body = await response.json();
+
+        if (response.status !== 200) throw Error(body.message);
+
+        return body;
+    };
+
+    setUserWidgetIds = async (data) => {
+        console.log("setting user widget ids")
+        const response = await fetch('/api/user/setUserWidgetIds', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                "user_id": 'felix',
+                "widget_id": data.widget_id,
+                "slot": data.slot,
+                "previous_slot": data.previous_slot
+            })
+        });
         const body = await response.json();
 
         if (response.status !== 200) throw Error(body.message);
@@ -54,8 +84,8 @@ class App extends Component {
         return (
             <div>
                 {this.state.horizontal ?
-                  <Grid widget_ids={this.state.widget_ids} />
-                  : null
+                    <Grid widget_ids={this.state.widget_ids}/>
+                    : null
                 }
             </div>
         );
