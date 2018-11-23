@@ -130,6 +130,18 @@ app.get('/native/getUserData', verifyToken, (req, res) => {
     });
 });
 
+// Get user data
+app.get('/native/getAllWidgets', verifyToken, (req, res) => {
+    MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
+        if (err) {
+            console.log('Unable to connect to MongoDB');
+            throw err;
+        } else {
+            database.getAllWidgets(client.db('smartmirror'), res, client);
+        }
+    });
+});
+
 
 // Uploading Image for Open CV
 app.post('/native/uploadImage', verifyToken, upload.single('file'), (req, res) => {

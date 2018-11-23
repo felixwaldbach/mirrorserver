@@ -5,12 +5,10 @@ const ObjectId = require('mongodb').ObjectId;
 
 var getUserWidgetIds = async function (db, user_id) {
     return new Promise((resolve, reject) => {
-        console.log("Test get user widget ids");
         if (user_id) {
             db.collection('userWidgetIds').findOne({"user_id": user_id}, (err, docs) => {
                 if (err) resolve(null);
                 if (docs) {
-                    console.log(docs);
                     resolve(docs.widget_ids);
                 } else {
                     resolve(null);
@@ -226,16 +224,10 @@ const funcall = module.exports = {
     setUserWidgetIds: async function (db, data, res, client) {
         if (data.user_id) {
             let widget_ids = await getUserWidgetIds(db, data.user_id);
-            console.log("1");
-            console.log(widget_ids);
             if (data.previous_slot) {
                 widget_ids[data.previous_slot] = null;
             }
-            console.log(data.slot);
-            console.log(data.widget_id);
             widget_ids[data.slot] = data.widget_id;
-            console.log("2");
-            console.log(widget_ids);
             await db.collection('userWidgetIds').updateOne({"user_id": data.user_id}, {$set: {widget_ids: widget_ids}}, (err, result) => {
                 if (err) throw err;
                 else {
@@ -253,6 +245,36 @@ const funcall = module.exports = {
             }));
             client.close();
         }
+    },
+
+    //----------------------Set User Widget ids----------------------//
+    getAllWidgets: async function (db, res, client) {
+        db.collection('allWidgets').find().toArray((err, docs) => {
+            if (err) throw err;
+            if (docs) {
+                let all_widgets = [];
+                docs.forEach(function (doc) {
+                    all_widgets.push({
+                        widget_id: doc.widget_id,
+                        widget_name: doc.widget_name
+                    });
+                })
+                res.send(JSON.stringify({
+                    status: true,
+                    message: "Widgets found.",
+                    data: {
+                        all_widgets: all_widgets
+                    }
+                }));
+                client.close();
+            } else {
+                res.send(JSON.stringify({
+                    status: false,
+                    message: "No Widgets found."
+                }));
+                client.close();
+            }
+        });
     }
 
 }
