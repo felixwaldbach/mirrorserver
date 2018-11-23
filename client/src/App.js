@@ -15,13 +15,16 @@ class App extends Component {
     state = {
         response: '',
         horizontal: true,
-        widgets: [],
+        widget_ids: [],
         endpoint: frontendConfig.server_address + ':' + frontendConfig.socket_server_port
     };
 
     componentDidMount() {
         this.callApi()
             .then(res => this.setState({response: res.express}))
+            .catch(err => console.log(err));
+        this.getUserWidgetIds()
+            .then(res => this.setState({widget_ids: res.data}))
             .catch(err => console.log(err));
         const socket = socketIOClient(this.state.endpoint);
         socket.emit('message', {
@@ -38,20 +41,20 @@ class App extends Component {
         return body;
     };
 
+    getUserWidgetIds = async () => {
+        const response = await fetch('/api/user/getUserWidgetIds?user_id=felix');
+        const body = await response.json();
+
+        if (response.status !== 200) throw Error(body.message);
+
+        return body;
+    };
+
     render() {
-
-        // Reihenfolge der pushes bzw. Stelle wo es uebersprungen ist, wird in der App festgelegt
-        this.state.widgets = [];
-        this.state.widgets.push(<ClockWidget style={{color: 'white'}}/>);
-        this.state.widgets.push(<NewsFeed />);
-        this.state.widgets.push(<WeatherWidget />);
-        this.state.widgets.push(<QuotesWidget />);
-        this.state.widgets.push(<ToDoWidget />);
-
         return (
             <div>
                 {this.state.horizontal ?
-                  <Grid widgets={this.state.widgets} />
+                  <Grid widget_ids={this.state.widget_ids} />
                   : null
                 }
             </div>

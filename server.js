@@ -55,6 +55,17 @@ app.get('/api/hello', (req, res) => {
     res.send({express: 'Hello From Express'});
 });
 
+app.get('/api/user/getUserWidgetIds', (req, res) => {
+    MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
+        if (err) {
+            console.log('Unable to connect to MongoDB');
+            throw err;
+        } else {
+            database.getUserWidgetIds(client.db('smartmirror'), req.query.user_id, res, client);
+        }
+    });
+});
+
 
 // HTTP Requests
 // Register, check user credentials and create user with jwt
