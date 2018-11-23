@@ -1,11 +1,6 @@
 import React, {Component} from 'react';
 
 import Grid from "./layouts/Grid";
-import ClockWidget from "./widgets/ClockWidget";
-import NewsFeed from "./widgets/NewsFeed";
-import WeatherWidget from "./widgets/WeatherWidget";
-import QuotesWidget from "./widgets/QuotesWidget";
-import ToDoWidget from "./widgets/ToDoWidget";
 
 import socketIOClient from "socket.io-client";
 import frontendConfig from './frontendConfig';
@@ -15,7 +10,7 @@ class App extends Component {
     state = {
         response: '',
         horizontal: true,
-        widget_ids: [],
+        widgets: [],
         endpoint: frontendConfig.server_address + ':' + frontendConfig.socket_server_port
     };
 
@@ -23,8 +18,10 @@ class App extends Component {
         this.callApi()
             .then(res => this.setState({response: res.express}))
             .catch(err => console.log(err));
-        this.getUserWidgetIds()
-            .then(res => this.setState({widget_ids: res.data}))
+        this.getUserWidgets()
+            .then(res => {
+                this.setState({widgets: res.data})
+            })
             .catch(err => console.log(err));
         const socket = socketIOClient(this.state.endpoint);
         socket.emit('message', {
@@ -32,11 +29,10 @@ class App extends Component {
         });
         const app = this;
         socket.on('web_drop_event', function (data) {
-            app.setUserWidgetIds(data)
-                .then(res => app.getUserWidgetIds())
+            app.setUserWidgets(data)
+                .then(res => app.getUserWidgets())
                 .then(res => {
-                    console.log(res.data);
-                    app.setState({widget_ids: res.data})
+                    app.setState({widgets: res.data})
                 })
                 .catch(err => console.log(err));
         })
@@ -51,9 +47,8 @@ class App extends Component {
         return body;
     };
 
-    getUserWidgetIds = async () => {
-        console.log('getting user widgets id');
-        const response = await fetch('/api/user/getUserWidgetIds?user_id=felix');
+    getUserWidgets = async () => {
+        const response = await fetch('/api/user/getUserWidgets?user_id=felix');
         const body = await response.json();
 
         if (response.status !== 200) throw Error(body.message);
@@ -61,14 +56,16 @@ class App extends Component {
         return body;
     };
 
-    setUserWidgetIds = async (data) => {
-        console.log("setting user widget ids")
-        const response = await fetch('/api/user/setUserWidgetIds', {
+    setUserWidgets = async (data) => {
+        const response = await fetch('/api/user/setUserWidgets', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 "user_id": 'felix',
-                "widget_id": data.widget_id,
+                "widget": {
+                    widget_id: data.widget_id,
+                    widget_name: data.widget_name
+                },
                 "slot": data.slot,
                 "previous_slot": data.previous_slot
             })
@@ -84,7 +81,7 @@ class App extends Component {
         return (
             <div>
                 {this.state.horizontal ?
-                    <Grid widget_ids={this.state.widget_ids}/>
+                    <Grid widgets={this.state.widgets}/>
                     : null
                 }
             </div>

@@ -11,79 +11,81 @@ class Grid extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            widget_ids: props.widget_ids,
-            widgets: []
+            widgets: props.widgets,
+            htmlElements: []
         };
-        this.resolveWidgetIds(props.widget_ids);
+        this.resolveWidgets(props.widgets);
     }
 
     componentWillReceiveProps(props, content) {
         this.setState({
-            widget_ids: props.widget_ids
+            widgets: props.widgets
         });
-        this.resolveWidgetIds(props.widget_ids);
+        this.resolveWidgets(props.widgets);
     }
 
-    resolveWidgetIds(widget_ids) {
-        let widgets = [];
-        widget_ids.forEach(function (widget_id) {
-            switch (widget_id) {
+    resolveWidgets(widgets) {
+        let htmlElements = [];
+        widgets.forEach(function (widget, index) {
+            switch (widget.widget_id) {
                 case 0:
-                    widgets.push(<ClockWidget style={{color: 'white'}}/>);
+                    htmlElements.push(<ClockWidget style={{color: 'white'}}/>);
                     break;
                 case 1:
-                    widgets.push(<NewsFeed/>);
+                    htmlElements.push(<NewsFeed/>);
                     break;
                 case 2:
-                    widgets.push(<QuotesWidget/>);
+                    htmlElements.push(<QuotesWidget/>);
                     break;
                 case 3:
-                    widgets.push(<ToDoWidget/>);
+                    htmlElements.push(<ToDoWidget/>);
                     break;
                 case 4:
-                    widgets.push(<WeatherWidget/>);
+                    htmlElements.push(<WeatherWidget/>);
                     break;
                 default:
+                    htmlElements.push(null);
                     break;
             }
         });
 
         this.setState({
-            widgets: widgets
+            htmlElements: htmlElements
         })
     }
 
     render() {
+
         return (
             <div className="container">
 
                 <div className="upper-row">
                     <div id="widget">
-                        {this.state.widgets[0]}
+                        {this.state.htmlElements[0]}
                     </div>
                     <div id="widget">
-                        {this.state.widgets[1]}
+                        {this.state.htmlElements[1]}
                     </div>
                     <div id="widget">
-                        {this.state.widgets[2]}
+                        {this.state.htmlElements[2]}
                     </div>
                     <div id="widget">
-                        {this.state.widgets[3]}
+                        {this.state.htmlElements[3]}
                     </div>
                 </div>
 
                 <div className="lower-row">
                     <div id="widget">
-                        {this.state.widgets[4]}
+                        {this.state.htmlElements[4]}
                     </div>
                     <div id="widget">
-                        {this.state.widgets[5]}
+                        {this.state.htmlElements[5]}
                     </div>
                     <div id="widget">
-                        {this.state.widgets[6]}
+                        {this.state.htmlElements[6]}
                     </div>
                     <div id="widget">
-                        {this.state.widgets[7]}
+                        {this.state.htmlElements[7]}
                     </div>
                 </div>
 

@@ -3,13 +3,13 @@ const uuid = require('uuid/v4');
 const SHA256 = require('crypto-js/sha256');
 const ObjectId = require('mongodb').ObjectId;
 
-var getUserWidgetIds = async function (db, user_id) {
+var getUserWidgets = async function (db, user_id) {
     return new Promise((resolve, reject) => {
         if (user_id) {
-            db.collection('userWidgetIds').findOne({"user_id": user_id}, (err, docs) => {
+            db.collection('userWidgets').findOne({"user_id": user_id}, (err, docs) => {
                 if (err) resolve(null);
                 if (docs) {
-                    resolve(docs.widget_ids);
+                    resolve(docs);
                 } else {
                     resolve(null);
                 }
@@ -194,14 +194,16 @@ const funcall = module.exports = {
     },
 
     //----------------------Get User Widget ids----------------------//
-    processGetUserWidgetIds: async function (db, user_id, res, client) {
+    processGetUserWidgets: async function (db, user_id, res, client) {
         if (user_id) {
-            let widget_ids = await getUserWidgetIds(db, user_id);
-            if (widget_ids) {
+
+            let entry = await getUserWidgets(db, user_id);
+            let widgets = entry.widgets;
+            if (widgets) {
                 res.send(JSON.stringify({
                     status: true,
                     message: "User widgets found.",
-                    data: widget_ids
+                    data: widgets
                 }));
                 client.close();
             } else {
@@ -221,14 +223,16 @@ const funcall = module.exports = {
     },
 
     //----------------------Set User Widget ids----------------------//
-    setUserWidgetIds: async function (db, data, res, client) {
+    setUserWidgets: async function (db, data, res, client) {
+        console.log(data);
         if (data.user_id) {
-            let widget_ids = await getUserWidgetIds(db, data.user_id);
+            let entry = await getUserWidgets(db, data.user_id);
+            let widgets = entry.widgets;
             if (data.previous_slot) {
-                widget_ids[data.previous_slot] = null;
+                widgets[data.previous_slot] = null;
             }
-            widget_ids[data.slot] = data.widget_id;
-            await db.collection('userWidgetIds').updateOne({"user_id": data.user_id}, {$set: {widget_ids: widget_ids}}, (err, result) => {
+            widgets[data.slot] = {widget_id: data.widget.widget_id, widget_name: data.widget.widget_name};
+            await db.collection('userWidgets').updateOne({"user_id": data.user_id}, {$set: {widgets: widgets}}, (err, result) => {
                 if (err) throw err;
                 else {
                     res.send(JSON.stringify({

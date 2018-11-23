@@ -60,13 +60,13 @@ app.get('/api/hello', (req, res) => {
     res.send({express: 'Hello From Express'});
 });
 
-app.get('/api/user/getUserWidgetIds', (req, res) => {
+app.get('/api/user/getUserWidgets', (req, res) => {
     MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
         if (err) {
             console.log('Unable to connect to MongoDB');
             throw err;
         } else {
-            database.processGetUserWidgetIds(client.db('smartmirror'), req.query.user_id, res, client);
+            database.processGetUserWidgets(client.db('smartmirror'), req.query.user_id, res, client);
         }
     });
 });
@@ -98,14 +98,13 @@ app.post('/native/signin', (req, res) => {
 });
 
 // Login, check if credentials are correct and send back access_token
-app.post('/api/user/setUserWidgetIds', (req, res) => {
-    console.log("Receiving set user widget id post request");
+app.post('/api/user/setUserWidgets', (req, res) => {
     MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
         if (err) {
             console.log('Unable to connect to MongoDB');
             throw err;
         } else {
-            database.setUserWidgetIds(client.db('smartmirror'), req.body, res, client);
+            database.setUserWidgets(client.db('smartmirror'), req.body, res, client);
         }
     });
 });
@@ -141,7 +140,6 @@ app.get('/native/getAllWidgets', verifyToken, (req, res) => {
         }
     });
 });
-
 
 // Uploading Image for Open CV
 app.post('/native/uploadImage', verifyToken, upload.single('file'), (req, res) => {
