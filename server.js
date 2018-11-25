@@ -55,7 +55,6 @@ app.get('/api/hello', (req, res) => {
     res.send({express: 'Hello From Express'});
 });
 
-
 // HTTP Requests
 // check if token is authorized
 app.post('/native/authizeToken', verifyToken, (req, res) => {
@@ -183,6 +182,12 @@ io.on('connection', function (socket) {
             console.log(typeof list);
             io.emit('five_day_forecast', { forecast: stdout});
         });
+    });
+
+    // DHT22 from Arduino Uno
+    socket.on('dht22', function (data) {
+      console.log("FROM DHT22");
+      console.log(data);
     });
 
     // Quotes Widget
