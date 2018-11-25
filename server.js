@@ -8,6 +8,7 @@ const multer = require('multer');
 const uuid = require('uuid/v4');
 
 const port = process.env.PORT || 5000;
+app.use("/public", express.static(__dirname + '/public'));
 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
