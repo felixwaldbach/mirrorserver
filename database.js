@@ -224,7 +224,6 @@ const funcall = module.exports = {
 
     //----------------------Set User Widget ids----------------------//
     setUserWidgets: async function (db, data, res, client) {
-        console.log(data);
         if (data.user_id) {
             let entry = await getUserWidgets(db, data.user_id);
             let widgets = entry.widgets;

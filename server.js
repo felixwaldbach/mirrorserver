@@ -120,7 +120,6 @@ app.get('/native/getUserData', verifyToken, (req, res) => {
                 if (err) {
                     res.json({});
                 } else {
-                    console.log("User verified...");
                     const userid = authData.userid;
                     database.getUserDataForCurrentUser(client.db('smartmirror'), res, userid, client);
                 }
@@ -137,6 +136,18 @@ app.get('/native/getAllWidgets', verifyToken, (req, res) => {
             throw err;
         } else {
             database.getAllWidgets(client.db('smartmirror'), res, client);
+        }
+    });
+});
+
+// Get user data
+app.get('/native/getUserWidgets', verifyToken, (req, res) => {
+    MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
+        if (err) {
+            console.log('Unable to connect to MongoDB');
+            throw err;
+        } else {
+            database.processGetUserWidgets(client.db('smartmirror'), req.query.user_id, res, client);
         }
     });
 });
