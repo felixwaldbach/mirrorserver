@@ -133,6 +133,7 @@ const funcall = module.exports = {
         if (res_find_user) {
           res.send(JSON.stringify({
             status: true,
+            userid: userid,
             username: res_find_user.username,
             face_image: res_find_user.face_image
           }));
