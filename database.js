@@ -176,4 +176,72 @@ const funcall = module.exports = {
     });
   },
 
+  //----------------------Get Wunderlist settings from current user----------------------//
+  getWunderlistSettings: function (db, res, userId, client) {
+    db.collection('users').findOne({"_id": new ObjectId(userid)}, (err, res_find_user) => {
+        if (err) {
+          res.send(JSON.stringify({
+            message: "User not found"
+          }));
+          client.close();
+          throw err;
+        }
+        if (res_find_user) {
+          res.send(JSON.stringify({
+            status: true,
+            userid: userid,
+            username: res_find_user.username,
+            face_image: res_find_user.face_image
+          }));
+          client.close();
+        }
+        else {
+          res.send(JSON.stringify({
+            status: false,
+            message: "User not found"
+          }));
+          client.close();
+        }
+    })
+
+/*
+    // JOIN in MongoDB
+    db.collection('deviceConfig').aggregate([
+      { $lookup:
+        {
+          from: "deviceData",
+          localField: "uuid",
+          foreignField: "uuid",
+          as: "deviceData"
+        }
+      },
+      { $project:
+          {
+            "user": "$deviceData.user",
+            "deviceName": "$deviceData.name",
+            "deviceId": "$deviceData._id",
+            "uuid": 1,
+            "name": 1,
+            "model": 1,
+            "steps": 1
+          }
+      }
+    ]).toArray((err_configs, res_configs) => {
+        if (err_configs) throw err_configs;
+        res_configs.map(item => {
+          item.user = item.user;
+          item.deviceName = item.deviceName;
+          item.deviceId = item.deviceId;
+          item.appId = item._id;
+          item.model = item.model;
+          item.uuid = item.uuid;
+          item.steps;
+        });
+
+        io.emit('get_configs', res_configs);
+        client.close();
+    });
+*/
+
+  },
 }

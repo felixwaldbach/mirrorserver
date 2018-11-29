@@ -156,6 +156,33 @@ app.post('/native/uploadImage', verifyToken, upload.single('file'), (req, res) =
     }
 });
 
+// Getting Wunderlist Settings and clientid
+app.post('/native/getWunderlistSettings', verifyToken, (req, res) => {
+  jwt.verify(req.token, process.env.secretkey, (err, authData) => {
+      if(err) {
+          res.json({
+            status: false,
+            message: "User is not authorized. Please reload the application and try again!"
+          });
+      } else {
+        MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
+          if (err) {
+            console.log('Unable to connect to MongoDB');
+            res.send(JSON.stringify({
+              status: false,
+              message: "Database error! Please contact administrator or try again!"
+            }));
+          } else {
+              const userId = authData.userid;
+              database.getWunderlistSettings(client.db('smartmirror'), res, userId, client);
+          }
+        });
+
+      }
+  });
+});
+
+
 //
 //
 //
