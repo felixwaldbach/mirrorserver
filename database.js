@@ -177,7 +177,76 @@ const funcall = module.exports = {
   },
 
   //----------------------Get Wunderlist settings from current user----------------------//
-  getWunderlistSettings: function (db, res, userId, client) {
+  uploadWunderlistSettings: function (db, settings, res, userId, client) {
+    let todo_list = settings.todoList;
+    let client_secret = settings.wl_access_token;
+    let client_id = settings.wl_client_id;
+
+    // Check for empty or blank entries
+    if (todo_list.trim().length !== 0 && client_secret.trim().length !== 0 && client_id.trim().length !== 0 && todo_list !== null && client_secret !== null && client_id !== null) {
+      // Check if has already settings
+
+      db.collection('wunderlist').findOne({"user_id": userId}, (err, docs) => {
+          if (err) throw err;
+          if (docs) {
+            // UPDATE current settings
+            db.collection("wunderlist").updateOne({"user_id": userId},
+                {
+                    $set: { todo_list: todo_list, client_secret: client_secret, client_id: client_id}
+                }, (err, response) => {
+                  if (err) {
+                    throw err;
+                  } else {
+                    if(response.result.ok === 1) {
+                      res.send(JSON.stringify({
+                        status: true,
+                        message: "Wunderlist Settings updated successfully!"
+                      }));
+                    } else {
+                      res.send(JSON.stringify({
+                        status: false,
+                        message: "Error updating Wunderlist Settings. Please try again!"
+                      }));
+                    }
+                    client.close();
+                  }
+            });
+          } else {
+            // Add new entry
+            db.collection('wunderlist').insertOne({
+                "user_id": userId,
+                "todo_list": todo_list,
+                "client_secret": client_secret,
+                "client_id": client_id
+            }, function (err, result) {
+                if(err) {
+                  console.log(err);
+                  res.send(JSON.stringify({
+                    status: false,
+                    message: "Something went wrong. Please try again!"
+                  }));
+                } else {
+                    res.send(JSON.stringify({
+                      status: true,
+                      message: "Wunderlist Settings added successfully"
+                    }));
+                    client.close();
+                }
+            });
+          }
+      });
+    } else {
+      res.send(JSON.stringify({
+          status: false,
+          message: "Wunderlist Settings and lists can't be empty."
+      }));
+      client.close();
+    }
+
+  },
+
+  //----------------------Get Wunderlist settings from current user----------------------//
+  getWunderlistSettings: function (db, res, userid, client) {
     db.collection('users').findOne({"_id": new ObjectId(userid)}, (err, res_find_user) => {
         if (err) {
           res.send(JSON.stringify({
