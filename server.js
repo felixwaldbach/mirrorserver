@@ -209,8 +209,6 @@ io.on('connection', function (socket) {
     socket.on('send_weather_forecast', function (data) {
         shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET 'api.openweathermap.org/data/2.5/forecast?q=Stuttgart,DE&APPID=ba26397fa9d26d3655feda1b51d4b79d'", function (code, stdout, stderr) {
             let list = JSON.parse(stdout);
-            console.log(list);
-            console.log(typeof list);
             io.emit('five_day_forecast', {forecast: stdout});
         });
     });
@@ -225,6 +223,26 @@ io.on('connection', function (socket) {
 
     socket.on('app_drop_event', function (data) {
         io.emit('web_drop_event', data);
+    });
+
+    socket.on('app_delete_event', async function (data) {
+        MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
+            if (err) {
+                console.log('Unable to connect to MongoDB');
+                throw err;
+            } else {
+                jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
+                    if (err) {
+                        throw err;
+                    } else {
+                        data.user_id = authData.username;
+                        const response = await database.removeUserWidgets(client.db('smartmirror'), data, client);
+                        io.emit('web_delete_event', data);
+                    }
+                });
+            }
+        });
+
     });
 });
 

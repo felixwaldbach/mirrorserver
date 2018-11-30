@@ -123,8 +123,7 @@ const funcall = module.exports = {
                             }));
                             client.close();
                         }
-                    }
-                    else {
+                    } else {
                         console.log(username + " failed to login.");
                         res.send(JSON.stringify({
                             status: false,
@@ -155,8 +154,7 @@ const funcall = module.exports = {
                     face_image: res_find_user.face_image
                 }));
                 client.close();
-            }
-            else {
+            } else {
                 res.send(JSON.stringify({
                     status: false,
                     message: "User not found"
@@ -199,6 +197,9 @@ const funcall = module.exports = {
 
             let entry = await getUserWidgets(db, user_id);
             let widgets = entry.widgets;
+            widgets.forEach(function (widget, index) {
+                if (widget !== null) widget.slot = index;
+            })
             if (widgets) {
                 res.send(JSON.stringify({
                     status: true,
@@ -247,6 +248,31 @@ const funcall = module.exports = {
                 message: "User ID undefined"
             }));
             client.close();
+        }
+    },
+
+    //----------------------Set User Widget ids----------------------//
+    removeUserWidgets: async function (db, data, client) {
+        if (data.user_id) {
+            let entry = await getUserWidgets(db, data.user_id);
+            let widgets = entry.widgets;
+            console.log("Removing slot " + data.slot);
+            widgets[data.slot] = null;
+            await db.collection('userWidgets').updateOne({"user_id": data.user_id}, {$set: {widgets: widgets}}, (err, result) => {
+                if (err) throw err;
+                else {
+                    client.close()
+                    return {
+                        type: 'success',
+                        message: 'removeUserWidgets successfully executed'
+                    }
+                }
+            });
+        } else {
+            return {
+                type: 'error',
+                message: 'An error occured during removeUserWidgets'
+            }
         }
     },
 

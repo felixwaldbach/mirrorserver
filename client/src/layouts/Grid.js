@@ -26,26 +26,30 @@ class Grid extends Component {
 
     resolveWidgets(widgets) {
         let htmlElements = [];
-        widgets.forEach(function (widget, index) {
-            switch (widget.widget_id) {
-                case 0:
-                    htmlElements.push(<ClockWidget style={{color: 'white'}}/>);
-                    break;
-                case 1:
-                    htmlElements.push(<NewsFeed/>);
-                    break;
-                case 2:
-                    htmlElements.push(<QuotesWidget/>);
-                    break;
-                case 3:
-                    htmlElements.push(<ToDoWidget/>);
-                    break;
-                case 4:
-                    htmlElements.push(<WeatherWidget/>);
-                    break;
-                default:
-                    htmlElements.push(null);
-                    break;
+        widgets.forEach(function (widget) {
+            if (widget) {
+                switch (widget.widget_id) {
+                    case 0:
+                        htmlElements.push(<ClockWidget style={{color: 'white'}}/>);
+                        break;
+                    case 1:
+                        htmlElements.push(<NewsFeed/>);
+                        break;
+                    case 2:
+                        htmlElements.push(<QuotesWidget/>);
+                        break;
+                    case 3:
+                        htmlElements.push(<ToDoWidget/>);
+                        break;
+                    case 4:
+                        htmlElements.push(<WeatherWidget/>);
+                        break;
+                    default:
+                        htmlElements.push(null);
+                        break;
+                }
+            } else {
+                htmlElements.push(<div/>);
             }
         });
 

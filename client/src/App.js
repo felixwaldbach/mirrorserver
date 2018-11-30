@@ -64,7 +64,8 @@ class App extends Component {
                 "user_id": 'felix',
                 "widget": {
                     widget_id: data.widget_id,
-                    widget_name: data.widget_name
+                    widget_name: data.widget_name,
+                    remove: false
                 },
                 "slot": data.slot,
                 "previous_slot": data.previous_slot
