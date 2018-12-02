@@ -14,35 +14,20 @@ import WunderlistSDK from 'wunderlist';
 import socketIOClient from "socket.io-client";
 import frontendConfig from '../frontendConfig';
 
-var lists = [];
+var mylist = [];
 
 class ToDoWidget extends Component {
 
   constructor(props) {
       super(props);
       this.state = {
+        wunderlist_settings: [],
         lists: [],
+        mylist: [],
         tasks: [],
-        list_id: 370586319
+        list_id: 0
       }
-      var wunderlistAPI = new WunderlistSDK({
-        'accessToken': '9f9ddbe9ad76533351fe0ca2a8f98207d748462e33970694ccd27fa8d2a1',
-        'clientID': 'cc357d122b2db83be2e1'
-      });
-      //this method gets all lists
-      wunderlistAPI.http.lists.all()
-        .done(function (lists) {
-          this.setState({lists: lists});
-          let x;
-          for(x in lists) {
-            if(lists[x].id === this.state.list_id) {
-              console.log(lists[x]);
-            }
-          }
-        }.bind(this))
-        .fail(function () {
-          console.error('there was a problem');
-        });
+
   }
 
   componentDidMount() {
@@ -65,16 +50,64 @@ class ToDoWidget extends Component {
 
       const addListToUI = data => {
           if(data) {
-            console.log(data);
+            this.setState({wunderlist_settings: data});
+
+            var wunderlistAPI = new WunderlistSDK({
+              'accessToken': this.state.wunderlist_settings.client_secret,
+              'clientID': this.state.wunderlist_settings.client_id
+            });
+            //this method gets all lists
+            wunderlistAPI.http.lists.all()
+              .done(function (lists) {
+                this.setState({lists: lists});
+
+                let x;
+                for(x in lists) {
+                  if(lists[x].title === this.state.wunderlist_settings.todo_list) {
+                    this.setState({list_id: lists[x].id});
+                    // with list_id we get list items...
+                    this.getSubtasks();
+                  }
+                }
+
+
+              }.bind(this))
+              .fail(function () {
+                console.error('there was a problem');
+              });
           }
       };
   }
 
+  async getSubtasks () {
+    let accessToken = this.state.wunderlist_settings.client_secret;
+    let client_id = this.state.wunderlist_settings.client_id;
+    fetch("https://a.wunderlist.com/api/v1/tasks?list_id="+this.state.list_id, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          "X-Access-Token": accessToken,
+          "X-Client-ID": client_id
+        },
+    })
+    .then((response) => {
+      return response.json();
+    })
+    .then((response) => {
+      this.setState({mylist: response});
+    })
+    .catch(function(err) {
+      console.log(err);
+    });
+  }
+
   render() {
-    lists = this.state.lists;
+    mylist = this.state.mylist;
+    mylist.slice(0, 10);
     return (
         <div className="todo-container">
-          {lists.map((item, index) => {
+          {mylist.map((item, index) => {
               return(
                 <div key={index}>
                   {item.title}
