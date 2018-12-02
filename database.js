@@ -186,11 +186,11 @@ const funcall = module.exports = {
     if (todo_list.trim().length !== 0 && client_secret.trim().length !== 0 && client_id.trim().length !== 0 && todo_list !== null && client_secret !== null && client_id !== null) {
       // Check if has already settings
 
-      db.collection('wunderlist').findOne({"user_id": userId}, (err, docs) => {
+      db.collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, docs) => {
           if (err) throw err;
           if (docs) {
             // UPDATE current settings
-            db.collection("wunderlist").updateOne({"user_id": userId},
+            db.collection("wunderlist").updateOne({"user_id": new ObjectId(userId)},
                 {
                     $set: { todo_list: todo_list, client_secret: client_secret, client_id: client_id}
                 }, (err, response) => {
@@ -214,7 +214,7 @@ const funcall = module.exports = {
           } else {
             // Add new entry
             db.collection('wunderlist').insertOne({
-                "user_id": userId,
+                "user_id": new ObjectId(userId),
                 "todo_list": todo_list,
                 "client_secret": client_secret,
                 "client_id": client_id
@@ -247,70 +247,44 @@ const funcall = module.exports = {
 
   //----------------------Get Wunderlist settings from current user----------------------//
   getWunderlistSettings: function (db, res, userid, client) {
-    db.collection('users').findOne({"_id": new ObjectId(userid)}, (err, res_find_user) => {
-        if (err) {
-          res.send(JSON.stringify({
-            message: "User not found"
-          }));
-          client.close();
-          throw err;
-        }
-        if (res_find_user) {
-          res.send(JSON.stringify({
-            status: true,
-            userid: userid,
-            username: res_find_user.username,
-            face_image: res_find_user.face_image
-          }));
-          client.close();
-        }
-        else {
-          res.send(JSON.stringify({
-            status: false,
-            message: "User not found"
-          }));
-          client.close();
-        }
-    })
 
-/*
     // JOIN in MongoDB
-    db.collection('deviceConfig').aggregate([
+    db.collection('wunderlist').aggregate([
       { $lookup:
         {
-          from: "deviceData",
-          localField: "uuid",
-          foreignField: "uuid",
-          as: "deviceData"
+          from: "users",
+          localField: "user_id",
+          foreignField: "_id",
+          as: "user"
         }
       },
       { $project:
           {
-            "user": "$deviceData.user",
-            "deviceName": "$deviceData.name",
-            "deviceId": "$deviceData._id",
-            "uuid": 1,
-            "name": 1,
-            "model": 1,
-            "steps": 1
+            "todo_list": 1,
+            "client_secret": 1,
+            "client_id": 1,
+            "username": "$user.username",
+            "face_image": "$user.face_image",
           }
       }
-    ]).toArray((err_configs, res_configs) => {
-        if (err_configs) throw err_configs;
-        res_configs.map(item => {
-          item.user = item.user;
-          item.deviceName = item.deviceName;
-          item.deviceId = item.deviceId;
-          item.appId = item._id;
-          item.model = item.model;
-          item.uuid = item.uuid;
-          item.steps;
+    ]).toArray((err_settings, res_settings) => {
+        if (err_settings) throw err_settings;
+        res_settings.map(item => {
+          item.todo_list = item.todo_list;
+          item.client_secret = item.client_secret;
+          item.client_id = item.client_id;
+          item.face_image = item.face_image[0];
+          item.username = item.username[0];
         });
-
-        io.emit('get_configs', res_configs);
+        res.send(JSON.stringify({
+          status: true,
+          settings: res_settings[0]
+        }));
         client.close();
     });
-*/
+
 
   },
+
+
 }

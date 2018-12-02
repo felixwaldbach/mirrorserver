@@ -11,6 +11,8 @@ Endpoint to get tasks of a list: a.wunderlist.com/api/v1/tasks?list_id=INTEGER_I
 
 import React, {Component} from 'react';
 import WunderlistSDK from 'wunderlist';
+import socketIOClient from "socket.io-client";
+import frontendConfig from '../frontendConfig';
 
 var lists = [];
 
@@ -41,6 +43,31 @@ class ToDoWidget extends Component {
         .fail(function () {
           console.error('there was a problem');
         });
+  }
+
+  componentDidMount() {
+      // WebSockets
+      this.socket = socketIOClient(this.state.endpoint);
+      this.socket.emit('send_wunderlist_settings', {
+          message: "send me credentials please!"
+      });
+
+      this.socket.on('wunderlist_settings', function (data) {
+          addListToUI(data);
+      });
+
+      this.intervalID = setInterval( () => {
+          this.socket.emit('wunderlist_settings', {
+              message: "send me credentials please!"
+          })},
+          3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
+      );
+
+      const addListToUI = data => {
+          if(data) {
+            console.log(data);
+          }
+      };
   }
 
   render() {
