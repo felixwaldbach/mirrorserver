@@ -104,13 +104,13 @@ class ToDoWidget extends Component {
 
   render() {
     mylist = this.state.mylist;
-    mylist.slice(0, 10);
+    mylist.slice(0, 5);
     return (
         <div className="todo-container">
           {mylist.map((item, index) => {
               return(
                 <div key={index}>
-                  {item.title}
+                  {index < 6 ? <li>{item.title}</li>: null}
                 </div>
               )
             }
