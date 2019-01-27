@@ -51,7 +51,6 @@ class ToDoWidget extends Component {
 
       const addListToUI = data => {
           if(data) {
-            console.log(data);
             this.setState({wunderlist_settings: data});
 
             var wunderlistAPI = new WunderlistSDK({
