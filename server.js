@@ -6,8 +6,10 @@ const database = require('./database');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const uuid = require('uuid/v4');
+const ObjectId = require('mongodb').ObjectId;
 
 const port = process.env.PORT || 5000;
+app.use("/public", express.static(__dirname + '/public'));
 
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
@@ -55,8 +57,27 @@ app.get('/api/hello', (req, res) => {
     res.send({express: 'Hello From Express'});
 });
 
-
 // HTTP Requests
+// check if token is authorized
+app.post('/native/authizeToken', verifyToken, (req, res) => {
+  jwt.verify(req.token, process.env.secretkey, (err, authData) => {
+      console.log("Checking auth token");
+      if(err) {
+        console.log("User not verified");
+        res.send(JSON.stringify({
+          authorized: false,
+          message: "Token not authorized. Please login!"
+        }));
+      } else {
+        console.log("User is verified");
+        res.send(JSON.stringify({
+          authorized: true,
+          message: "Token is authorized. All good!"
+        }));
+      }
+  });
+});
+
 // Register, check user credentials and create user with jwt
 app.post('/native/signup', (req, res)  => {
   MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
@@ -136,6 +157,59 @@ app.post('/native/uploadImage', verifyToken, upload.single('file'), (req, res) =
     }
 });
 
+// Upload Wunderlist Settings and clientid
+app.post('/native/uploadWunderlistSettings', verifyToken, (req, res) => {
+  jwt.verify(req.token, process.env.secretkey, (err, authData) => {
+      if(err) {
+          res.json({
+            status: false,
+            message: "User is not authorized. Please reload the application and try again!"
+          });
+      } else {
+        MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
+          if (err) {
+            console.log('Unable to connect to MongoDB');
+            res.send(JSON.stringify({
+              status: false,
+              message: "Database error! Please contact administrator or try again!"
+            }));
+          } else {
+              const userId = authData.userid;
+              database.uploadWunderlistSettings(client.db('smartmirror'), req.body, res, userId, client);
+          }
+        });
+
+      }
+  });
+});
+
+// Getting Wunderlist Settings and clientid
+app.post('/native/getWunderlistSettings', verifyToken, (req, res) => {
+  jwt.verify(req.token, process.env.secretkey, (err, authData) => {
+      if(err) {
+          res.json({
+            status: false,
+            message: "User is not authorized. Please reload the application and try again!"
+          });
+      } else {
+        MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
+          if (err) {
+            console.log('Unable to connect to MongoDB');
+            res.send(JSON.stringify({
+              status: false,
+              message: "Database error! Please contact administrator or try again!"
+            }));
+          } else {
+              const userId = authData.userid;
+              database.getWunderlistSettings(client.db('smartmirror'), res, userId, client);
+          }
+        });
+
+      }
+  });
+});
+
+
 //
 //
 //
@@ -159,8 +233,6 @@ io.on('connection', function (socket) {
     socket.on('send_weather_forecast', function (data) {
         shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET 'api.openweathermap.org/data/2.5/forecast?q=Stuttgart,DE&APPID=ba26397fa9d26d3655feda1b51d4b79d'", function (code, stdout, stderr) {
             let list = JSON.parse(stdout);
-            console.log(list);
-            console.log(typeof list);
             io.emit('five_day_forecast', { forecast: stdout});
         });
     });
@@ -168,9 +240,36 @@ io.on('connection', function (socket) {
     // Quotes Widget
     // Send random quotes to UI. Use CURL and GET
     socket.on('send_quotes', function (data) {
-        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET https://talaikis.com/api/quotes/random/", function (code, stdout, stderr) {
+        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET http://quotesondesign.com/wp-json/posts", function (code, stdout, stderr) {
             io.emit('new_quotes', { randomQuote: stdout});
         });
+    });
+
+    // Wunderlist Widget
+    socket.on('send_wunderlist_settings', function (data) {
+      MongoClient.connect(mongoURL, { useNewUrlParser: true }, function(err, client) {
+        if (err) {
+          console.log('Unable to connect to MongoDB');
+        } else {
+            client.db('smartmirror').collection('users').findOne({"username": currentUser}, (err, res_find_user) => {
+                if (err) {
+                  client.close();
+                  throw err;
+                } else {
+                    let userId = res_find_user._id;
+                    client.db('smartmirror').collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
+                        if (err) {
+                          client.close();
+                          throw err;
+                        } else {
+                            client.close();
+                            socket.emit('wunderlist_settings', res_find_wunderlist_settings);
+                        }
+                    });
+                }
+            });
+        }
+      });
     });
 });
 
