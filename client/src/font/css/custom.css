@@ -1,0 +1,28 @@
+.clock-container {
+  text-align: center;
+}
+
+.news-container li {
+  list-style-type: square;
+}
+
+.weather-container {
+  font-size: 14px;
+}
+
+.weather-container table {
+  width: 100%;
+  color: white;
+}
+
+.weather-container td, th {
+  text-align: center;
+}
+
+#head-border {
+    color: red;
+}
+
+.todo-container {
+  font-size: 12px;
+}

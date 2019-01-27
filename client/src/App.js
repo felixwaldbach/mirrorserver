@@ -5,6 +5,7 @@ import ClockWidget from "./widgets/ClockWidget";
 import NewsFeed from "./widgets/NewsFeed";
 import WeatherWidget from "./widgets/WeatherWidget";
 import QuotesWidget from "./widgets/QuotesWidget";
+import ToDoWidget from "./widgets/ToDoWidget";
 
 import socketIOClient from "socket.io-client";
 import frontendConfig from './frontendConfig';
@@ -45,6 +46,7 @@ class App extends Component {
         this.state.widgets.push(<NewsFeed />);
         this.state.widgets.push(<WeatherWidget />);
         this.state.widgets.push(<QuotesWidget />);
+        this.state.widgets.push(<ToDoWidget />);
 
         return (
             <div>

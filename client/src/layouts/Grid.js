@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import '../grid.css';
+import '../font/css/grid.css';
 
 class Grid extends Component {
 
