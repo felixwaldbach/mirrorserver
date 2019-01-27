@@ -44,7 +44,7 @@ class App extends Component {
         this.state.widgets = [];
         this.state.widgets.push(<ClockWidget style={{color: 'white'}}/>);
         this.state.widgets.push(<NewsFeed />);
-        //this.state.widgets.push(<WeatherWidget />);
+        this.state.widgets.push(<WeatherWidget />);
         this.state.widgets.push(<QuotesWidget />);
         this.state.widgets.push(<ToDoWidget />);
 
