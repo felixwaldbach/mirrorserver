@@ -25,7 +25,8 @@ class ToDoWidget extends Component {
         lists: [],
         mylist: [],
         tasks: [],
-        list_id: 0
+        list_id: 0,
+        endpoint: frontendConfig.server_address + ':' + frontendConfig.socket_server_port
       }
 
   }
@@ -80,6 +81,7 @@ class ToDoWidget extends Component {
   }
 
   async getSubtasks () {
+    console.log("getSubtasks");
     let accessToken = this.state.wunderlist_settings.client_secret;
     let client_id = this.state.wunderlist_settings.client_id;
     fetch("https://a.wunderlist.com/api/v1/tasks?list_id="+this.state.list_id, {

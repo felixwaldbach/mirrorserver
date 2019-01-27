@@ -32,7 +32,9 @@ class QuotesWidget extends Component {
 
         const addQuotesToUI = data => {
             if(data) {
-                let quote = JSON.parse(data.randomQuote).quote + " - " + JSON.parse(data.randomQuote).author;
+                let quote = JSON.stringify(data.randomQuote).content + " - " + JSON.stringify(data.randomQuote).title;
+                console.log(data);
+                console.log(quote);
                 this.setState({quote: quote});
             }
         };
