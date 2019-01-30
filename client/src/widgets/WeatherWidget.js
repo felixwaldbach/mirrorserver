@@ -46,7 +46,7 @@ class WeatherWidget extends Component {
 
         const addWeatherForecastToUI = data => {
             if(data) {
-                console.log(JSON.parse(data.forecast));
+                //console.log(JSON.parse(data.forecast));
             }
         };
     }

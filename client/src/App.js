@@ -1,11 +1,6 @@
 import React, {Component} from 'react';
 
 import Grid from "./layouts/Grid";
-import ClockWidget from "./widgets/ClockWidget";
-import NewsFeed from "./widgets/NewsFeed";
-import WeatherWidget from "./widgets/WeatherWidget";
-import QuotesWidget from "./widgets/QuotesWidget";
-import ToDoWidget from "./widgets/ToDoWidget";
 
 import socketIOClient from "socket.io-client";
 import frontendConfig from './frontendConfig';
@@ -23,10 +18,24 @@ class App extends Component {
         this.callApi()
             .then(res => this.setState({response: res.express}))
             .catch(err => console.log(err));
+        this.getUserWidgets()
+            .then(res => {
+                this.setState({widgets: res.data})
+            })
+            .catch(err => console.log(err));
         const socket = socketIOClient(this.state.endpoint);
         socket.emit('message', {
             message: 'Hello World'
         });
+        const app = this;
+        socket.on('web_drop_event', function (data) {
+            app.setUserWidgets(data)
+                .then(res => app.getUserWidgets())
+                .then(res => {
+                    app.setState({widgets: res.data})
+                })
+                .catch(err => console.log(err));
+        })
     }
 
     callApi = async () => {
@@ -38,21 +47,43 @@ class App extends Component {
         return body;
     };
 
+    getUserWidgets = async () => {
+        const response = await fetch('/api/user/getUserWidgets?user_id=felix');
+        const body = await response.json();
+
+        if (response.status !== 200) throw Error(body.message);
+
+        return body;
+    };
+
+    setUserWidgets = async (data) => {
+        const response = await fetch('/api/user/setUserWidgets', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                "user_id": 'felix',
+                "widget": {
+                    widget_id: data.widget_id,
+                    widget_name: data.widget_name,
+                    remove: false
+                },
+                "slot": data.slot,
+                "previous_slot": data.previous_slot
+            })
+        });
+        const body = await response.json();
+
+        if (response.status !== 200) throw Error(body.message);
+
+        return body;
+    };
+
     render() {
-
-        // Reihenfolge der pushes bzw. Stelle wo es uebersprungen ist, wird in der App festgelegt
-        this.state.widgets = [];
-        this.state.widgets.push(<ClockWidget style={{color: 'white'}}/>);
-        this.state.widgets.push(<NewsFeed />);
-        this.state.widgets.push(<WeatherWidget />);
-        this.state.widgets.push(<QuotesWidget />);
-        this.state.widgets.push(<ToDoWidget />);
-
         return (
             <div>
                 {this.state.horizontal ?
-                  <Grid widgets={this.state.widgets} />
-                  : null
+                    <Grid widgets={this.state.widgets}/>
+                    : null
                 }
             </div>
         );
