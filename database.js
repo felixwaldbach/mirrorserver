@@ -296,6 +296,54 @@ const funcall = module.exports = {
                     }
                 }));
                 client.close();
+        }
+    },
+
+  //----------------------Get Current User----------------------//
+  getUserDataForCurrentUser: function(db, res, userid, client) {
+    // Return logged in user information with token of jwt
+    db.collection('users').findOne({"_id": new ObjectId(userid)}, (err, res_find_user) => {
+        if (err) {
+          res.send(JSON.stringify({
+            message: "User not found"
+          }));
+          client.close();
+          throw err;
+        }
+        if (res_find_user) {
+          res.send(JSON.stringify({
+            status: true,
+            userid: userid,
+            username: res_find_user.username,
+            face_image: res_find_user.face_image
+          }));
+          client.close();
+        }
+        else {
+          res.send(JSON.stringify({
+            status: false,
+            message: "User not found"
+          }));
+          client.close();
+        }
+    })
+  },
+
+  //----------------------Update user face image----------------------//
+  uploadImageToServer: function (db, res, fileData, userId, client) {
+    db.collection("users").updateOne({ _id : new ObjectId(userId) },
+        {
+            $set: { face_image: fileData.filename }
+        }, (err, response) => {
+          if (err) {
+            throw err;
+          } else {
+            if(response.result.ok === 1) {
+              console.log("Image uploaded successfully for user: " + userId);
+              res.send(JSON.stringify({
+                status: true,
+                message: "Image uploaded successfully!"
+              }));
             } else {
                 res.send(JSON.stringify({
                     status: false,
@@ -305,5 +353,116 @@ const funcall = module.exports = {
             }
         });
     }
+
+  //----------------------Get Wunderlist settings from current user----------------------//
+  uploadWunderlistSettings: function (db, settings, res, userId, client) {
+    let todo_list = settings.todoList;
+    let client_secret = settings.wl_access_token;
+    let client_id = settings.wl_client_id;
+
+    // Check for empty or blank entries
+    if (todo_list.trim().length !== 0 && client_secret.trim().length !== 0 && client_id.trim().length !== 0 && todo_list !== null && client_secret !== null && client_id !== null) {
+      // Check if has already settings
+
+      db.collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, docs) => {
+          if (err) throw err;
+          if (docs) {
+            // UPDATE current settings
+            db.collection("wunderlist").updateOne({"user_id": new ObjectId(userId)},
+                {
+                    $set: { todo_list: todo_list, client_secret: client_secret, client_id: client_id}
+                }, (err, response) => {
+                  if (err) {
+                    throw err;
+                  } else {
+                    if(response.result.ok === 1) {
+                      res.send(JSON.stringify({
+                        status: true,
+                        message: "Wunderlist Settings updated successfully!"
+                      }));
+                    } else {
+                      res.send(JSON.stringify({
+                        status: false,
+                        message: "Error updating Wunderlist Settings. Please try again!"
+                      }));
+                    }
+                    client.close();
+                  }
+            });
+          } else {
+            // Add new entry
+            db.collection('wunderlist').insertOne({
+                "user_id": new ObjectId(userId),
+                "todo_list": todo_list,
+                "client_secret": client_secret,
+                "client_id": client_id
+            }, function (err, result) {
+                if(err) {
+                  console.log(err);
+                  res.send(JSON.stringify({
+                    status: false,
+                    message: "Something went wrong. Please try again!"
+                  }));
+                } else {
+                    res.send(JSON.stringify({
+                      status: true,
+                      message: "Wunderlist Settings added successfully"
+                    }));
+                    client.close();
+                }
+            });
+          }
+      });
+    } else {
+      res.send(JSON.stringify({
+          status: false,
+          message: "Wunderlist Settings and lists can't be empty."
+      }));
+      client.close();
+    }
+
+  },
+
+  //----------------------Get Wunderlist settings from current user----------------------//
+  getWunderlistSettings: function (db, res, userid, client) {
+
+    // JOIN in MongoDB
+    db.collection('wunderlist').aggregate([
+      { $lookup:
+        {
+          from: "users",
+          localField: "user_id",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      { $project:
+          {
+            "todo_list": 1,
+            "client_secret": 1,
+            "client_id": 1,
+            "username": "$user.username",
+            "face_image": "$user.face_image",
+          }
+      }
+    ]).toArray((err_settings, res_settings) => {
+        if (err_settings) throw err_settings;
+        res_settings.map(item => {
+          item.todo_list = item.todo_list;
+          item.client_secret = item.client_secret;
+          item.client_id = item.client_id;
+          item.face_image = item.face_image[0];
+          item.username = item.username[0];
+        });
+        res.send(JSON.stringify({
+          status: true,
+          settings: res_settings[0]
+        }));
+        client.close();
+    });
+
+
+  },
+
 
 }
