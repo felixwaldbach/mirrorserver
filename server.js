@@ -319,9 +319,6 @@ io.on('connection', function (socket) {
 
         // Wunderlist Widget
         socket.on('send_wunderlist_settings', function (data) {
-          console.log("data");
-          console.log("data", data);
-
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
                 if (err) {
                     console.log('Unable to connect to MongoDB');
@@ -331,7 +328,6 @@ io.on('connection', function (socket) {
                             client.close();
                             throw err;
                         } else {
-                            console.log("res_find_user", res_find_user);
                             let userId = res_find_user._id;
                             client.db('smartmirror').collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
                                 if (err) {
