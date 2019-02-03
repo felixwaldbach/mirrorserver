@@ -39,20 +39,20 @@ class ToDoWidget extends Component {
       });
 
       this.socket.on('wunderlist_settings', function (data) {
-          addListToUI(data);
+        console.log("mount...");
 
+          addListToUI(data);
+/*
           this.intervalID = setInterval(
             () => this.getSubtasks(),
             300000 // every 5 minutes
           );
-      });
-
-      this.socket.emit('wunderlist_settings', {
-          message: "send me credentials please!"
+*/
       });
 
       const addListToUI = data => {
           if(data) {
+            console.log(data);
             this.setState({wunderlist_settings: data});
 
             var wunderlistAPI = new WunderlistSDK({

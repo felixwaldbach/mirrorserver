@@ -281,18 +281,20 @@ io.on('connection', function (socket) {
 
     // Weather Forecast
     socket.on('send_weather_forecast', function (data) {
-        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET 'api.openweathermap.org/data/2.5/forecast?q=Stuttgart,DE&APPID=ba26397fa9d26d3655feda1b51d4b79d'", function (code, stdout, stderr) {
+        /*shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET 'api.openweathermap.org/data/2.5/forecast?q=Stuttgart,DE&APPID=ba26397fa9d26d3655feda1b51d4b79d'", function (code, stdout, stderr) {
             let list = JSON.parse(stdout);
             io.emit('five_day_forecast', {forecast: stdout});
         });
+*/
     });
 
     // Quotes Widget
     // Send random quotes to UI. Use CURL and GET
     socket.on('send_quotes', function (data) {
-        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET https://talaikis.com/api/quotes/random/", function (code, stdout, stderr) {
+      /*  shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET https://talaikis.com/api/quotes/random/", function (code, stdout, stderr) {
             io.emit('new_quotes', {randomQuote: stdout});
         });
+*/
     });
 
     socket.on('app_drop_event', function (data) {
@@ -319,6 +321,9 @@ io.on('connection', function (socket) {
 
         // Wunderlist Widget
         socket.on('send_wunderlist_settings', function (data) {
+          console.log("data");
+          console.log("data", data);
+
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
                 if (err) {
                     console.log('Unable to connect to MongoDB');
@@ -328,6 +333,7 @@ io.on('connection', function (socket) {
                             client.close();
                             throw err;
                         } else {
+                            console.log("res_find_user", res_find_user);
                             let userId = res_find_user._id;
                             client.db('smartmirror').collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
                                 if (err) {
