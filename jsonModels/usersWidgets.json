@@ -1,0 +1,38 @@
+{
+  "_id": "ObjectId",
+  "user_id": "felix",
+  "widgets": [
+    {
+      "widget_id": 0,
+      "widget_name": "WidgetName0"
+    },
+    {
+      "widget_id": 0,
+      "widget_name": "WidgetName0"
+    },
+    {
+      "widget_id": 3,
+      "widget_name": "WidgetName3"
+    },
+    {
+      "widget_id": 4,
+      "widget_name": "WidgetName4"
+    },
+    {
+      "widget_id": 0,
+      "widget_name": "WidgetName0"
+    },
+    {
+      "widget_id": 2,
+      "widget_name": "WidgetName2"
+    },
+    {
+      "widget_id": 1,
+      "widget_name": "WidgetName1"
+    },
+    {
+      "widget_id": 2,
+      "widget_name": "WidgetName2"
+    }
+  ]
+}
