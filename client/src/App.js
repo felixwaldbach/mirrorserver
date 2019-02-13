@@ -48,7 +48,7 @@ class App extends Component {
     };
 
     getUserWidgets = async () => {
-        const response = await fetch('/api/user/getUserWidgets?user_id=felix');
+        const response = await fetch('/api/user/getUserWidgets?user_id=Emre');
         const body = await response.json();
 
         if (response.status !== 200) throw Error(body.message);

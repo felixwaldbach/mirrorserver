@@ -40,14 +40,16 @@ class ToDoWidget extends Component {
 
       this.socket.on('wunderlist_settings', function (data) {
           addListToUI(data);
+
+          this.intervalID = setInterval(
+            () => this.getSubtasks(),
+            300000 // every 5 minutes
+          );
       });
 
-      this.intervalID = setInterval( () => {
-          this.socket.emit('wunderlist_settings', {
-              message: "send me credentials please!"
-          })},
-          3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
-      );
+      this.socket.emit('wunderlist_settings', {
+          message: "send me credentials please!"
+      });
 
       const addListToUI = data => {
           if(data) {
@@ -84,6 +86,9 @@ class ToDoWidget extends Component {
     console.log("getSubtasks");
     let accessToken = this.state.wunderlist_settings.client_secret;
     let client_id = this.state.wunderlist_settings.client_id;
+    console.log(accessToken);
+    console.log(client_id);
+    console.log(this.state.list_id);
     fetch("https://a.wunderlist.com/api/v1/tasks?list_id="+this.state.list_id, {
         method: 'GET',
         headers: {
@@ -109,15 +114,20 @@ class ToDoWidget extends Component {
     mylist.slice(0, 5);
     return (
         <div className="todo-container">
-          <h2>To Do List:</h2>
-          {mylist.map((item, index) => {
-              return(
-                <div key={index}>
-                  {index < 10 ? <li>{item.title}</li>: null}
-                </div>
-              )
-            }
-          )}
+          <h2>To Do List</h2>
+          {mylist.length > 0 ?
+            <div>
+              {mylist.map((item, index) => {
+                  return(
+                    <div key={index}>
+                      {index < 7 ? <li>{item.title}</li>: null}
+                    </div>
+                  )
+                }
+              )}
+            </div>
+          : <span>Nothing to do - Well done!</span>}
+
         </div>
     );
   }

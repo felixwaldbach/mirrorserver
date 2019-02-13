@@ -45,15 +45,15 @@ io.on('connection', function (socket) {
     socket.on('send_weather_forecast', function (data) {
         shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET 'api.openweathermap.org/data/2.5/forecast?q=Stuttgart,DE&APPID=ba26397fa9d26d3655feda1b51d4b79d'", function (code, stdout, stderr) {
             let list = JSON.parse(stdout);
-            io.emit('five_day_forecast', {forecast: stdout});
+            io.emit('five_day_forecast', { forecast: stdout});
         });
     });
 
     // Quotes Widget
     // Send random quotes to UI. Use CURL and GET
     socket.on('send_quotes', function (data) {
-        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET https://talaikis.com/api/quotes/random/", function (code, stdout, stderr) {
-            io.emit('new_quotes', {randomQuote: stdout});
+        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET http://quotesondesign.com/wp-json/posts", function (code, stdout, stderr) {
+            io.emit('new_quotes', { randomQuote: stdout});
         });
     });
 
@@ -72,34 +72,36 @@ io.on('connection', function (socket) {
                 io.emit('web_delete_event', data);
             }
         });
-
-        // Wunderlist Widget
-        socket.on('send_wunderlist_settings', function (data) {
-            MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
-                if (err) {
-                    console.log('Unable to connect to MongoDB');
-                } else {
-                    client.db('smartmirror').collection('users').findOne({"username": currentUser}, (err, res_find_user) => {
-                        if (err) {
-                            client.close();
-                            throw err;
-                        } else {
-                            let userId = res_find_user._id;
-                            client.db('smartmirror').collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
-                                if (err) {
-                                    client.close();
-                                    throw err;
-                                } else {
-                                    client.close();
-                                    socket.emit('wunderlist_settings', res_find_wunderlist_settings);
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        });
     });
+
+    // Wunderlist Widget
+    socket.on('send_wunderlist_settings', function (data) {
+        MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
+            if (err) {
+                console.log('Unable to connect to MongoDB');
+            } else {
+                client.db('smartmirror').collection('users').findOne({"username": currentUser}, (err, res_find_user) => {
+                    if (err) {
+                        client.close();
+                        throw err;
+                    } else {
+                        let userId = res_find_user._id;
+                        client.db('smartmirror').collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
+                            if (err) {
+                                client.close();
+                                throw err;
+                            } else {
+                                client.close();
+                                socket.emit('wunderlist_settings', res_find_wunderlist_settings);
+                            }
+                        });
+                    }
+                });
+            }
+      });
+    });
+
+
 });
 
 http.listen(port, () => console.log(`Listening on port ${port}`));
