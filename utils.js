@@ -1,3 +1,5 @@
+const responseMessages = require('./responseMessages');
+
 // for jsonwebtoken and session, verifies session token
 function verifyToken(req, res, next) {
     const bearerHeader = req.headers.authorization;
@@ -8,7 +10,7 @@ function verifyToken(req, res, next) {
         next();
     } else {
         res.json({
-            message: "User is not authorized"
+            message: responseMessages.USER_NOT_AUTHORIZED
         });
     }
 }

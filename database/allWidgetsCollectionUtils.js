@@ -1,5 +1,6 @@
 const MongoClient = require('mongodb').MongoClient;
 const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
+const responseMessages = require('../responseMessages');
 
 const funcall = module.exports = {
     //----------------------Set User Widget ids----------------------//
@@ -8,7 +9,7 @@ const funcall = module.exports = {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                 if (err) resolve(JSON.stringify({
                     status: false,
-                    message: "Database connection could not be established",
+                    message: responseMessages.DATABASE_CONNECTION_ERROR,
                     error: err
                 }));
                 else {
@@ -18,7 +19,7 @@ const funcall = module.exports = {
                             client.close();
                             resolve(JSON.stringify({
                                 status: false,
-                                message: "An error occured",
+                                message: responseMessages.DATABASE_COLLECTION_FIND_ERROR,
                                 error: err
                             }));
                         } else {
@@ -33,7 +34,7 @@ const funcall = module.exports = {
                                 client.close();
                                 resolve(JSON.stringify({
                                     status: true,
-                                    message: "Widgets found.",
+                                    message: responseMessages.WIDGETS_SUCCESS,
                                     data: {
                                         all_widgets: all_widgets
                                     }

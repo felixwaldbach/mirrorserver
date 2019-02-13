@@ -4,6 +4,7 @@ const ObjectId = require('mongodb').ObjectId;
 const MongoClient = require('mongodb').MongoClient;
 const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
 const userWidgetsCollectionUtils = require('./userWidgetsCollectionUtils');
+const responseMessages = require('../responseMessages');
 
 const funcall = module.exports = {
     //----------------------Register user----------------------//
@@ -18,7 +19,7 @@ const funcall = module.exports = {
                 MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                     if (err) resolve(JSON.stringify({
                         status: false,
-                        message: "Database connection could not be established",
+                        message: responseMessages.DATABASE_CONNECTION_ERROR,
                         error: err
                     }));
                     else {
@@ -29,7 +30,7 @@ const funcall = module.exports = {
                                 client.close();
                                 resolve(JSON.stringify({
                                     status: false,
-                                    message: "Something went wrong while connecting to the database",
+                                    message: responseMessages.DATABASE_COLLECTION_FIND_ERROR,
                                     error: err
                                 }));
                             }
@@ -37,7 +38,7 @@ const funcall = module.exports = {
                                 client.close();
                                 resolve(JSON.stringify({
                                     status: false,
-                                    message: "This username is not available. Please try another one."
+                                    message: responseMessages.USER_DATA_INVALID
                                 }));
                             } else {
                                 // Add new user to database with hashed password
@@ -50,7 +51,7 @@ const funcall = module.exports = {
                                         client.close();
                                         resolve(JSON.stringify({
                                             status: false,
-                                            message: "Something went wrong registering this user. Please try again!",
+                                            message: responseMessages.USER_REGISTRATION_ERROR,
                                             error: err
                                         }));
                                     } else {
@@ -67,7 +68,7 @@ const funcall = module.exports = {
             } else {
                 resolve(JSON.stringify({
                     status: false,
-                    message: "User data can't be empty."
+                    message: responseMessages.USER_DATA_INVALID
                 }));
             }
         });
@@ -83,7 +84,7 @@ const funcall = module.exports = {
             if (!username.trim() || !password) {
                 resolve(JSON.stringify({
                     status: false,
-                    message: "All fields are required."
+                    message: responseMessages.USER_DATA_INVALID
                 }));
             } else {
                 // Check for blank fields
@@ -91,7 +92,7 @@ const funcall = module.exports = {
                     MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                         if (err) resolve(JSON.stringify({
                             status: false,
-                            message: "Database connection could not be established",
+                            message: responseMessages.DATABASE_CONNECTION_ERROR,
                             error: err
                         }));
                         else {
@@ -101,7 +102,7 @@ const funcall = module.exports = {
                                     client.close();
                                     resolve(JSON.stringify({
                                         status: false,
-                                        message: "Sorry, your password is incorrect. Please check again!",
+                                        message: responseMessages.USER_DATA_INVALID,
                                         error: err
                                     }));
                                 }
@@ -117,21 +118,21 @@ const funcall = module.exports = {
                                             resolve(JSON.stringify({
                                                 status: true,
                                                 token: token,
-                                                message: "Correct credentials",
+                                                message: responseMessages.USER_DATA_SUCCESS,
                                             }));
                                         });
                                     } else {
                                         client.close();
                                         resolve(JSON.stringify({
                                             status: false,
-                                            message: "Sorry, your password is incorrect. Please check again."
+                                            message: responseMessages.USER_DATA_INVALID
                                         }));
                                     }
                                 } else {
                                     client.close();
                                     resolve(JSON.stringify({
                                         status: false,
-                                        message: "Sorry, your password is incorrect. Please check again."
+                                        message: responseMessages.USER_DATA_INVALID
                                     }));
                                 }
                             });
@@ -149,7 +150,7 @@ const funcall = module.exports = {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                 if (err) resolve(JSON.stringify({
                     status: false,
-                    message: "Database connection could not be established",
+                    message: responseMessages.DATABASE_CONNECTION_ERROR,
                     error: err
                 }));
                 else {
@@ -157,7 +158,7 @@ const funcall = module.exports = {
                         if (err) {
                             resolve(JSON.stringify({
                                 status: false,
-                                message: "Error during authentication",
+                                message: responseMessages.USER_NOT_AUTHORIZED,
                                 error: err
                             }));
                         } else {
@@ -168,7 +169,7 @@ const funcall = module.exports = {
                                 if (err) {
                                     client.close();
                                     resolve(JSON.stringify({
-                                        message: "User not found",
+                                        message: responseMessages.USER_DATA_INVALID,
                                         error: err
                                     }));
                                 }
@@ -178,13 +179,14 @@ const funcall = module.exports = {
                                         status: true,
                                         userid: userid,
                                         username: res_find_user.username,
-                                        face_image: res_find_user.face_image
+                                        face_image: res_find_user.face_image,
+                                        message: responseMessages.USER_DATA_SUCCESS
                                     }));
                                 } else {
                                     client.close();
                                     resolve(JSON.stringify({
                                         status: false,
-                                        message: "User not found"
+                                        message: responseMessages.USER_DATA_INVALID
                                     }));
                                 }
                             })
@@ -201,7 +203,7 @@ const funcall = module.exports = {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                 if (err) resolve(JSON.stringify({
                     status: false,
-                    message: "Database connection could not be established",
+                    message: responseMessages.DATABASE_CONNECTION_ERROR,
                     error: err
                 }));
                 else {
@@ -214,7 +216,7 @@ const funcall = module.exports = {
                                 client.close();
                                 resolve(JSON.stringify({
                                     status: false,
-                                    message: "Error during update",
+                                    message: responseMessages.DATABASE_COLLECTION_UPDATE_ERROR,
                                     error: err
                                 }));
                             } else {
@@ -222,13 +224,13 @@ const funcall = module.exports = {
                                     client.close();
                                     resolve(JSON.stringify({
                                         status: true,
-                                        message: "Image uploaded successfully!"
+                                        message: responseMessages.IMAGE_UPLOAD_SUCCESS
                                     }));
                                 } else {
                                     client.close();
                                     resolve(JSON.stringify({
                                         status: false,
-                                        message: "Updating image failed. Please try again!"
+                                        message: responseMessages.IMAGE_UPLOAD_ERROR
                                     }));
                                 }
                             }

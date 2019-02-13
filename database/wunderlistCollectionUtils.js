@@ -1,6 +1,7 @@
 const ObjectId = require('mongodb').ObjectId;
 const MongoClient = require('mongodb').MongoClient;
 const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
+const responseMessages = require('../responseMessages');
 
 const funcall = module.exports = {
     //----------------------Get Wunderlist settings from current user----------------------//
@@ -16,7 +17,7 @@ const funcall = module.exports = {
                 MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                     if (err) resolve(JSON.stringify({
                         status: false,
-                        message: "Database connection could not be established",
+                        message: responseMessages.DATABASE_CONNECTION_ERROR,
                         error: err
                     }));
                     else {
@@ -24,7 +25,7 @@ const funcall = module.exports = {
                         db.collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, docs) => {
                             if (err) resolve(JSON.stringify({
                                 status: false,
-                                message: "An error occured",
+                                message: responseMessages.DATABASE_COLLECTION_FIND_ERROR,
                                 error: err
                             }));
                             if (docs) {
@@ -37,7 +38,7 @@ const funcall = module.exports = {
                                             client.close();
                                             resolve(JSON.stringify({
                                                 status: false,
-                                                message: "An error occured",
+                                                message: responseMessages.DATABASE_COLLECTION_UPDATE_ERROR,
                                                 error: err
                                             }));
                                         } else {
@@ -45,13 +46,13 @@ const funcall = module.exports = {
                                                 client.close();
                                                 resolve(JSON.stringify({
                                                     status: true,
-                                                    message: "Wunderlist Settings updated successfully!"
+                                                    message: responseMessages.DATABASE_COLLECTION_UPDATE_SUCCESS
                                                 }));
                                             } else {
                                                 client.close();
                                                 resolve(JSON.stringify({
                                                     status: false,
-                                                    message: "Error updating Wunderlist Settings. Please try again!"
+                                                    message: responseMessages.DATABASE_COLLECTION_UPDATE_ERROR
                                                 }));
                                             }
                                         }
@@ -68,13 +69,13 @@ const funcall = module.exports = {
                                         client.close();
                                         resolve(JSON.stringify({
                                             status: false,
-                                            message: "Something went wrong. Please try again!"
+                                            message: responseMessages.DATABASE_COLLECTION_INSERT_ERROR
                                         }));
                                     } else {
                                         client.close();
                                         resolve(JSON.stringify({
                                             status: true,
-                                            message: "Wunderlist Settings added successfully"
+                                            message: responseMessages.DATABASE_COLLECTION_INSERT_SUCCESS
                                         }));
                                     }
                                 });
@@ -85,7 +86,7 @@ const funcall = module.exports = {
             } else {
                 resolve(JSON.stringify({
                     status: false,
-                    message: "Wunderlist Settings and lists can't be empty."
+                    message: responseMessages.WUNDERLIST_DATA_INVALID
                 }));
             }
         });
@@ -97,7 +98,7 @@ const funcall = module.exports = {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                 if (err) resolve(JSON.stringify({
                     status: false,
-                    message: "Database connection could not be established",
+                    message: responseMessages.DATABASE_CONNECTION_ERROR,
                     error: err
                 }));
                 else {
@@ -126,7 +127,7 @@ const funcall = module.exports = {
                     ]).toArray((err_settings, res_settings) => {
                         if (err_settings) resolve(JSON.stringify({
                             status: false,
-                            message: "Settings error",
+                            message: responseMessages.DATABASE_COLLECTION_AGGREGATE_ERROR,
                             error: err
                         }));
                         res_settings.map(item => {
@@ -139,7 +140,8 @@ const funcall = module.exports = {
                         client.close();
                         resolve(JSON.stringify({
                             status: true,
-                            settings: res_settings[0]
+                            settings: res_settings[0],
+                            message: responseMessages.DATABASE_COLLECTION_AGGREGATE_SUCCESS
                         }));
                     });
                 }

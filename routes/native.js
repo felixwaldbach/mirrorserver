@@ -7,6 +7,7 @@ const usersCollectionUtils = require('../database/usersCollectionUtils');
 const userWidgetsCollectionUtils = require('../database/userWidgetsCollectionUtils');
 const wunderlistCollectionUtils = require('../database/wunderlistCollectionUtils');
 const jwt = require('jsonwebtoken');
+const responseMessages = require('../responseMessages');
 
 //Setup Multer for uploading images
 const storage = multer.diskStorage({
@@ -32,18 +33,15 @@ var verifyToken = require('../utils').verifyToken;
 // check if token is authorized
 router.post('/authizeToken', verifyToken, (req, res) => {
     jwt.verify(req.token, process.env.secretkey, (err, authData) => {
-        console.log("Checking auth token");
         if (err) {
-            console.log("User not verified");
             res.send(JSON.stringify({
                 authorized: false,
-                message: "Token not authorized. Please login!"
+                message: responseMessages.TOKEN_ERROR
             }));
         } else {
-            console.log("User is verified");
             res.send(JSON.stringify({
                 authorized: true,
-                message: "Token is authorized. All good!"
+                message: responseMessages.TOKEN_SUCCESS
             }));
         }
     });
@@ -84,14 +82,14 @@ router.post('/uploadImage', verifyToken, upload.single('file'), async (req, res)
     if (!req.file) {
         res.send(JSON.stringify({
             status: false,
-            message: "Image could not be uploaded. Please try again!"
+            message: responseMessages.IMAGE_UPLOAD_ERROR
         }));
     } else {
         jwt.verify(req.token, process.env.secretkey, async (err, authData) => {
             if (err) {
                 res.send(JSON.stringify({
                     status: false,
-                    message: "User is not authorized uploading images. Please reload the application and try again!"
+                    message: responseMessages.USER_NOT_AUTHORIZED
                 }));
             } else {
                 const fileData = req.file;
@@ -109,7 +107,7 @@ router.post('/uploadWunderlistSettings', verifyToken, async (req, res) => {
         if (err) {
             res.send(JSON.stringify({
                 status: false,
-                message: "User is not authorized. Please reload the application and try again!"
+                message: responseMessages.USER_NOT_AUTHORIZED
             }));
         } else {
             const userId = authData.userid;
@@ -125,7 +123,7 @@ router.post('/getWunderlistSettings', verifyToken, async (req, res) => {
         if (err) {
             res.send(JSON.stringify({
                 status: false,
-                message: "User is not authorized. Please reload the application and try again!"
+                message: responseMessages.USER_NOT_AUTHORIZED
             }));
         } else {
             const userId = authData.userid;
