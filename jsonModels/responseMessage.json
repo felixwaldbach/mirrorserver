@@ -1,0 +1,11 @@
+{
+  status: false,
+  message: "Custom Error Message",
+  error: "Thrown error"
+}
+
+{
+  status: true,
+  message: "Custom Success Message",
+  data: "Data if applicable"
+}
