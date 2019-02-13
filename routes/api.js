@@ -1,10 +1,11 @@
 var express = require('express');
 var router = express.Router();
 const userWidgetsCollectionUtils = require('../database/userWidgetsCollectionUtils');
+const responseMessages = require("../responseMessages");
 
 router.get('/hello', async (req, res) => {
     res.send({
-        express: 'Hello From Express'
+        message: responseMessages.HELLO_EXPRESS
     });
 });
 

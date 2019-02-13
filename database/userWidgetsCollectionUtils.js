@@ -1,12 +1,13 @@
 const MongoClient = require('mongodb').MongoClient;
 const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
+const responseMessages = require('../responseMessages');
 
 var getUserWidgets = async function (user_id) {
     return new Promise((resolve, reject) => {
         MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
             if (err) resolve(JSON.stringify({
                 status: false,
-                message: "Database connection could not be established",
+                message: responseMessages.DATABASE_CONNECTION_ERROR,
                 error: err
             }));
             else {
@@ -15,26 +16,26 @@ var getUserWidgets = async function (user_id) {
                     db.collection('userWidgets').findOne({"user_id": user_id}, (err, docs) => {
                         if (err) resolve(JSON.stringify({
                             status: false,
-                            message: "An error occured",
+                            message: responseMessages.DATABASE_COLLECTION_FIND_ERROR,
                             error: err
                         }));
                         if (docs) {
                             resolve(JSON.stringify({
                                 status: true,
-                                message: "Query executed successfully",
+                                message: responseMessages.DATABASE_COLLECTION_FIND_SUCCESS,
                                 data: docs
                             }));
                         } else {
                             resolve(JSON.stringify({
                                 status: false,
-                                message: "No docs available"
+                                message: responseMessages.DATABASE_NO_DATA_AVAILABLE
                             }));
                         }
                     });
                 } else {
                     resolve(JSON.stringify({
                         status: false,
-                        message: "Invalid user id"
+                        message: responseMessages.USER_DATA_INVALID
                     }));
                 }
             }
@@ -55,19 +56,19 @@ const funcall = module.exports = {
                 if (widgets) {
                     resolve(JSON.stringify({
                         status: true,
-                        message: "User widgets found.",
+                        message: responseMessages.WIDGETS_SUCCESS,
                         data: widgets
                     }));
                 } else {
                     resolve(JSON.stringify({
                         status: false,
-                        message: "No user widgets found"
+                        message: responseMessages.WIDGETS_NO_DATA
                     }));
                 }
             } else {
                 resolve(JSON.stringify({
                     status: false,
-                    message: "User ID undefined"
+                    message: responseMessages.USER_DATA_INVALID
                 }));
             }
         });
@@ -89,7 +90,7 @@ const funcall = module.exports = {
                 MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                     if (err) resolve(JSON.stringify({
                         status: false,
-                        message: "Database connection could not be established",
+                        message: responseMessages.DATABASE_CONNECTION_ERROR,
                         error: err
                     }));
                     else {
@@ -97,14 +98,14 @@ const funcall = module.exports = {
                         await db.collection('userWidgets').updateOne({"user_id": data.user_id}, {$set: {widgets: widgets}}, (err, result) => {
                             if (err) resolve(JSON.stringify({
                                 status: false,
-                                message: "An error occured",
+                                message: responseMessages.DATABASE_COLLECTION_UPDATE_ERROR,
                                 error: err
                             }));
                             else {
                                 client.close();
                                 resolve(JSON.stringify({
                                     status: true,
-                                    message: "User widgets updated."
+                                    message: responseMessages.DATABASE_COLLECTION_UPDATE_SUCCESS
                                 }));
                             }
                         });
@@ -114,7 +115,7 @@ const funcall = module.exports = {
                 client.close();
                 resolve(JSON.stringify({
                     status: false,
-                    message: "User ID undefined"
+                    message: responseMessages.USER_DATA_INVALID
                 }));
             }
         });
@@ -130,7 +131,7 @@ const funcall = module.exports = {
                 MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                     if (err) resolve(JSON.stringify({
                         status: false,
-                        message: "Database connection could not be established",
+                        message: responseMessages.DATABASE_CONNECTION_ERROR,
                         error: err
                     }));
                     else {
@@ -138,14 +139,14 @@ const funcall = module.exports = {
                         await db.collection('userWidgets').updateOne({"user_id": data.user_id}, {$set: {widgets: widgets}}, (err, result) => {
                             if (err) resolve(JSON.stringify({
                                 status: false,
-                                message: "Database connection could not be established",
+                                message: responseMessages.DATABASE_COLLECTION_UPDATE_ERROR,
                                 error: err
                             }));
                             else {
                                 client.close();
                                 resolve(JSON.stringify({
                                     status: true,
-                                    message: "User widget successfully removed"
+                                    message: responseMessages.DATABASE_COLLECTION_UPDATE_SUCCESS
                                 }));
                             }
                         });
@@ -154,7 +155,7 @@ const funcall = module.exports = {
             } else {
                 resolve(JSON.stringify({
                     status: false,
-                    message: "An error occured while removing user widget"
+                    message: responseMessages.USER_DATA_INVALID
                 }));
             }
         });
@@ -165,7 +166,7 @@ const funcall = module.exports = {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                 if (err) resolve(JSON.stringify({
                     status: false,
-                    message: "Database Connection could not be established",
+                    message: responseMessages.DATABASE_CONNECTION_ERROR,
                     error: err
                 }));
                 else {
@@ -173,7 +174,7 @@ const funcall = module.exports = {
                     let userWidgets = await getUserWidgets(username);
                     if (userWidgets.status) resolve(JSON.stringify({
                         status: false,
-                        message: "User Widgets Document already exists for this user"
+                        message: responseMessages.USER_WIDGETS_AVAILABLE
                     }));
                     else {
                         db.collection('userWidgets').insertOne({
@@ -184,14 +185,14 @@ const funcall = module.exports = {
                                 client.close();
                                 resolve(JSON.stringify({
                                     status: false,
-                                    message: "Something went wrong creating a user widget document for this user. Please try again!",
+                                    message: responseMessages.USER_WIDGETS_ERROR,
                                     error: err
                                 }));
                             } else {
                                 client.close();
                                 resolve(JSON.stringify({
                                     status: true,
-                                    message: "Your user widget document was successfully created."
+                                    message: responseMessages.USER_WIDGETS_SUCCESS
                                 }));
                             }
                         });
