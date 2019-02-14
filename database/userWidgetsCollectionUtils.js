@@ -20,11 +20,11 @@ var getUserWidgets = async function (user_id) {
                             error: err
                         }));
                         if (docs) {
-                            resolve(JSON.stringify({
+                            resolve({
                                 status: true,
                                 message: responseMessages.DATABASE_COLLECTION_FIND_SUCCESS,
-                                data: docs
-                            }));
+                                data: JSON.stringify(docs)
+                            });
                         } else {
                             resolve(JSON.stringify({
                                 status: false,
@@ -49,7 +49,7 @@ const funcall = module.exports = {
         return new Promise(async (resolve, reject) => {
             if (user_id) {
                 let entry = await getUserWidgets(user_id);
-                let widgets = JSON.parse(entry).data.widgets;
+                let widgets = entry.data ? JSON.parse(entry.data).widgets : [];
                 widgets.forEach(function (widget, index) {
                     if (widget !== null) widget.slot = index;
                 });
@@ -79,7 +79,7 @@ const funcall = module.exports = {
         return new Promise(async (resolve, reject) => {
             if (data.user_id) {
                 let entry = await getUserWidgets(data.user_id);
-                let widgets = entry.widgets;
+                let widgets = entry.data ? JSON.parse(entry.data).widgets : [];
                 if (data.previous_slot) {
                     widgets[data.previous_slot] = null;
                 }
