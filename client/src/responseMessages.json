@@ -1,0 +1,4 @@
+{
+  "FETCH_SUCCESS": "Fetch successfully executed",
+  "FETCH_ERROR": "An error occured trying to execute fetch"
+}
