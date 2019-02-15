@@ -6,9 +6,7 @@
 //       https://openweathermap.org/forecast5
 
 import React, {Component} from 'react';
-import kelvinToCelsius from 'kelvin-to-celsius';
-import socketIOClient from "socket.io-client";
-import frontendConfig from '../frontendConfig';
+import {socket} from '../frontendConfig';
 import '../font/css/weather-icons.css';
 import '../font/css/custom.css';
 
@@ -21,40 +19,37 @@ class WeatherWidget extends Component {
         this.state = {
             current_indoor_temperature: 0,
             current_outdoor_temperature: 0,
-            five_day_forecast: [],
-            endpoint: frontendConfig.server_address + ':' + frontendConfig.socket_server_port
+            five_day_forecast: []
         }
     }
 
     componentDidMount() {
-        // WebSockets
-        this.socket = socketIOClient(this.state.endpoint);
-        this.socket.emit('send_weather_forecast', {
+        socket.emit('send_weather_forecast', {
             message: "send me forecast please!"
         });
 
-        this.socket.on('five_day_forecast', function (data) {
+        socket.on('five_day_forecast', function (data) {
             addWeatherForecastToUI(data);
         });
 
-        this.intervalID = setInterval( () => {
-            this.socket.emit('send_weather_forecast', {
-                message: "send me forecast please!"
-            })},
+        this.intervalID = setInterval(() => {
+                socket.emit('send_weather_forecast', {
+                    message: "send me forecast please!"
+                })
+            },
             3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
         );
 
         const addWeatherForecastToUI = data => {
-            if(data) {
+            if (data) {
                 //console.log(JSON.parse(data.forecast));
             }
         };
     }
 
     componentWillUnmount() {
-      clearInterval(this.intervalID);
+        clearInterval(this.intervalID);
     }
-
 
 
     render() {
@@ -62,30 +57,31 @@ class WeatherWidget extends Component {
 
         return (
             <div className="weather-container">
-                <h2>Indoor: {this.state.current_indoor_temperature}° C <br /> Outdoor: {this.state.current_indoor_temperature}° C</h2>
+                <h2>Indoor: {this.state.current_indoor_temperature}°
+                    C <br/> Outdoor: {this.state.current_indoor_temperature}° C</h2>
 
                 <table>
-                  <tr id="head-border">
-                    <th>Mon</th>
-                    <th>Tue</th>
-                    <th>Wed</th>
-                    <th>Thur</th>
-                    <th>Fri</th>
-                  </tr>
-                  <tr>
-                      <td><i className="wi wi-day-sunny"></i></td>
-                      <td><i className="wi wi-day-storm-showers"></i></td>
-                      <td><i className="wi wi-solar-eclipse"></i></td>
-                      <td><i className="wi wi-day-light-wind"></i></td>
-                      <td><i className="wi wi-day-cloudy-high"></i></td>
-                  </tr>
-                  <tr>
-                    <td>22° C</td>
-                    <td>33° C</td>
-                    <td>45° C</td>
-                    <td>23° C</td>
-                    <td>24° C</td>
-                  </tr>
+                    <tr id="head-border">
+                        <th>Mon</th>
+                        <th>Tue</th>
+                        <th>Wed</th>
+                        <th>Thur</th>
+                        <th>Fri</th>
+                    </tr>
+                    <tr>
+                        <td><i className="wi wi-day-sunny"></i></td>
+                        <td><i className="wi wi-day-storm-showers"></i></td>
+                        <td><i className="wi wi-solar-eclipse"></i></td>
+                        <td><i className="wi wi-day-light-wind"></i></td>
+                        <td><i className="wi wi-day-cloudy-high"></i></td>
+                    </tr>
+                    <tr>
+                        <td>22° C</td>
+                        <td>33° C</td>
+                        <td>45° C</td>
+                        <td>23° C</td>
+                        <td>24° C</td>
+                    </tr>
                 </table>
             </div>
         );

@@ -1,8 +1,4 @@
+import io from 'socket.io-client';
+import config from './config';
 
-const frontendConfig = {
-    server_address: '127.0.0.1',
-    socket_server_port: 5000
-};
-
-
-module.exports = frontendConfig;
+export const socket = io.connect(config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT)
