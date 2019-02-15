@@ -1,17 +1,14 @@
 import React, {Component} from 'react';
 
 import Grid from "./layouts/Grid";
-
-import socketIOClient from "socket.io-client";
-import frontendConfig from './frontendConfig';
+import {socket} from './frontendConfig';
 
 class App extends Component {
 
     state = {
         response: '',
         horizontal: true,
-        widgets: [],
-        endpoint: frontendConfig.server_address + ':' + frontendConfig.socket_server_port
+        widgets: []
     };
 
     componentDidMount() {
@@ -23,7 +20,6 @@ class App extends Component {
                 this.setState({widgets: res.data})
             })
             .catch(err => console.log(err));
-        const socket = socketIOClient(this.state.endpoint);
         socket.emit('message', {
             message: 'Hello World'
         });

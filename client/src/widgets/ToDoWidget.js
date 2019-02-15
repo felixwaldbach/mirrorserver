@@ -11,8 +11,7 @@ Endpoint to get tasks of a list: a.wunderlist.com/api/v1/tasks?list_id=INTEGER_I
 
 import React, {Component} from 'react';
 import WunderlistSDK from 'wunderlist';
-import socketIOClient from "socket.io-client";
-import frontendConfig from '../frontendConfig';
+import {socket} from '../frontendConfig';
 
 var mylist = [];
 
@@ -26,19 +25,16 @@ class ToDoWidget extends Component {
         mylist: [],
         tasks: [],
         list_id: 0,
-        endpoint: frontendConfig.server_address + ':' + frontendConfig.socket_server_port
       }
 
   }
 
   componentDidMount() {
-      // WebSockets
-      this.socket = socketIOClient(this.state.endpoint);
-      this.socket.emit('send_wunderlist_settings', {
+      socket.emit('send_wunderlist_settings', {
           message: "send me credentials please!"
       });
 
-      this.socket.on('wunderlist_settings', function (data) {
+      socket.on('wunderlist_settings', function (data) {
           addListToUI(data);
 
           this.intervalID = setInterval(
@@ -47,7 +43,7 @@ class ToDoWidget extends Component {
           );
       });
 
-      this.socket.emit('wunderlist_settings', {
+      socket.emit('wunderlist_settings', {
           message: "send me credentials please!"
       });
 
