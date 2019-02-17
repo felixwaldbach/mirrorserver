@@ -179,7 +179,7 @@ const funcall = module.exports = {
                     else {
                         db.collection('userWidgets').insertOne({
                             "user_id": username,
-                            "widgets": []
+                            "widgets": new Array(8)
                         }, function (err, res) {
                             if (err) {
                                 client.close();
