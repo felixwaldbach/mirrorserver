@@ -36,17 +36,13 @@ class ToDoWidget extends Component {
         });
 
         socket.on('wunderlist_settings', function (data) {
+            refreshList();
             addListToUI(data);
-
-            this.intervalID = setInterval(
-                () => this.getSubtasks(),
-                300000 // every 5 minutes
-            );
         });
 
-        socket.emit('wunderlist_settings', {
-            message: "send me credentials please!"
-        });
+        const refreshList = () => {
+            this.setState({mylist: []});
+        }
 
         const addListToUI = data => {
             if (data) {
@@ -60,7 +56,6 @@ class ToDoWidget extends Component {
                 wunderlistAPI.http.lists.all()
                     .done(function (lists) {
                         this.setState({lists: lists});
-
                         let x;
                         for (x in lists) {
                             if (lists[x].title === this.state.wunderlist_settings.todo_list) {
@@ -69,8 +64,6 @@ class ToDoWidget extends Component {
                                 this.getSubtasks();
                             }
                         }
-
-
                     }.bind(this))
                     .fail(function () {
                         console.error('there was a problem');
@@ -80,12 +73,9 @@ class ToDoWidget extends Component {
     }
 
     async getSubtasks() {
-        console.log("getSubtasks");
-        let accessToken = this.state.wunderlist_settings.client_secret;
-        let client_id = this.state.wunderlist_settings.client_id;
-        let response = await getWunderlistTasks(accessToken, this.state.list_id, client_id);
-        if (response.status === true) this.setState({
-            mylist: response.mylist
+        let response = await getWunderlistTasks(this.state.wunderlist_settings.client_secret, this.state.list_id, this.state.wunderlist_settings.client_id);
+        if (response) this.setState({
+            mylist: response
         });
     }
 

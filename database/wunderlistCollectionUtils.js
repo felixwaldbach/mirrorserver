@@ -147,5 +147,34 @@ const funcall = module.exports = {
                 }
             });
         });
+    },
+
+    sendCredentials: function (currentUser) {
+        return new Promise((resolve, reject) => {
+            MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
+                if (err) {
+                    console.log('Unable to connect to MongoDB');
+                } else {
+                    client.db('smartmirror').collection('users').findOne({"username": currentUser}, (err, res_find_user) => {
+                        if (err) {
+                            client.close();
+                            throw err;
+                        } else {
+                            let userId = res_find_user._id;
+                            client.db('smartmirror').collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
+                                if (err) {
+                                    client.close();
+                                    throw err;
+                                } else {
+                                    client.close();
+                                    resolve(res_find_wunderlist_settings);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        });
     }
+
 }
