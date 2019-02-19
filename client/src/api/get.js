@@ -5,19 +5,18 @@ import config from '../config';
 export const getWunderlistTasks = (accessToken, list_id, client_id) => {
     return new Promise((resolve, reject) => {
         $.ajax({
-                url: "https://a.wunderlist.com/api/v1/tasks?list_id=" + list_id,
+                url: "https://a.wunderlist.com/api/v1/tasks?list_id="+list_id,
                 cache: false,
                 type: "GET",
                 contentType: 'application/json',
                 headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
                     "X-Access-Token": accessToken,
                     "X-Client-ID": client_id
                 },
-                data: {
-                    list_id: list_id
-                },
                 success: function (data) {
-                    resolve(JSON.parse(data));
+                    resolve(data);
                 },
                 error: function (xhr, status, err) {
                     reject(err);

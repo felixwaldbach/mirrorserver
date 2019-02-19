@@ -4,6 +4,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const userWidgetsCollectionUtils = require('./database/userWidgetsCollectionUtils');
+const wunderlistCollectionUtils = require('./database/wunderlistCollectionUtils');
 const jwt = require('jsonwebtoken');
 const ObjectId = require('mongodb').ObjectId;
 
@@ -45,10 +46,10 @@ io.on('connection', function (socket) {
 
     // Weather Forecast
     socket.on('send_weather_forecast', function (data) {
-        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET 'api.openweathermap.org/data/2.5/forecast?q=Stuttgart,DE&APPID=ba26397fa9d26d3655feda1b51d4b79d'", function (code, stdout, stderr) {
+        /*shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET 'api.openweathermap.org/data/2.5/forecast?q=Stuttgart,DE&APPID=ba26397fa9d26d3655feda1b51d4b79d'", function (code, stdout, stderr) {
             let list = JSON.parse(stdout);
             io.emit('five_day_forecast', {forecast: stdout});
-        });
+        });*/
     });
 
     // Quotes Widget
@@ -77,30 +78,15 @@ io.on('connection', function (socket) {
     });
 
     // Wunderlist Widget
-    socket.on('send_wunderlist_settings', function (data) {
-        MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
-            if (err) {
-                console.log('Unable to connect to MongoDB');
-            } else {
-                client.db('smartmirror').collection('users').findOne({"username": currentUser}, (err, res_find_user) => {
-                    if (err) {
-                        client.close();
-                        throw err;
-                    } else {
-                        let userId = res_find_user._id;
-                        client.db('smartmirror').collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
-                            if (err) {
-                                client.close();
-                                throw err;
-                            } else {
-                                client.close();
-                                socket.emit('wunderlist_settings', res_find_wunderlist_settings);
-                            }
-                        });
-                    }
-                });
-            }
-        });
+    socket.on('send_wunderlist_settings', async function (data) {
+        const response = await wunderlistCollectionUtils.sendCredentials(currentUser);
+        io.emit('wunderlist_settings', response);
+    });
+
+    socket.on('update_to_do_list', async function (data) {
+        console.log(data);
+        const response = await wunderlistCollectionUtils.sendCredentials(currentUser);
+        io.emit('wunderlist_settings', response);
     });
 
 
