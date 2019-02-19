@@ -18,7 +18,7 @@ var shell = require('shelljs');
 var apiRouter = require('./routes/api');
 var nativeRouter = require('./routes/native');
 
-const currentUser = "felix";
+const currentUser = "Emre";
 const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
 
 require('dotenv').load();

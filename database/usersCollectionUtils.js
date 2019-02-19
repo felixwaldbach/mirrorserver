@@ -110,7 +110,6 @@ const funcall = module.exports = {
                                     // Check if account password of username is right
                                     if (JSON.stringify(SHA256(password).words) === JSON.stringify(docs.password)) {
                                         jwt.sign({
-                                            exp: Math.floor(Date.now() / 1000) + (60 * 60 * 60 * 60 * 24),
                                             userid: docs._id,
                                             username: docs.username
                                         }, process.env.secretkey, (err, token) => {

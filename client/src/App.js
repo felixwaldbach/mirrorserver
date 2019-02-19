@@ -19,7 +19,7 @@ class App extends Component {
     };
 
     async componentDidMount() {
-        let response = await getUserWidgets('felix');
+        let response = await getUserWidgets('Emre');
         this.setState({
             widgets: response.data
         });
