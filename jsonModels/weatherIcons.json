@@ -1,0 +1,10 @@
+{
+    "Rain": "wi wi-rain",
+    "Snow": "wi wi-snow",
+    "Fog": "wi wi-day-fog",
+    "Thunderstorm": "wi wi-thunderstorm",
+    "Sunny": "wi wi-day-sunny",
+    "Clouds": "wi wi-cloud",
+    "Clear": "wi wi-night-clear",
+    "Undefined": "wi wi-na"
+}

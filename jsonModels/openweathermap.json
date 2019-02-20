@@ -1,0 +1,20 @@
+{ dt: 1550685600,
+  main:
+   { temp: 4.12,
+     temp_min: 3.89,
+     temp_max: 4.12,
+     pressure: 979.71,
+     sea_level: 1039.73,
+     grnd_level: 979.71,
+     humidity: 93,
+     temp_kf: 0.23 },
+  weather:
+   [ { id: 801,
+       main: 'Clouds',
+       description: 'few clouds',
+       icon: '02n' } ],
+  clouds: { all: 24 },
+  wind: { speed: 1.16, deg: 234.001 },
+  sys: { pod: 'n' },
+  dt_txt: '2019-02-20 18:00:00'
+}

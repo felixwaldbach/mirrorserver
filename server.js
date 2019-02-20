@@ -9,6 +9,8 @@ const weatherCollectionUtils = require('./database/weatherCollectionUtils');
 const jwt = require('jsonwebtoken');
 const ObjectId = require('mongodb').ObjectId;
 const mosca = require('mosca');
+const fetch = require('node-fetch');
+const weatherIcons = require('./jsonModels/weatherIcons');
 
 const port = process.env.PORT || 5000;
 app.use("/public", express.static(__dirname + '/public'));
@@ -52,9 +54,100 @@ io.on('connection', function (socket) {
     socket.on('send_weather_forecast', async function (data) {
         // get city of user
         let response = await weatherCollectionUtils.getWeatherSettings(userId);
-        let requiredCity = JSON.parse(response).settings.city
-        io.emit('required_city_weather', requiredCity);
+        let requiredCity = JSON.parse(response).settings.city;
+
+        // with this city, fetch weather forecast from openweathermap
+        let responseForecast = {};
+        await fetch("http://api.openweathermap.org/data/2.5/forecast?q="+requiredCity+"&APPID="+process.env.weatherkey+"&units=metric", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+        })
+        .then(res =>
+            res.json()
+        )
+        .then(json => {
+            responseForecast = json;
+        });
+
+        // calculate next five days to extract from the list
+        let today = new Date();
+        let tomorrow = new Date();
+        let dayThree = new Date();
+        let dayFour= new Date();
+        let dayFive = new Date();
+        tomorrow.setDate(today.getDate()+1);
+        dayThree.setDate(today.getDate()+2);
+        dayFour.setDate(today.getDate()+3);
+        dayFive.setDate(today.getDate()+4);
+
+        today = today.toJSON().slice(0,10).replace(/-/g,'-');
+        tomorrow = tomorrow.toJSON().slice(0,10).replace(/-/g,'-');
+        dayThree = dayThree.toJSON().slice(0,10).replace(/-/g,'-');
+        dayFour = dayFour.toJSON().slice(0,10).replace(/-/g,'-');
+        dayFive = dayFive.toJSON().slice(0,10).replace(/-/g,'-');
+
+        let today_selected = false;
+        let forecast = [];
+        const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thurdsay", "Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thurdsay", "Friday", "Saturday"];
+
+        // extract five days, take 12pm of every day and connect with className of weather icons
+        // push these into the new array
+        for (x in responseForecast.list) {
+            // get weather from today, get the next timestamp -> first one in the main array
+            if(today_selected === false) {
+                forecast.push({
+                    "weekday": weekdays[new Date().getDay()],
+                    "temp": responseForecast.list[0].main.temp,
+                    "weather": responseForecast.list[0].weather[0].main,
+                    "icon": weatherIcons[responseForecast.list[0].weather[0].main]
+                });
+                today_selected = true;
+            }
+            // get weather for tomorrow
+            if(responseForecast.list[x].dt_txt === tomorrow + ' 15:00:00') {
+                forecast.push({
+                    "weekday": weekdays[new Date().getDay()+1],
+                    "temp": responseForecast.list[x].main.temp,
+                    "weather": responseForecast.list[x].weather[0].main,
+                    "icon": weatherIcons[responseForecast.list[x].weather[0].main]
+                });
+            }
+            // get weather for day 3
+            if(responseForecast.list[x].dt_txt === dayThree + ' 15:00:00') {
+                forecast.push({
+                    "weekday": weekdays[new Date().getDay()+2],
+                    "temp": responseForecast.list[x].main.temp,
+                    "weather": responseForecast.list[x].weather[0].main,
+                    "icon": weatherIcons[responseForecast.list[x].weather[0].main]
+                });
+            }
+            // get weather for day 4
+            if(responseForecast.list[x].dt_txt === dayFour + ' 15:00:00') {
+                forecast.push({
+                    "weekday": weekdays[new Date().getDay()+3],
+                    "temp": responseForecast.list[x].main.temp,
+                    "weather": responseForecast.list[x].weather[0].main,
+                    "icon": weatherIcons[responseForecast.list[x].weather[0].main]
+                });
+            }
+            // get weather for day 5
+            if(responseForecast.list[x].dt_txt === dayFive + ' 15:00:00') {
+                forecast.push({
+                    "weekday": weekdays[new Date().getDay()+4],
+                    "temp": responseForecast.list[x].main.temp,
+                    "weather": responseForecast.list[x].weather[0].main,
+                    "icon": weatherIcons[responseForecast.list[x].weather[0].main]
+                });
+            }
+        }
+
+        // send list to ui
+        io.emit('required_city_weather', {forecast: forecast, city: requiredCity});
     });
+
+
 
     socket.on('update_weather_widget', async function (data) {
         console.log(data);
@@ -63,6 +156,7 @@ io.on('connection', function (socket) {
 
     // Quotes Widget
     // Send random quotes to UI. Use CURL and GET
+    // change to fetch...
     socket.on('send_quotes', function (data) {
         shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET http://quotesondesign.com/wp-json/posts", function (code, stdout, stderr) {
             io.emit('new_quotes', {randomQuote: stdout});
@@ -91,13 +185,6 @@ io.on('connection', function (socket) {
         const response = await wunderlistCollectionUtils.sendCredentials(currentUser);
         io.emit('wunderlist_settings', response);
     });
-
-    socket.on('update_to_do_list', async function (data) {
-        console.log(data);
-        const response = await wunderlistCollectionUtils.sendCredentials(currentUser);
-        io.emit('wunderlist_settings', response);
-    });
-
 
 });
 
