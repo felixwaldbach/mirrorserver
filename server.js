@@ -7,6 +7,7 @@ const userWidgetsCollectionUtils = require('./database/userWidgetsCollectionUtil
 const wunderlistCollectionUtils = require('./database/wunderlistCollectionUtils');
 const jwt = require('jsonwebtoken');
 const ObjectId = require('mongodb').ObjectId;
+const mosca = require('mosca');
 
 const port = process.env.PORT || 5000;
 app.use("/public", express.static(__dirname + '/public'));
@@ -14,7 +15,8 @@ app.use("/public", express.static(__dirname + '/public'));
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var shell = require('shelljs');
-
+var mqttServ = new mosca.Server({});
+mqttServ.attachHttpServer(http);
 
 var apiRouter = require('./routes/api');
 var nativeRouter = require('./routes/native');
@@ -91,5 +93,35 @@ io.on('connection', function (socket) {
 
 
 });
+
+
+// MQTT
+mqttServ.on('clientConnected', function (client) {
+    console.log('client connected: ' + client.id);
+});
+
+mqttServ.on('ready', function () {
+    console.log('Mosca server is up and running');
+});
+
+// fired when a message is received
+mqttServ.on('published', function (packet, client) {
+  console.log(packet.topic);
+  console.log(packet.payload.toString('utf8'));
+    /*
+    switch (packet.topic) {
+        case 'mirrorino/softpot':
+            io.emit('web_softpot_data', parseInt(packet.payload.toString('utf8')));
+            break;
+        case 'mirrorino/temperature':
+            io.emit('web_temperature_data', packet.payload.toString('utf8'));
+            break;
+        case 'mirrorino/humidity':
+            io.emit('web_humidity_data', packet.payload.toString('utf8'));
+            break;
+    }
+    */
+});
+
 
 http.listen(port, () => console.log(`Listening on port ${port}`));
