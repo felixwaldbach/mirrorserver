@@ -202,19 +202,14 @@ mqttServ.on('ready', function () {
 mqttServ.on('published', function (packet, client) {
   console.log(packet.topic);
   console.log(packet.payload.toString('utf8'));
-    /*
     switch (packet.topic) {
-        case 'mirrorino/softpot':
-            io.emit('web_softpot_data', parseInt(packet.payload.toString('utf8')));
+        case 'temperature/inside':
+            io.emit('temperature_inside_data', packet.payload.toString('utf8'));
             break;
-        case 'mirrorino/temperature':
-            io.emit('web_temperature_data', packet.payload.toString('utf8'));
-            break;
-        case 'mirrorino/humidity':
-            io.emit('web_humidity_data', packet.payload.toString('utf8'));
+        case 'temperature/outside':
+            io.emit('temperature_outside_data', packet.payload.toString('utf8'));
             break;
     }
-    */
 });
 
 

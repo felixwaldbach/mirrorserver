@@ -22,8 +22,27 @@ class WeatherWidget extends Component {
             message: "send me forecast please!"
         });
 
+        socket.on('temperature_inside_data', function (data) {
+            addDataToInsideTemperature(data);
+        });
+
+        const addDataToInsideTemperature = data => {
+            if (data) {
+                this.setState({current_indoor_temperature: data});
+            }
+        };
+
+        socket.on('temperature_outside_data', function (data) {
+            addDataToOutsideTemperature(data);
+        });
+
+        const addDataToOutsideTemperature = data => {
+            if (data) {
+                this.setState({current_outdoor_temperature: data});
+            }
+        };
+
         socket.on('required_city_weather', function (data) {
-            console.log(data);
             refreshList();
             refreshCity();
             addCityToUI(data);
