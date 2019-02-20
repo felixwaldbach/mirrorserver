@@ -41,7 +41,7 @@ app.use('/native', nativeRouter);
 
 // Web Sockets
 io.on('connection', function (socket) {
-    console.log('a user connected');
+    console.log('a user has connected');
     socket.send('testFromApi', {
         message: 'Hello World'
     });
@@ -147,13 +147,6 @@ io.on('connection', function (socket) {
         io.emit('required_city_weather', {forecast: forecast, city: requiredCity});
     });
 
-
-
-    socket.on('update_weather_widget', async function (data) {
-        console.log(data);
-        // See above...
-    });
-
     // Quotes Widget
     // Send random quotes to UI. Use CURL and GET
     // change to fetch...
@@ -195,7 +188,7 @@ mqttServ.on('clientConnected', function (client) {
 });
 
 mqttServ.on('ready', function () {
-    console.log('Mosca server is up and running');
+    console.log('Mosca MQTT server is up and running');
 });
 
 // fired when a message is received
