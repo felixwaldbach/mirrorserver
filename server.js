@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const MongoClient = require('mongodb').MongoClient;
 const userWidgetsCollectionUtils = require('./database/userWidgetsCollectionUtils');
 const wunderlistCollectionUtils = require('./database/wunderlistCollectionUtils');
+const weatherCollectionUtils = require('./database/weatherCollectionUtils');
 const jwt = require('jsonwebtoken');
 const ObjectId = require('mongodb').ObjectId;
 const mosca = require('mosca');
@@ -22,6 +23,7 @@ var apiRouter = require('./routes/api');
 var nativeRouter = require('./routes/native');
 
 const currentUser = "Emre";
+const userId = "5bf42e57e8d590da0243a593";
 const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
 
 require('dotenv').load();
@@ -47,11 +49,16 @@ io.on('connection', function (socket) {
     });
 
     // Weather Forecast
-    socket.on('send_weather_forecast', function (data) {
-        /*shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET 'api.openweathermap.org/data/2.5/forecast?q=Stuttgart,DE&APPID=ba26397fa9d26d3655feda1b51d4b79d'", function (code, stdout, stderr) {
-            let list = JSON.parse(stdout);
-            io.emit('five_day_forecast', {forecast: stdout});
-        });*/
+    socket.on('send_weather_forecast', async function (data) {
+        // get city of user
+        let response = await weatherCollectionUtils.getWeatherSettings(userId);
+        let requiredCity = JSON.parse(response).settings.city
+        io.emit('required_city_weather', requiredCity);
+    });
+
+    socket.on('update_weather_widget', async function (data) {
+        console.log(data);
+        // See above...
     });
 
     // Quotes Widget

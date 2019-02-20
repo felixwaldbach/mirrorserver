@@ -17,6 +17,7 @@ class WeatherWidget extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            city: "",
             current_indoor_temperature: 0,
             current_outdoor_temperature: 0,
             five_day_forecast: []
@@ -28,21 +29,26 @@ class WeatherWidget extends Component {
             message: "send me forecast please!"
         });
 
-        socket.on('five_day_forecast', function (data) {
-            addWeatherForecastToUI(data);
+        socket.on('required_city_weather', function (data) {
+            console.log(data);
+            refreshList();
+            refreshCity();
+            addCityToUI(data);
         });
 
-        this.intervalID = setInterval(() => {
-                socket.emit('send_weather_forecast', {
-                    message: "send me forecast please!"
-                })
-            },
-            3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
-        );
+        const refreshList = () => {
+            this.setState({five_day_forecast: []});
+        }
 
-        const addWeatherForecastToUI = data => {
+        const refreshCity = () => {
+            this.setState({city: ""});
+        }
+
+        const addCityToUI = data => {
             if (data) {
-                //console.log(JSON.parse(data.forecast));
+                this.setState({city: data});
+                // get getFiveDayForecast
+                this.getFiveDayForecast();
             }
         };
     }
@@ -51,14 +57,17 @@ class WeatherWidget extends Component {
         clearInterval(this.intervalID);
     }
 
+    async getFiveDayForecast() {
+        console.log("soon...");
+    }
 
     render() {
         five_day_forecast = this.state.five_day_forecast;
 
         return (
             <div className="weather-container">
-                <h2>Indoor: {this.state.current_indoor_temperature}°
-                    C <br/> Outdoor: {this.state.current_indoor_temperature}° C</h2>
+
+                <h3>Weather for {this.state.city}</h3>
 
                 <table>
                     <tr id="head-border">
@@ -83,6 +92,10 @@ class WeatherWidget extends Component {
                         <td>24° C</td>
                     </tr>
                 </table>
+
+                <h3>Indoor: {this.state.current_indoor_temperature}°
+                    C <br/> Outdoor: {this.state.current_indoor_temperature}° C</h3>
+
             </div>
         );
     }

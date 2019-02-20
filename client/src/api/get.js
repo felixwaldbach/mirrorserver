@@ -46,3 +46,26 @@ export const getUserWidgets = (user_id) => {
         );
     });
 }
+
+export const getFiveDayForecast = (city) => {
+/*
+    return new Promise((resolve, reject) => {
+        $.ajax({
+                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/user/getUserWidgets",
+                cache: false,
+                type: "GET",
+                contentType: 'application/json',
+                data: {
+                    user_id: user_id
+                },
+                success: function (data) {
+                    resolve(JSON.parse(data));
+                },
+                error: function (xhr, status, err) {
+                    reject(err);
+                }
+            }
+        );
+    });
+*/
+}
