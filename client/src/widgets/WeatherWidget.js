@@ -26,6 +26,14 @@ class WeatherWidget extends Component {
             addDataToInsideTemperature(data);
         });
 
+        this.intervalID = setInterval(() => {
+                socket.emit('send_weather_forecast', {
+                    message: "send me forecast please!"
+                })
+            },
+            3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
+        );
+
         const addDataToInsideTemperature = data => {
             if (data) {
                 this.setState({current_indoor_temperature: data});
