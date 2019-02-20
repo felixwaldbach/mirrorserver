@@ -6,6 +6,7 @@ const allWidgetsCollectionUtils = require('../database/allWidgetsCollectionUtils
 const usersCollectionUtils = require('../database/usersCollectionUtils');
 const userWidgetsCollectionUtils = require('../database/userWidgetsCollectionUtils');
 const wunderlistCollectionUtils = require('../database/wunderlistCollectionUtils');
+const weatherCollectionUtils = require('../database/weatherCollectionUtils');
 const jwt = require('jsonwebtoken');
 const responseMessages = require('../responseMessages');
 
@@ -128,6 +129,38 @@ router.post('/getWunderlistSettings', verifyToken, async (req, res) => {
         } else {
             const userId = authData.userid;
             let response = await wunderlistCollectionUtils.getWunderlistSettings(userId);
+            res.send(response);
+        }
+    });
+});
+
+// Upload Weather Settings and clientid
+router.post('/uploadWeatherSettings', verifyToken, async (req, res) => {
+    jwt.verify(req.token, process.env.secretkey, async (err, authData) => {
+        if (err) {
+            res.send(JSON.stringify({
+                status: false,
+                message: responseMessages.USER_NOT_AUTHORIZED
+            }));
+        } else {
+            const userId = authData.userid;
+            let response = await weatherCollectionUtils.uploadWeatherSettings(req.body, userId);
+            res.send(response);
+        }
+    });
+});
+
+// Getting Weather API Settings and clientid
+router.get('/getWeatherSettings', verifyToken, async (req, res) => {
+    jwt.verify(req.token, process.env.secretkey, async (err, authData) => {
+        if (err) {
+            res.send(JSON.stringify({
+                status: false,
+                message: responseMessages.USER_NOT_AUTHORIZED
+            }));
+        } else {
+            const userId = authData.userid;
+            let response = await weatherCollectionUtils.getWeatherSettings(userId);
             res.send(response);
         }
     });
