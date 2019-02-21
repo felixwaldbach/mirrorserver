@@ -1,25 +1,19 @@
-// https://openweathermap.org/current
-// api.openweathermap.org/data/2.5/weather?q=Stuttgart&APPID=ba26397fa9d26d3655feda1b51d4b79d
-// Please, always use your API keys as &APPID=ba26397fa9d26d3655feda1b51d4b79d in any queries.
-
-// 5 day forecast api: api.openweathermap.org/data/2.5/forecast?q=Stuttgart,DE&APPID=ba26397fa9d26d3655feda1b51d4b79d
-//       https://openweathermap.org/forecast5
-
 import React, {Component} from 'react';
 import {socket} from '../frontendConfig';
 import '../font/css/weather-icons.css';
 import '../font/css/custom.css';
 
-var five_day_forecast = [];
+var forecast = [];
 
 class WeatherWidget extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
+            city: "",
             current_indoor_temperature: 0,
             current_outdoor_temperature: 0,
-            five_day_forecast: []
+            forecast: []
         }
     }
 
@@ -28,9 +22,46 @@ class WeatherWidget extends Component {
             message: "send me forecast please!"
         });
 
-        socket.on('five_day_forecast', function (data) {
-            addWeatherForecastToUI(data);
+        socket.on('temperature_inside_data', function (data) {
+            addDataToInsideTemperature(data);
         });
+
+        const addDataToInsideTemperature = data => {
+            if (data) {
+                this.setState({current_indoor_temperature: data});
+            }
+        };
+
+        socket.on('temperature_outside_data', function (data) {
+            addDataToOutsideTemperature(data);
+        });
+
+        const addDataToOutsideTemperature = data => {
+            if (data) {
+                this.setState({current_outdoor_temperature: data});
+            }
+        };
+
+        socket.on('required_city_weather', function (data) {
+            refreshList();
+            refreshCity();
+            addCityToUI(data);
+        });
+
+        const refreshList = () => {
+            this.setState({forecast: []});
+        }
+
+        const refreshCity = () => {
+            this.setState({city: ""});
+        }
+
+        const addCityToUI = data => {
+            if (data) {
+                this.setState({city: data.city});
+                this.setState({forecast: data.forecast});
+            }
+        };
 
         this.intervalID = setInterval(() => {
                 socket.emit('send_weather_forecast', {
@@ -39,50 +70,57 @@ class WeatherWidget extends Component {
             },
             3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
         );
-
-        const addWeatherForecastToUI = data => {
-            if (data) {
-                //console.log(JSON.parse(data.forecast));
-            }
-        };
     }
 
     componentWillUnmount() {
         clearInterval(this.intervalID);
     }
 
-
     render() {
-        five_day_forecast = this.state.five_day_forecast;
+        forecast = this.state.forecast;
 
         return (
             <div className="weather-container">
-                <h2>Indoor: {this.state.current_indoor_temperature}°
-                    C <br/> Outdoor: {this.state.current_indoor_temperature}° C</h2>
+
+                {forecast.length == 0 ? <h3>No forecast available for {this.state.city}</h3> : <h3>Weather for {this.state.city}</h3>}
 
                 <table>
                     <tr id="head-border">
-                        <th>Mon</th>
-                        <th>Tue</th>
-                        <th>Wed</th>
-                        <th>Thur</th>
-                        <th>Fri</th>
+                        {forecast.map((item, index) => {
+                                return (
+                                    <th key={index}>
+                                        {item.weekday.substring(0, 3)}
+                                    </th>
+                                )
+                            }
+                        )}
                     </tr>
                     <tr>
-                        <td><i className="wi wi-day-sunny"></i></td>
-                        <td><i className="wi wi-day-storm-showers"></i></td>
-                        <td><i className="wi wi-solar-eclipse"></i></td>
-                        <td><i className="wi wi-day-light-wind"></i></td>
-                        <td><i className="wi wi-day-cloudy-high"></i></td>
+                        {forecast.map((item, index) => {
+                                return (
+                                    <td key={index}>
+                                        {index !== undefined ? <i className={item.icon}></i> : <i className="wi wi-na"></i>}
+                                    </td>
+                                )
+                            }
+                        )}
                     </tr>
                     <tr>
-                        <td>22° C</td>
-                        <td>33° C</td>
-                        <td>45° C</td>
-                        <td>23° C</td>
-                        <td>24° C</td>
+                        {forecast.map((item, index) => {
+                                return (
+                                    <td>{item.temp} °C</td>
+                                )
+                            }
+                        )}
                     </tr>
                 </table>
+
+                <h3>
+                    Indoor: {this.state.current_indoor_temperature} °C
+                    <br/>
+                    Outdoor: {this.state.current_outdoor_temperature} °C
+                </h3>
+
             </div>
         );
     }
