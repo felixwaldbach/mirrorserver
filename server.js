@@ -149,7 +149,6 @@ io.on('connection', function (socket) {
 
     // Quotes Widget
     // Send random quotes to UI. Use CURL and GET
-    // change to fetch...
     socket.on('send_quotes', function (data) {
         shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET http://quotesondesign.com/wp-json/posts", function (code, stdout, stderr) {
             io.emit('new_quotes', {randomQuote: stdout});

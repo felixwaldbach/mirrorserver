@@ -26,14 +26,6 @@ class WeatherWidget extends Component {
             addDataToInsideTemperature(data);
         });
 
-        this.intervalID = setInterval(() => {
-                socket.emit('send_weather_forecast', {
-                    message: "send me forecast please!"
-                })
-            },
-            3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
-        );
-
         const addDataToInsideTemperature = data => {
             if (data) {
                 this.setState({current_indoor_temperature: data});
@@ -70,6 +62,14 @@ class WeatherWidget extends Component {
                 this.setState({forecast: data.forecast});
             }
         };
+
+        this.intervalID = setInterval(() => {
+                socket.emit('send_weather_forecast', {
+                    message: "send me forecast please!"
+                })
+            },
+            3600000 // 1 hour = 3600 seconds = 3600000 milliseconds
+        );
     }
 
     componentWillUnmount() {
@@ -116,9 +116,9 @@ class WeatherWidget extends Component {
                 </table>
 
                 <h3>
-                    Indoor: {this.state.current_indoor_temperature}°C
+                    Indoor: {this.state.current_indoor_temperature} °C
                     <br/>
-                    Outdoor: {this.state.current_indoor_temperature}° C
+                    Outdoor: {this.state.current_outdoor_temperature} °C
                 </h3>
 
             </div>
