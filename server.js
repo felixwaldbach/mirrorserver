@@ -201,6 +201,9 @@ mqttServ.on('published', function (packet, client) {
         case 'temperature/outside':
             io.emit('temperature_outside_data', packet.payload.toString('utf8'));
             break;
+        case 'temperature/pir':
+            io.emit('pir_motion_data', packet.payload.toString('utf8'));
+            break;
     }
 });
 
