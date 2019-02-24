@@ -5,6 +5,7 @@ import NewsFeed from "./widgets/NewsFeed";
 import QuotesWidget from "./widgets/QuotesWidget";
 import ToDoWidget from "./widgets/ToDoWidget";
 import WeatherWidget from "./widgets/WeatherWidget";
+import MotionTest from "./widgets/MotionTest";
 
 import {socket} from './frontendConfig';
 import {getUserWidgets} from "./api/get";
@@ -87,6 +88,8 @@ class App extends Component {
                         {this.state.htmlElements[3]}
                     </div>
                 </div>
+
+                <MotionTest />
 
                 <div className="lower-row">
                     <div id="widget">
