@@ -47,3 +47,46 @@ export const getUserWidgets = (user_id) => {
         );
     });
 }
+
+export const getCameraPicture = (mirror_uuid) => {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/camera/recognizeimage",
+                cache: false,
+                type: "GET",
+                contentType: 'application/json',
+                data: {
+                    mirror_uuid: mirror_uuid
+                },
+                success: function (data) {
+                    resolve(JSON.parse(data));
+                },
+                error: function (xhr, status, err) {
+                    reject(err);
+                }
+            }
+        );
+    });
+}
+
+export const getStoreTrainDataset = (mirror_uuid, user_id) => {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/camera/storetrain",
+                cache: false,
+                type: "GET",
+                contentType: 'application/json',
+                data: {
+                    mirror_uuid: mirror_uuid,
+                    user_id: user_id
+                },
+                success: function (data) {
+                    resolve(JSON.parse(data));
+                },
+                error: function (xhr, status, err) {
+                    reject(err);
+                }
+            }
+        );
+    });
+}

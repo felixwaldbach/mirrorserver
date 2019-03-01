@@ -7,7 +7,7 @@ import ToDoWidget from "./widgets/ToDoWidget";
 import WeatherWidget from "./widgets/WeatherWidget";
 
 import {socket} from './frontendConfig';
-import {getUserWidgets} from "./api/get";
+import {getUserWidgets, getCameraPicture, getStoreTrainDataset} from "./api/get";
 import {setUserWidgets} from "./api/post";
 
 class App extends Component {
@@ -72,7 +72,6 @@ class App extends Component {
     render() {
         return (
             <div className="container">
-
                 <div className="upper-row">
                     <div id="widget">
                         {this.state.htmlElements[0]}
@@ -102,7 +101,6 @@ class App extends Component {
                         {this.state.htmlElements[7]}
                     </div>
                 </div>
-
             </div>
         );
     }

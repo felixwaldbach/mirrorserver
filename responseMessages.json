@@ -23,5 +23,7 @@
   "IMAGE_UPLOAD_SUCCESS": "Image successfully uploaded into the database!",
   "WIDGETS_SUCCESS": "Widgets were found",
   "WIDGETS_NO_DATA": "No Widgets were found in the database",
-  "WUNDERLIST_DATA_INVALID": "Provided wunderlist data is invalid"
+  "WUNDERLIST_DATA_INVALID": "Provided wunderlist data is invalid",
+  "FACE_RECOGNITION_ERROR": "An error occured during face detection",
+  "FACE_TRAIN_ERROR": "An error occured during training the face recognition model"
 }

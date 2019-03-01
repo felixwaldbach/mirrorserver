@@ -45,7 +45,7 @@ io.on('connection', function (socket) {
 
     // Weather Forecast
     socket.on('send_weather_forecast', function (data) {
-        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET 'api.openweathermap.org/data/2.5/forecast?q=Stuttgart,DE&APPID=ba26397fa9d26d3655feda1b51d4b79d'", function (code, stdout, stderr) {
+        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET 'api.openweathermap.org/data/2.5/forecast?q=Stuttgart,DE&APPID=ba26397fa9d26d3655feda1b51d4b79d'", {silent: true}, function (code, stdout, stderr) {
             let list = JSON.parse(stdout);
             io.emit('five_day_forecast', {forecast: stdout});
         });
@@ -54,7 +54,7 @@ io.on('connection', function (socket) {
     // Quotes Widget
     // Send random quotes to UI. Use CURL and GET
     socket.on('send_quotes', function (data) {
-        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET http://quotesondesign.com/wp-json/posts", function (code, stdout, stderr) {
+        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET http://quotesondesign.com/wp-json/posts", {silent: true}, function (code, stdout, stderr) {
             io.emit('new_quotes', {randomQuote: stdout});
         });
     });
