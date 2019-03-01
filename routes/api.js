@@ -28,8 +28,8 @@ router.get('/camera/recognizeimage', async (req, res) => {
     let response;
     response = await utils.initializeWebcam(req.query.user_id, os.platform());
     response = await utils.takeImage(response.Webcam, os.platform(), 0, req.query.mirror_uuid, req.query.user_id);
-    response = await utils.recognizeImage(req.query.mirror_uuid, response.base64)
-    res.send(response);
+    response = await utils.recognizeImage(req.query.mirror_uuid, response.base64);
+    res.send(JSON.stringify(response));
 });
 
 router.get('/camera/storetrain', async (req, res) => {
@@ -41,12 +41,12 @@ router.get('/camera/storetrain', async (req, res) => {
     }
     if (response.last_image) {
         if (response.error) {
-            res.send({
+            res.send(JSON.stringify({
                 status: false,
                 message: responseMessages.FACE_TRAIN_ERROR
-            });
+            }));
         }
-        res.send(JSON.stringify(response.body));
+        res.send(JSON.stringify(response));
     }
 });
 
