@@ -202,7 +202,7 @@ mqttServ.on('published', function (packet, client) {
             io.emit('temperature_outside_data', packet.payload.toString('utf8'));
             break;
         case 'temperature/pir':
-            io.emit('pir_motion_data', packet.payload.toString('utf8'));
+            // 1 = motion detected, 0 = no motion detected, take pictures and send to django server which will return the user_id of the recognized user
             break;
     }
 });
