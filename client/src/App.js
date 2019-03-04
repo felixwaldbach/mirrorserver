@@ -5,6 +5,7 @@ import NewsFeed from "./widgets/NewsFeed";
 import QuotesWidget from "./widgets/QuotesWidget";
 import ToDoWidget from "./widgets/ToDoWidget";
 import WeatherWidget from "./widgets/WeatherWidget";
+import {bake_cookie, delete_cookie} from 'sfcookies';
 
 import {socket} from './frontendConfig';
 import {getUserWidgets, getCameraPicture, getStoreTrainDataset} from "./api/get";
@@ -19,6 +20,23 @@ class App extends Component {
     };
 
     async componentDidMount() {
+        socket.on('handle_session', function (data) {
+            addCookies(data);
+        });
+
+        const addCookies = data => {
+            if (data) {
+                if(data.motion == "1") {
+                // set cookie & get widget allignment for this user
+                bake_cookie("token", data.user_id);
+                } else if(data.motion == "0") {
+                    // delete cookie & redirect to qr-code
+                    delete_cookie('token');
+                }
+            }
+        };
+
+        // send user_id from cookies to backend to get userwidgets for that user_id via read_cookie('token')
         let response = await getUserWidgets('Emre');
         this.setState({
             widgets: response.data

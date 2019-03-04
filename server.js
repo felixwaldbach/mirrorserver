@@ -192,8 +192,8 @@ mqttServ.on('ready', function () {
 
 // fired when a message is received
 mqttServ.on('published', function (packet, client) {
-  console.log(packet.topic);
-  console.log(packet.payload.toString('utf8'));
+    console.log(packet.topic);
+    console.log(packet.payload.toString('utf8'));
     switch (packet.topic) {
         case 'temperature/inside':
             io.emit('temperature_inside_data', packet.payload.toString('utf8'));
@@ -203,6 +203,35 @@ mqttServ.on('published', function (packet, client) {
             break;
         case 'temperature/pir':
             // 1 = motion detected, 0 = no motion detected, take pictures and send to django server which will return the user_id of the recognized user
+            if(packet.payload.toString('utf8') == "1") {
+                // start session
+                let response;
+                /*
+                response = await utils.initializeWebcam(req.query.user_id, os.platform());
+                response = await utils.takeImage(response.Webcam, os.platform(), 0, req.query.mirror_uuid, req.query.user_id);
+                response = await utils.recognizeImage(req.query.mirror_uuid, response.base64);
+                //res.send(JSON.stringify(response)); // coming from django server
+
+                // create no expiring session token with the user_id of the recognized user
+                jwt.sign({
+                    user_id: user_id._id
+                }, process.env.secretkey, (err, token) => {
+                    client.close();
+                    io.emit('handle_session', {user_id: token, motion: packet.payload.toString('utf8')}); // create session with user_id, send to frontend and save in cookies
+                });
+
+                if(response.status) {
+                */
+                if(packet.payload.toString('utf8') == "1") { // workaround code because server is not setup yet
+                    io.emit('handle_session', {user_id: "5bf42e57e8d590da0243a593", motion: packet.payload.toString('utf8')});
+                } else {
+                    console.log("Something went wrong during face recognition...");
+                    io.emit('handle_session', {user_id: "empty", motion: "0"});     // kill session because error happened, try again in 3 minutes...
+                }
+            } else {
+                // kill session because no one is in front of the mirror
+                io.emit('handle_session', {user_id: "empty", motion: packet.payload.toString('utf8')});
+            }
             break;
     }
 });

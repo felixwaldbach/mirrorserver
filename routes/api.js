@@ -23,15 +23,6 @@ router.post('/user/setUserWidgets', async (req, res) => {
     res.send(response);
 });
 
-
-router.get('/camera/recognizeimage', async (req, res) => {
-    let response;
-    response = await utils.initializeWebcam(req.query.user_id, os.platform());
-    response = await utils.takeImage(response.Webcam, os.platform(), 0, req.query.mirror_uuid, req.query.user_id);
-    response = await utils.recognizeImage(req.query.mirror_uuid, response.base64);
-    res.send(JSON.stringify(response));
-});
-
 router.get('/camera/storetrain', async (req, res) => {
     let response;
     for (let i = 1; i <= config.TRAIN_IMAGE_NUMBER; i++) {
