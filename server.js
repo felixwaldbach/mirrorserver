@@ -149,10 +149,24 @@ io.on('connection', function (socket) {
 
     // Quotes Widget
     // Send random quotes to UI. Use CURL and GET
-    socket.on('send_quotes', function (data) {
-        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET http://quotesondesign.com/wp-json/posts", {silent: true}, function (code, stdout, stderr) {
-            io.emit('new_quotes', {randomQuote: stdout});
+    socket.on('send_quotes', async function (data) {
+        await fetch("http://quotesondesign.com/wp-json/posts", {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+        })
+        .then(res =>
+            res.json()
+        )
+        .then(json => {
+            randomQuote = json;
         });
+        // delete html tags: object to string. delete. string back to object
+        let quoteAsString = JSON.stringify(randomQuote);
+        quoteAsString = quoteAsString.replace(/<\/?[^>]+(>|$)/g, "");
+        let quote = JSON.parse(quoteAsString);
+        io.emit('new_quotes', quote[0]);
     });
 
     socket.on('app_drop_event', function (data) {
