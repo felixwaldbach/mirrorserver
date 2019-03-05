@@ -29,11 +29,8 @@ class QuotesWidget extends Component {
 
         const addQuotesToUI = data => {
             if (data) {
-                // delete html tags: object to string. delete. string back to object
-                let quoteAsString = JSON.stringify(data);
-                quoteAsString = quoteAsString.replace(/<\/?[^>]+(>|$)/g, "");
-                let quote = JSON.parse(JSON.parse(quoteAsString).randomQuote)[0].content + " - " + JSON.parse(JSON.parse(quoteAsString).randomQuote)[0].title;
-                this.setState({quote: quote});
+                console.log(data);
+                this.setState({quote: data});
             }
         };
     }
@@ -45,7 +42,7 @@ class QuotesWidget extends Component {
     render() {
         return (
             <div className="quotes-container">
-                <span>{this.state.quote}</span>
+                <span>{this.state.quote.content} - {this.state.quote.title}</span>
             </div>
         );
     }
