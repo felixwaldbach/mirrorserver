@@ -25,4 +25,5 @@
 
 .todo-container {
   font-size: 12px;
+  list-style-type: circle;
 }
