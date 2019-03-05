@@ -26,5 +26,6 @@
   "WUNDERLIST_DATA_INVALID": "Provided wunderlist data is invalid",
   "WEATHER_DATA_INVALID": "City cannot be empty!",
   "FACE_RECOGNITION_ERROR": "An error occured during face detection",
-  "FACE_TRAIN_ERROR": "An error occured during training the face recognition model"
+  "FACE_TRAIN_ERROR": "An error occured during training the face recognition model",
+  "QRCODE_SUCCESS": "QR Code successfully generated"
 }

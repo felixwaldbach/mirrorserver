@@ -5,7 +5,7 @@ import config from '../config';
 export const getWunderlistTasks = (accessToken, list_id, client_id) => {
     return new Promise((resolve, reject) => {
         $.ajax({
-                url: "https://a.wunderlist.com/api/v1/tasks?list_id="+list_id,
+                url: "https://a.wunderlist.com/api/v1/tasks?list_id=" + list_id,
                 cache: false,
                 type: "GET",
                 contentType: 'application/json',
@@ -79,6 +79,24 @@ export const getStoreTrainDataset = (mirror_uuid, user_id) => {
                     mirror_uuid: mirror_uuid,
                     user_id: user_id
                 },
+                success: function (data) {
+                    resolve(JSON.parse(data));
+                },
+                error: function (xhr, status, err) {
+                    reject(err);
+                }
+            }
+        );
+    });
+}
+
+export const generateQRCode = () => {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/qrcode",
+                cache: false,
+                type: "GET",
+                contentType: 'application/json',
                 success: function (data) {
                     resolve(JSON.parse(data));
                 },

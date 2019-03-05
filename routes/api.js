@@ -5,6 +5,9 @@ const responseMessages = require("../responseMessages");
 const os = require('os');
 const config = require('../client/src/config');
 const utils = require('../utils');
+var qr = require('qr-image');
+var fs = require('fs');
+const path = require('path');
 
 router.get('/hello', async (req, res) => {
     res.send({
@@ -39,6 +42,18 @@ router.get('/camera/storetrain', async (req, res) => {
         }
         res.send(JSON.stringify(response));
     }
+});
+
+router.get('/qrcode', async (req, res) => {
+
+    var qr_svg = qr.image(config.SERVER_ADDRESS + ':' + config.SOCKET_SERVER_PORT, {type: 'svg'});
+    let jsonPath = path.join(__dirname, '..', 'client', 'src', 'savedQrCode', 'qrcode.svg');
+    qr_svg.pipe(fs.createWriteStream(jsonPath));
+
+    res.send(JSON.stringify({
+        status: true,
+        message: responseMessages.QRCODE_SUCCESS,
+    }));
 });
 
 module.exports = router;

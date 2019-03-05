@@ -25,6 +25,7 @@
     "multer": "^1.4.1",
     "node-fetch": "^2.3.0",
     "node-webcam": "^0.4.6",
+    "qr-image": "^3.2.0",
     "raspicam": "^0.2.14",
     "readline": "^1.3.0",
     "request": "^2.88.0",

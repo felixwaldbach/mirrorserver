@@ -5,6 +5,7 @@ import NewsFeed from "./widgets/NewsFeed";
 import QuotesWidget from "./widgets/QuotesWidget";
 import ToDoWidget from "./widgets/ToDoWidget";
 import WeatherWidget from "./widgets/WeatherWidget";
+import QRCode from "./QRCode";
 import {bake_cookie, delete_cookie} from 'sfcookies';
 
 import {socket} from './frontendConfig';
@@ -16,7 +17,8 @@ class App extends Component {
     state = {
         horizontal: true,
         widgets: [],
-        htmlElements: []
+        htmlElements: [],
+        redirectToQRCode: true
     };
 
     async componentDidMount() {
@@ -26,10 +28,13 @@ class App extends Component {
 
         const addCookies = data => {
             if (data) {
-                if(data.motion == "1") {
-                // set cookie & get widget allignment for this user
-                bake_cookie("token", data.user_id);
-                } else if(data.motion == "0") {
+                if (data.motion == "1") {
+                    // set cookie & get widget allignment for this user
+                    bake_cookie("token", data.user_id);
+                    this.setState({
+                        redirectToQRCode: false
+                    })
+                } else if (data.motion == "0") {
                     // delete cookie & redirect to qr-code
                     delete_cookie('token');
                 }
@@ -89,37 +94,39 @@ class App extends Component {
 
     render() {
         return (
-            <div className="container">
-                <div className="upper-row">
-                    <div id="widget">
-                        {this.state.htmlElements[0]}
+            this.state.redirectToQRCode ?
+                <QRCode/> :
+                <div className="container">
+                    <div className="upper-row">
+                        <div id="widget">
+                            {this.state.htmlElements[0]}
+                        </div>
+                        <div id="widget">
+                            {this.state.htmlElements[1]}
+                        </div>
+                        <div id="widget">
+                            {this.state.htmlElements[2]}
+                        </div>
+                        <div id="widget">
+                            {this.state.htmlElements[3]}
+                        </div>
                     </div>
-                    <div id="widget">
-                        {this.state.htmlElements[1]}
-                    </div>
-                    <div id="widget">
-                        {this.state.htmlElements[2]}
-                    </div>
-                    <div id="widget">
-                        {this.state.htmlElements[3]}
-                    </div>
-                </div>
 
-                <div className="lower-row">
-                    <div id="widget">
-                        {this.state.htmlElements[4]}
-                    </div>
-                    <div id="widget">
-                        {this.state.htmlElements[5]}
-                    </div>
-                    <div id="widget">
-                        {this.state.htmlElements[6]}
-                    </div>
-                    <div id="widget">
-                        {this.state.htmlElements[7]}
+                    <div className="lower-row">
+                        <div id="widget">
+                            {this.state.htmlElements[4]}
+                        </div>
+                        <div id="widget">
+                            {this.state.htmlElements[5]}
+                        </div>
+                        <div id="widget">
+                            {this.state.htmlElements[6]}
+                        </div>
+                        <div id="widget">
+                            {this.state.htmlElements[7]}
+                        </div>
                     </div>
                 </div>
-            </div>
         );
     }
 }
