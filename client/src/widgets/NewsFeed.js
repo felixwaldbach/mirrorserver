@@ -10,11 +10,12 @@ class NewsFeed extends Component {
 
         return (
             <div className="news-container">
-              <span id="news-title">Current News:</span>
-              <li>Barcaaaaa</li>
-              <li>Lets go..</li>
-              <li>Morgen 23 Grad</li>
-              <li>Nice</li>
+              <span id="news-title">Schlagzeilen:</span>
+              <li id="news-items">Retro Classics in Stuttgart</li>
+              <li id="news-items">In der ZDF-Erfolgsserie Ferdinand Seebacher wird der neue Bergretter</li>
+              <li id="news-items">EU-Kommission besorgt über hohe Flüchtligszahl in Spanien</li>
+              <li id="news-items">Unfall auf der A 81 bei Asperg</li>
+              <li id="news-items">Porsche sucht Hunderte Arbeiter</li>
             </div>
         );
     }

@@ -93,7 +93,7 @@ class ToDoWidget extends Component {
                         {mylist.map((item, index) => {
                                 return (
                                     <div key={index}>
-                                        {index < 7 ? <li>{item.title}</li> : null}
+                                        {index < 7 ? <li id="todo-items">{item.title}</li> : null}
                                     </div>
                                 )
                             }

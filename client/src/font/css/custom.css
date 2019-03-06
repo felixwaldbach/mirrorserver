@@ -12,6 +12,7 @@
 
 li {
   list-style-type: square;
+  list-style-position: inside;
 }
 
 .weather-container {
@@ -47,6 +48,10 @@ li {
   margin-bottom: 2%;
 }
 
+#todo-items {
+  text-indent: 1em;
+}
+
 .news-container {
   font-size: 14px;
 }
@@ -56,6 +61,11 @@ li {
   display: inline-block;
   margin-bottom: 2%;
 }
+
+#news-items {
+  text-indent: 1em;
+}
+
 
 .qr-screen {
   margin-top: 10%;
