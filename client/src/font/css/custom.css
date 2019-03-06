@@ -1,13 +1,27 @@
+.quotes-container {
+  font-size: 14px;
+}
+
 .clock-container {
   text-align: center;
 }
 
-.news-container li {
+#clock {
+  font-size: 4vw;
+}
+
+li {
   list-style-type: square;
 }
 
 .weather-container {
   font-size: 14px;
+}
+
+#weather-city {
+  font-size: 1.5vw;
+  display: inline-block;
+  margin-bottom: 2%;
 }
 
 .weather-container table {
@@ -24,7 +38,23 @@
 }
 
 .todo-container {
-  font-size: 12px;
+  font-size: 14px;
+}
+
+#todo-title {
+  font-size: 1.5vw;
+  display: inline-block;
+  margin-bottom: 2%;
+}
+
+.news-container {
+  font-size: 14px;
+}
+
+#news-title {
+  font-size: 1.5vw;
+  display: inline-block;
+  margin-bottom: 2%;
 }
 
 .qr-screen {

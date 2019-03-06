@@ -18,7 +18,7 @@ class App extends Component {
         horizontal: true,
         widgets: [],
         htmlElements: [],
-        redirectToQRCode: true
+        redirectToQRCode: false
     };
 
     async componentDidMount() {

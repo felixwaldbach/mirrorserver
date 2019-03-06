@@ -10,7 +10,7 @@ class NewsFeed extends Component {
 
         return (
             <div className="news-container">
-              <h2>Current News:</h2>
+              <span id="news-title">Current News:</span>
               <li>Barcaaaaa</li>
               <li>Lets go..</li>
               <li>Morgen 23 Grad</li>

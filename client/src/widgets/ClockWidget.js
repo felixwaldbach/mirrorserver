@@ -48,7 +48,7 @@ class ClockWidget extends Component {
     render() {
         return (
             <div className="clock-container">
-              <h1><Clock /></h1>
+              <span id="clock"><Clock /></span>
               <h2>{weekdays[this.state.weekday]}, {this.state.date}.{this.state.month}.{this.state.year}</h2>
             </div>
         );
