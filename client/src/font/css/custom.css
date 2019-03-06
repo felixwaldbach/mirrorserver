@@ -27,16 +27,40 @@
   font-size: 12px;
 }
 
-.qrcode-container {
-  width: 10%;
+.qr-screen {
+  margin-top: 10%;
+  margin-left: 10%;
+  margin-right: 5%;
+  width:100%;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 
-.qrcode-description {
+#qrcode-container {
+  float:left;
+  width: 25%;
+}
+
+#qrcode-description {
   text-align: center;
   color: white;
-  font-size: 0.75vw;
+  font-size: 2.4vw;
 }
 
-.qrcode-image {
+#qrcode-image {
   background: white;
+}
+
+#qrcode-container::after {
+
+}
+
+.qr-screen #qr-time-container {
+  display: table;
+  margin: 0 auto;
+  font-size: 7vw;
 }
