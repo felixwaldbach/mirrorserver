@@ -4,6 +4,7 @@ const config = require('./client/src/config');
 const request = require('request');
 const fs = require('fs-extra');
 const NodeWebcam = require("node-webcam");
+const os = require('os')
 
 const mac_opts = {
     width: 640,
@@ -43,13 +44,13 @@ function verifyToken(req, res, next) {
     }
 }
 
-function initializeWebcam(user_id, os) {
+function initializeWebcam(os) {
     return new Promise(async (resolve, reject) => {
         let Webcam;
         if (os === 'darwin') Webcam = NodeWebcam.create(mac_opts);
         else if (os === 'linux') Webcam = new RaspiCam(pi_opts);
-        if (!fs.existsSync("./public/uploads/" + user_id)) {
-            await fs.mkdirSync("./public/uploads/" + user_id);
+        if (!fs.existsSync("./public/uploads/temporary")) {
+            await fs.mkdirSync("./public/uploads/temporary");
         }
         resolve({
             Webcam: Webcam
@@ -59,12 +60,12 @@ function initializeWebcam(user_id, os) {
 
 function takeImage(Webcam, os, counter, mirror_uuid, user_id) {
     return new Promise(async (resolve, reject) => {
-        if (os === 'darwin') await Webcam.capture("./public/uploads/" + user_id + "/temporary_camera_picture" + counter + ".png", async function (err, data) {
-            await fs.removeSync("./public/uploads/" + user_id);
+        if (os === 'darwin') await Webcam.capture("./public/uploads/temporary/temporary_camera_picture" + counter + ".png", async function (err, data) {
+            //await fs.removeSync("./public/uploads/" + user_id);
             Webcam.clear();
             resolve({
                 base64: data,
-                name: mirror_uuid + "-" + user_id + "-" + counter + ".png"
+                filename: mirror_uuid + "-" + "temporary" + "-" + counter + ".png"
             });
         });
         else if (os === 'linux') {
@@ -76,21 +77,21 @@ function takeImage(Webcam, os, counter, mirror_uuid, user_id) {
             });
             resolve({
                 base64: data,
-                name: mirror_uuid + '-' + user_id + '-' + counter + '.png'
+                filename: mirror_uuid + '-' + "temporary" + '-' + counter + '.png'
             })
         }
     });
 }
 
-function sendImageToServer(base64, name, mirror_uuid, user_id) {
+function sendImageToServer(base64, filename, mirror_uuid, user_id) {
     return new Promise(async (resolve, reject) => {
         await request.post(config.DJANGO_SERVER_ADDRESS + ':' + config.DJANGO_SERVER_PORT + '/face/storetrain', {
             json: {
                 mirror_uuid: mirror_uuid,
                 user_id: user_id,
                 base64: base64,
-                name: name,
-                last_image: name.replace('.png', '').endsWith(config.TRAIN_IMAGE_NUMBER) ? true : false
+                filename: filename,
+                last_image: filename.replace('.png', '').endsWith(config.TRAIN_IMAGE_NUMBER) ? true : false
             }
         }, (error, django_response, body) => {
             resolve({
@@ -121,10 +122,29 @@ function recognizeImage(mirror_uuid, base64) {
     });
 }
 
+async function storeFaceDataset(mirror_uuid, user_id) {
+    let response;
+    for (let i = 1; i <= config.TRAIN_IMAGE_NUMBER; i++) {
+        response = await initializeWebcam(os.platform());
+        response = await takeImage(response.Webcam, os.platform(), i, mirror_uuid);
+        response = sendImageToServer(response.base64, response.filename, mirror_uuid, user_id);
+    }
+    if (response.last_image) {
+        if (response.error) {
+            return {
+                status: false,
+                message: responseMessages.FACE_TRAIN_ERROR
+            };
+        }
+        return response;
+    }
+}
+
 module.exports = {
     verifyToken,
     initializeWebcam,
     takeImage,
     sendImageToServer,
-    recognizeImage
+    recognizeImage,
+    storeFaceDataset
 }

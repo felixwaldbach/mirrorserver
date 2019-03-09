@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import responseMessages from '../responseMessages';
 import config from '../config';
 
 export const getWunderlistTasks = (accessToken, list_id, client_id) => {
@@ -26,10 +25,10 @@ export const getWunderlistTasks = (accessToken, list_id, client_id) => {
     });
 }
 
-export const getUserWidgets = (user_id) => {
+export const getUserData = (user_id) => {
     return new Promise((resolve, reject) => {
         $.ajax({
-                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/user/getUserWidgets",
+                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/user/getUserData",
                 cache: false,
                 type: "GET",
                 contentType: 'application/json',
@@ -47,38 +46,14 @@ export const getUserWidgets = (user_id) => {
     });
 }
 
-export const getCameraPicture = (mirror_uuid) => {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/camera/recognizeimage",
-                cache: false,
-                type: "GET",
-                contentType: 'application/json',
-                data: {
-                    mirror_uuid: mirror_uuid
-                },
-                success: function (data) {
-                    resolve(JSON.parse(data));
-                },
-                error: function (xhr, status, err) {
-                    reject(err);
-                }
-            }
-        );
-    });
-}
 
-export const getStoreTrainDataset = (mirror_uuid, user_id) => {
+export const getWidgets = () => {
     return new Promise((resolve, reject) => {
         $.ajax({
-                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/camera/storetrain",
+                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/getWidgets",
                 cache: false,
                 type: "GET",
                 contentType: 'application/json',
-                data: {
-                    mirror_uuid: mirror_uuid,
-                    user_id: user_id
-                },
                 success: function (data) {
                     resolve(JSON.parse(data));
                 },
