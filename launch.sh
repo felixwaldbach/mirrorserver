@@ -104,6 +104,6 @@ gnome-terminal --working-directory=/home/emre/Desktop/mirrorserver/client -- npm
 
 # Start Browser in fullscreen
 xdg-open http://localhost:3000 &
-xdotool search --sync --onlyvisible --class "Firefox" windowactivate key F11
+xdotool search --sync --onlyvisible --class "Chromium" windowactivate key F11
 
 # EOF
