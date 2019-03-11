@@ -2,15 +2,13 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const MongoClient = require('mongodb').MongoClient;
-const userWidgetsCollectionUtils = require('./database/userWidgetsCollectionUtils');
 const wunderlistCollectionUtils = require('./database/wunderlistCollectionUtils');
 const weatherCollectionUtils = require('./database/weatherCollectionUtils');
 const jwt = require('jsonwebtoken');
-const ObjectId = require('mongodb').ObjectId;
 const mosca = require('mosca');
 const fetch = require('node-fetch');
 const weatherIcons = require('./jsonModels/weatherIcons');
+const utils = require('./utils');
 
 const port = process.env.PORT || 5000;
 app.use("/public", express.static(__dirname + '/public'));
@@ -28,6 +26,8 @@ const currentUser = "Emre";
 const userId = "5bf42e57e8d590da0243a593";
 const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
 
+const config = require('./config');
+const os = require('os');
 require('dotenv').load();
 
 
@@ -58,35 +58,35 @@ io.on('connection', function (socket) {
 
         // with this city, fetch weather forecast from openweathermap
         let responseForecast = {};
-        await fetch("http://api.openweathermap.org/data/2.5/forecast?q="+requiredCity+"&APPID="+process.env.weatherkey+"&units=metric", {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+        await fetch("http://api.openweathermap.org/data/2.5/forecast?q=" + requiredCity + "&APPID=" + process.env.weatherkey + "&units=metric", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
         })
-        .then(res =>
-            res.json()
-        )
-        .then(json => {
-            responseForecast = json;
-        });
+            .then(res =>
+                res.json()
+            )
+            .then(json => {
+                responseForecast = json;
+            });
 
         // calculate next five days to extract from the list
         let today = new Date();
         let tomorrow = new Date();
         let dayThree = new Date();
-        let dayFour= new Date();
+        let dayFour = new Date();
         let dayFive = new Date();
-        tomorrow.setDate(today.getDate()+1);
-        dayThree.setDate(today.getDate()+2);
-        dayFour.setDate(today.getDate()+3);
-        dayFive.setDate(today.getDate()+4);
+        tomorrow.setDate(today.getDate() + 1);
+        dayThree.setDate(today.getDate() + 2);
+        dayFour.setDate(today.getDate() + 3);
+        dayFive.setDate(today.getDate() + 4);
 
-        today = today.toJSON().slice(0,10).replace(/-/g,'-');
-        tomorrow = tomorrow.toJSON().slice(0,10).replace(/-/g,'-');
-        dayThree = dayThree.toJSON().slice(0,10).replace(/-/g,'-');
-        dayFour = dayFour.toJSON().slice(0,10).replace(/-/g,'-');
-        dayFive = dayFive.toJSON().slice(0,10).replace(/-/g,'-');
+        today = today.toJSON().slice(0, 10).replace(/-/g, '-');
+        tomorrow = tomorrow.toJSON().slice(0, 10).replace(/-/g, '-');
+        dayThree = dayThree.toJSON().slice(0, 10).replace(/-/g, '-');
+        dayFour = dayFour.toJSON().slice(0, 10).replace(/-/g, '-');
+        dayFive = dayFive.toJSON().slice(0, 10).replace(/-/g, '-');
 
         let today_selected = false;
         let forecast = [];
@@ -96,7 +96,7 @@ io.on('connection', function (socket) {
         // push these into the new array
         for (x in responseForecast.list) {
             // get weather from today, get the next timestamp -> first one in the main array
-            if(today_selected === false) {
+            if (today_selected === false) {
                 forecast.push({
                     "weekday": weekdays[new Date().getDay()],
                     "temp": responseForecast.list[0].main.temp,
@@ -106,36 +106,36 @@ io.on('connection', function (socket) {
                 today_selected = true;
             }
             // get weather for tomorrow
-            if(responseForecast.list[x].dt_txt === tomorrow + ' 15:00:00') {
+            if (responseForecast.list[x].dt_txt === tomorrow + ' 15:00:00') {
                 forecast.push({
-                    "weekday": weekdays[new Date().getDay()+1],
+                    "weekday": weekdays[new Date().getDay() + 1],
                     "temp": responseForecast.list[x].main.temp,
                     "weather": responseForecast.list[x].weather[0].main,
                     "icon": weatherIcons[responseForecast.list[x].weather[0].main]
                 });
             }
             // get weather for day 3
-            if(responseForecast.list[x].dt_txt === dayThree + ' 15:00:00') {
+            if (responseForecast.list[x].dt_txt === dayThree + ' 15:00:00') {
                 forecast.push({
-                    "weekday": weekdays[new Date().getDay()+2],
+                    "weekday": weekdays[new Date().getDay() + 2],
                     "temp": responseForecast.list[x].main.temp,
                     "weather": responseForecast.list[x].weather[0].main,
                     "icon": weatherIcons[responseForecast.list[x].weather[0].main]
                 });
             }
             // get weather for day 4
-            if(responseForecast.list[x].dt_txt === dayFour + ' 15:00:00') {
+            if (responseForecast.list[x].dt_txt === dayFour + ' 15:00:00') {
                 forecast.push({
-                    "weekday": weekdays[new Date().getDay()+3],
+                    "weekday": weekdays[new Date().getDay() + 3],
                     "temp": responseForecast.list[x].main.temp,
                     "weather": responseForecast.list[x].weather[0].main,
                     "icon": weatherIcons[responseForecast.list[x].weather[0].main]
                 });
             }
             // get weather for day 5
-            if(responseForecast.list[x].dt_txt === dayFive + ' 15:00:00') {
+            if (responseForecast.list[x].dt_txt === dayFive + ' 15:00:00') {
                 forecast.push({
-                    "weekday": weekdays[new Date().getDay()+4],
+                    "weekday": weekdays[new Date().getDay() + 4],
                     "temp": responseForecast.list[x].main.temp,
                     "weather": responseForecast.list[x].weather[0].main,
                     "icon": weatherIcons[responseForecast.list[x].weather[0].main]
@@ -149,25 +149,33 @@ io.on('connection', function (socket) {
 
     // Quotes Widget
     // Send random quotes to UI. Use CURL and GET
-    socket.on('send_quotes', function (data) {
-        shell.exec("curl -H Accept:application/json -H Content-Type:application/json -X GET http://quotesondesign.com/wp-json/posts", function (code, stdout, stderr) {
-            io.emit('new_quotes', {randomQuote: stdout});
-        });
+    socket.on('send_quotes', async function (data) {
+        await fetch("http://quotesondesign.com/wp-json/posts", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+            .then(res =>
+                res.json()
+            )
+            .then(json => {
+                randomQuote = json;
+            });
+        // delete html tags: object to string. delete. string back to object
+        let quoteAsString = JSON.stringify(randomQuote);
+        quoteAsString = quoteAsString.replace(/<\/?[^>]+(>|$)/g, "");
+        let quote = JSON.parse(quoteAsString);
+        io.emit('new_quotes', quote[0]);
     });
 
     socket.on('app_drop_event', function (data) {
-        io.emit('web_drop_event', data);
-    });
-
-    socket.on('app_delete_event', async function (data) {
         jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
             if (err) {
                 throw err;
             } else {
-                data.user_id = authData.username;
-                const response = await userWidgetsCollectionUtils.removeUserWidgets(data);
-                console.log(response);
-                io.emit('web_delete_event', data);
+                data.user_id = authData.user_id;
+                io.emit('web_drop_event', data);
             }
         });
     });
@@ -178,6 +186,26 @@ io.on('connection', function (socket) {
         io.emit('wunderlist_settings', response);
     });
 
+    socket.on('app_trigger_face_id', function (data) {
+        jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
+            if (err) {
+                throw err;
+            } else {
+                data.user_id = authData.user_id;
+                data.message = "Face ID will be created shortly. Get ready and smile!";
+                io.emit('web_trigger_face_id', data);
+                setTimeout(async () => {
+                    data.message = "Processing images. Keep smiling!";
+                    io.emit('web_trigger_face_id', data);
+                    await utils.storeFaceDataset(config.mirror_uuid, authData.user_id).then(() => {
+                        data.message = "Processing images done. Keep smiling though :)";
+                        io.emit('web_trigger_face_id', data);
+                        //send pir motion detection ?
+                    });
+                }, 10);
+            }
+        });
+    });
 });
 
 
@@ -191,9 +219,9 @@ mqttServ.on('ready', function () {
 });
 
 // fired when a message is received
-mqttServ.on('published', function (packet, client) {
-  console.log(packet.topic);
-  console.log(packet.payload.toString('utf8'));
+mqttServ.on('published', async function (packet, client) {
+    console.log(packet.topic);
+    console.log(packet.payload.toString('utf8'));
     switch (packet.topic) {
         case 'temperature/inside':
             io.emit('temperature_inside_data', packet.payload.toString('utf8'));
@@ -202,7 +230,38 @@ mqttServ.on('published', function (packet, client) {
             io.emit('temperature_outside_data', packet.payload.toString('utf8'));
             break;
         case 'temperature/pir':
-            io.emit('pir_motion_data', packet.payload.toString('utf8'));
+            // 1 = motion detected, 0 = no motion detected, take pictures and send to django server which will return the user_id of the recognized user
+            if (packet.payload.toString('utf8') == "1") {
+                // start session
+                let response;
+
+                response = await utils.initializeWebcam(os.platform());
+                response = await utils.takeImage(response.Webcam, os.platform(), 0, config.mirror_uuid);
+                response = await utils.recognizeImage(config.mirror_uuid, response.base64);
+                console.log(response);
+                //res.send(JSON.stringify(response)); // coming from django server
+
+                // create no expiring session token with the user_id of the recognized user
+
+                if(response.status) {
+                    jwt.sign({
+                        user_id: response.user_id
+                    }, process.env.secretkey, (err, token) => {
+                        client.close();
+                        io.emit('handle_session', {
+                            token: token,
+                            user_id: response.user_id,
+                            motion: packet.payload.toString('utf8')
+                        });
+                    });
+                } else {
+                    console.log("Something went wrong during face recognition...");
+                    io.emit('handle_session', {user_id: "empty", motion: "0"});     // kill session because error happened, try again in 3 minutes...
+                }
+            } else {
+                // kill session because no one is in front of the mirror
+                io.emit('handle_session', {user_id: "empty", motion: packet.payload.toString('utf8')});
+            }
             break;
     }
 });

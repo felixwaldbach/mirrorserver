@@ -32,6 +32,11 @@ class ClockWidget extends Component {
     tick() {
       this.setState({weekday: new Date().getDay()}); // Sunday - Saturday : 0 - 6
       this.setState({date: new Date().getUTCDate()});
+      if(this.state.date < 10) {
+          this.setState({date: "0" + new Date().getUTCDate()});
+      } else {
+          this.setState({date: new Date().getUTCDate()});
+      }
       if(this.state.month < 9) {
         this.setState({month: "0" + (new Date().getMonth() + 1)});
       } else {

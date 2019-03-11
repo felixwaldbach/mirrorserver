@@ -27,3 +27,17 @@
   font-size: 12px;
   list-style-type: circle;
 }
+
+.qrcode-container {
+  width: 10%;
+}
+
+.qrcode-description {
+  text-align: center;
+  color: white;
+  font-size: 0.75vw;
+}
+
+.qrcode-image {
+  background: white;
+}

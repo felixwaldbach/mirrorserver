@@ -31,9 +31,9 @@ class ToDoWidget extends Component {
     }
 
     componentDidMount() {
-        socket.emit('send_wunderlist_settings', {
-            message: "send me credentials please!"
-        });
+        // socket.emit('send_wunderlist_settings', {
+        //     message: "send me credentials please!"
+        // });
 
         socket.on('wunderlist_settings', function (data) {
             refreshList();
