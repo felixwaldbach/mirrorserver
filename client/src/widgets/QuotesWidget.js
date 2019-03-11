@@ -42,7 +42,7 @@ class QuotesWidget extends Component {
     render() {
         return (
             <div className="quotes-container">
-                <span>{this.state.quote.content} - {this.state.quote.title}</span>
+                <h3>{this.state.quote.content} - {this.state.quote.title}</h3>
             </div>
         );
     }

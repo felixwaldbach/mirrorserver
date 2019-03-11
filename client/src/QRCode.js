@@ -1,7 +1,7 @@
 import * as React from "react";
 import {generateQRCode} from './api/get';
 import qrcode from './savedQrCode/qrcode.svg';
-
+import Clock from 'clock-react';
 
 export default class QRCode extends React.Component {
 
@@ -24,16 +24,18 @@ export default class QRCode extends React.Component {
 
     render() {
         return (
-            <div>
+            <div className="qr-screen">
                 {
                     this.state.qrcode_available ?
-                        <div className={'qrcode-container'}>
-                            <p className={'qrcode-description'}>Scan QR Code to create a new profile</p>
-                            <img src={qrcode} alt={"QRCode"} className={'qrcode-image'}/>
+                        <div id={'qrcode-container'}>
+                            <p id={'qrcode-description'}>Scan QR-Code to start!</p>
+                            <img src={qrcode} alt={"QRCode"} id={'qrcode-image'}/>
                         </div>
                         : null
-
                 }
+                <div id="qr-time-container">
+                    <Clock />
+                </div>
             </div>
         )
     }

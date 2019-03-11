@@ -22,6 +22,7 @@ class ToDoWidget extends Component {
         super(props);
         this.state = {
             wunderlist_settings: [],
+            list_name: "",
             lists: [],
             mylist: [],
             tasks: [],
@@ -41,6 +42,7 @@ class ToDoWidget extends Component {
         });
 
         const refreshList = () => {
+            this.setState({list_name: ""});
             this.setState({mylist: []});
         }
 
@@ -59,7 +61,8 @@ class ToDoWidget extends Component {
                         let x;
                         for (x in lists) {
                             if (lists[x].title === this.state.wunderlist_settings.todo_list) {
-                                this.setState({list_id: lists[x].id});
+                              this.setState({list_name: lists[x].title});
+                              this.setState({list_id: lists[x].id});
                                 // with list_id we get list items...
                                 this.getSubtasks();
                             }
@@ -84,13 +87,13 @@ class ToDoWidget extends Component {
         mylist.slice(0, 5);
         return (
             <div className="todo-container">
-                <h2>To Do List</h2>
+                {this.state.list_name ? <span id="todo-title">{this.state.list_name}</span>: <span id="todo-title">To Do List</span>}
                 {mylist.length > 0 ?
                     <div>
                         {mylist.map((item, index) => {
                                 return (
                                     <div key={index}>
-                                        {index < 7 ? <li>{item.title}</li> : null}
+                                        {index < 7 ? <li id="todo-items">{item.title}</li> : null}
                                     </div>
                                 )
                             }
