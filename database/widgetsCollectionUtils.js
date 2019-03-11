@@ -4,7 +4,7 @@ const responseMessages = require('../responseMessages');
 
 const funcall = module.exports = {
     //----------------------Set User Widget ids----------------------//
-    getAllWidgets: async function () {
+    getWidgets: async function () {
         return new Promise((resolve, reject) => {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                 if (err) resolve(JSON.stringify({
@@ -14,7 +14,7 @@ const funcall = module.exports = {
                 }));
                 else {
                     let db = client.db('smartmirror');
-                    db.collection('allWidgets').find().toArray((err, docs) => {
+                    db.collection('widgets').find({}, {_id: 0}).toArray((err, docs) => {
                         if (err) {
                             client.close();
                             resolve(JSON.stringify({
@@ -24,20 +24,11 @@ const funcall = module.exports = {
                             }));
                         } else {
                             if (docs) {
-                                let all_widgets = [];
-                                docs.forEach(function (doc) {
-                                    all_widgets.push({
-                                        widget_id: doc.widget_id,
-                                        widget_name: doc.widget_name
-                                    });
-                                });
                                 client.close();
                                 resolve(JSON.stringify({
                                     status: true,
                                     message: responseMessages.WIDGETS_SUCCESS,
-                                    data: {
-                                        all_widgets: all_widgets
-                                    }
+                                    widgets: docs
                                 }));
                             }
                         }

@@ -13,6 +13,7 @@ export default class QRCode extends React.Component {
     }
 
     async componentDidMount() {
+        console.log("Rendering qr code")
         let response = await generateQRCode();
         if (response.status) {
             this.setState({
