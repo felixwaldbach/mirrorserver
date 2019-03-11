@@ -22,8 +22,6 @@ mqttServ.attachHttpServer(http);
 var apiRouter = require('./routes/api');
 var nativeRouter = require('./routes/native');
 
-const currentUser = "Emre";
-const userId = "5bf42e57e8d590da0243a593";
 const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
 
 const config = require('./config');
