@@ -11,7 +11,7 @@ echo "Starting Configuration Script for Smart Mirror..."
 
 
 # change to directory where the code folder is based
-$(cd ~/Desktop)
+cd ~/Desktop
 
 
 # check if project exists: yes = direct to that folder, no = git clone
@@ -19,7 +19,7 @@ if [ -d "mirrorserver" ];
 then
 	echo "Project mirrorserver exists!"
 	# change to project directory
-	$(cd ~/Desktop/smartmirror)
+	cd ~/Desktop/mirrorserver
 else
 	echo "Project mirrorserver does not exists!"
 	# clone repo (master) folder from git
@@ -106,8 +106,9 @@ gnome-terminal --working-directory=/home/emre/Desktop/mirrorserver/client -- npm
 
 
 # Start Browser in fullscreen
+echo "Opening Browser..."
 xdg-open http://localhost:3000 &
 xdotool search --sync --onlyvisible --class "Firefox" windowactivate key F11
 
-
+exec bash
 # EOF
