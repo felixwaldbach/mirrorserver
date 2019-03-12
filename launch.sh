@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script is in the mirrorserver repository just to distribute the launch script.
+
 echo "Starting Configuration Script for Smart Mirror..."
 
 
@@ -18,8 +20,6 @@ cd ~/Desktop
 if [ -d "mirrorserver" ];
 then
 	echo "Project mirrorserver exists!"
-	# change to project directory
-	cd ~/Desktop/mirrorserver
 else
 	echo "Project mirrorserver does not exists!"
 	# clone repo (master) folder from git
@@ -29,6 +29,10 @@ else
 	# wait till installation of packages is done...
 	sleep 2m
 fi
+
+
+# change to project directory
+cd ~/Desktop/mirrorserver
 
 
 # check if config.json exists
