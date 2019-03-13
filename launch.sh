@@ -5,9 +5,6 @@
 echo "Starting Configuration Script for Smart Mirror..."
 
 
-# Installations for Smart Mirror: jq, git, nodejs, mongodb, gnome-terminal, uuidgen
-
-
 # rotate display, problem: needs reboot
 # rotate_display = 3
 
@@ -24,10 +21,14 @@ else
 	echo "Project mirrorserver does not exists!"
 	# clone repo (master) folder from git
 	$(git clone https://github.com/felixwaldbach/mirrorserver.git)
-	gnome-terminal --working-directory=/home/emre/Desktop/mirrorserver -- npm install . &
-	gnome-terminal --working-directory=/home/emre/Desktop/mirrorserver/client -- npm install . &
-	# wait till installation of packages is done...
-	sleep 2m
+	cd mirrorserver
+	nohup npm install &
+	cd client
+	nohup npm install &
+	#gnome-terminal --working-directory=/home/emre/Desktop/mirrorserver -- npm install . &
+	#gnome-terminal --working-directory=/home/emre/Desktop/mirrorserver/client -- npm install . &
+	# wait some time till installation of packages is done...
+	sleep 4m
 fi
 
 
@@ -67,8 +68,8 @@ then
 	# Not working yet, not supported???
 
 	# Set IP address of host and django server
-	ip_address_host="$(hostname -I)"
-	ip_address_django="$(hostname -I)"
+	ip_address_host="$(hostname -I | awk '{print $1}')"
+	ip_address_django="$(hostname -I | awk '{print $1}')"
 
 	ip_address_host+=:5000
 	ip_address_django+=:5000
@@ -76,7 +77,7 @@ then
 	ip_address_host="${ip_address_host//[[:space:]]/}"
 	ip_address_django="${ip_address_django//[[:space:]]/}"
 
-	uuid=$(uuidgen)
+	uuid=$(cat /proc/sys/kernel/random/uuid)
 
 	echo $ip_address_host
 	echo $ip_address_django
@@ -97,22 +98,23 @@ else
 fi
 
 
-# Start database: sudo service mongod start OR sudo service mongod stop
-echo "Starting MongoDB..."
-mongod="sudo service mongod start"
-$mongod
-
-
 # Start express server and frontend
 echo "Starting Application..."
-gnome-terminal --working-directory=/home/emre/Desktop/mirrorserver -- node server.js . &
-gnome-terminal --working-directory=/home/emre/Desktop/mirrorserver/client -- npm start . &
+nohup node server.js &
+cd client
+nohup npm start &
+cd ~/Desktop
+
+#gnome-terminal --working-directory=/home/emre/Desktop/mirrorserver -- node server.js . &
+#gnome-terminal --working-directory=/home/emre/Desktop/mirrorserver/client -- npm start . &
 
 
 # Start Browser in fullscreen
 echo "Opening Browser..."
+chromium-browser --start-fullscreen &
 xdg-open http://localhost:3000 &
-xdotool search --sync --onlyvisible --class "Firefox" windowactivate key F11
+sleep 5
+xdotool key "F11" &
 
 exec bash
 # EOF
