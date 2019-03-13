@@ -11,8 +11,6 @@ class WeatherWidget extends Component {
         super(props);
         this.state = {
             city: "",
-            current_indoor_temperature: 0,
-            current_outdoor_temperature: 0,
             forecast: []
         }
     }
@@ -82,7 +80,7 @@ class WeatherWidget extends Component {
         return (
             <div className="weather-container">
 
-                {forecast.length == 0 ? <h3>No forecast available for {this.state.city}</h3> : <h3>Weather for {this.state.city}</h3>}
+                {forecast.length == 0 ? <h2>No forecast available for {this.state.city}</h2> : <span id="weather-city">Weather for {this.state.city}</span>}
 
                 <table>
                     <tr id="head-border">
@@ -116,9 +114,13 @@ class WeatherWidget extends Component {
                 </table>
 
                 <h3>
-                    Indoor: {this.state.current_indoor_temperature} °C
-                    <br/>
-                    Outdoor: {this.state.current_outdoor_temperature} °C
+                    {this.state.current_indoor_temperature ?
+                        <span>
+                            Indoor: {this.state.current_indoor_temperature} °C
+                            <br/>
+                            Outdoor: {this.state.current_outdoor_temperature} °C
+                        </span>
+                    : null}
                 </h3>
 
             </div>

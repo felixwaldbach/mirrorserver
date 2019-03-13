@@ -1,13 +1,28 @@
+.quotes-container {
+  font-size: 14px;
+}
+
 .clock-container {
   text-align: center;
 }
 
-.news-container li {
+#clock {
+  font-size: 4vw;
+}
+
+li {
   list-style-type: square;
+  list-style-position: inside;
 }
 
 .weather-container {
   font-size: 14px;
+}
+
+#weather-city {
+  font-size: 1.5vw;
+  display: inline-block;
+  margin-bottom: 2%;
 }
 
 .weather-container table {
@@ -24,6 +39,70 @@
 }
 
 .todo-container {
+  font-size: 14px;
+}
+
+#todo-title {
+  font-size: 1.5vw;
+  display: inline-block;
+  margin-bottom: 2%;
+}
+
+#todo-items {
+  text-indent: 1em;
+}
+
+.news-container {
+  font-size: 14px;
+}
+
+#news-title {
+  font-size: 1.5vw;
+  display: inline-block;
+  margin-bottom: 2%;
+}
+
+#news-items {
+  text-indent: 1em;
+}
+
+
+.qr-screen {
+  margin-top: 10%;
+  margin-left: 10%;
+  margin-right: 5%;
+  width:100%;
+  text-align: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
   font-size: 12px;
   list-style-type: circle;
+}
+
+#qrcode-container {
+  float:left;
+  width: 25%;
+}
+
+#qrcode-description {
+  text-align: center;
+  color: white;
+  font-size: 2.4vw;
+}
+
+#qrcode-image {
+  background: white;
+}
+
+#qrcode-container::after {
+
+}
+
+.qr-screen #qr-time-container {
+  display: table;
+  margin: 0 auto;
+  font-size: 7vw;
 }

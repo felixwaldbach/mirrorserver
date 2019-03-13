@@ -1,11 +1,10 @@
 import $ from 'jquery';
-import responseMessages from '../responseMessages';
 import config from '../config';
 
 export const getWunderlistTasks = (accessToken, list_id, client_id) => {
     return new Promise((resolve, reject) => {
         $.ajax({
-                url: "https://a.wunderlist.com/api/v1/tasks?list_id="+list_id,
+                url: "https://a.wunderlist.com/api/v1/tasks?list_id=" + list_id,
                 cache: false,
                 type: "GET",
                 contentType: 'application/json',
@@ -26,16 +25,53 @@ export const getWunderlistTasks = (accessToken, list_id, client_id) => {
     });
 }
 
-export const getUserWidgets = (user_id) => {
+export const getUserData = (user_id) => {
     return new Promise((resolve, reject) => {
         $.ajax({
-                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/user/getUserWidgets",
+                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/user/getUserData",
                 cache: false,
                 type: "GET",
                 contentType: 'application/json',
                 data: {
                     user_id: user_id
                 },
+                success: function (data) {
+                    resolve(JSON.parse(data));
+                },
+                error: function (xhr, status, err) {
+                    reject(err);
+                }
+            }
+        );
+    });
+}
+
+
+export const getWidgets = () => {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/getWidgets",
+                cache: false,
+                type: "GET",
+                contentType: 'application/json',
+                success: function (data) {
+                    resolve(JSON.parse(data));
+                },
+                error: function (xhr, status, err) {
+                    reject(err);
+                }
+            }
+        );
+    });
+}
+
+export const generateQRCode = () => {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/qrcode",
+                cache: false,
+                type: "GET",
+                contentType: 'application/json',
                 success: function (data) {
                     resolve(JSON.parse(data));
                 },
