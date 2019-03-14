@@ -1,5 +1,6 @@
 import $ from 'jquery';
-import config from '../config';
+
+const IP_HOST = 'http://localhost:5000';
 
 export const getWunderlistTasks = (accessToken, list_id, client_id) => {
     return new Promise((resolve, reject) => {
@@ -28,7 +29,7 @@ export const getWunderlistTasks = (accessToken, list_id, client_id) => {
 export const getUserData = (user_id) => {
     return new Promise((resolve, reject) => {
         $.ajax({
-                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/user/getUserData",
+                url: IP_HOST + "/api/user/getUserData",
                 cache: false,
                 type: "GET",
                 contentType: 'application/json',
@@ -46,29 +47,10 @@ export const getUserData = (user_id) => {
     });
 }
 
-
-export const getWidgets = () => {
-    return new Promise((resolve, reject) => {
-        $.ajax({
-                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/getWidgets",
-                cache: false,
-                type: "GET",
-                contentType: 'application/json',
-                success: function (data) {
-                    resolve(JSON.parse(data));
-                },
-                error: function (xhr, status, err) {
-                    reject(err);
-                }
-            }
-        );
-    });
-}
-
 export const generateQRCode = () => {
     return new Promise((resolve, reject) => {
         $.ajax({
-                url: config.SERVER_ADDRESS + ":" + config.SOCKET_SERVER_PORT + "/api/qrcode",
+                url: IP_HOST + "/api/qrcode",
                 cache: false,
                 type: "GET",
                 contentType: 'application/json',

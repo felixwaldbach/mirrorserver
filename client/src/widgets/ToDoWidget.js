@@ -11,7 +11,7 @@ Endpoint to get tasks of a list: a.wunderlist.com/api/v1/tasks?list_id=INTEGER_I
 
 import React, {Component} from 'react';
 import WunderlistSDK from 'wunderlist';
-import {socket} from '../frontendConfig';
+import {socket} from '../socketConnection';
 import {getWunderlistTasks} from "../api/get";
 
 var mylist = [];

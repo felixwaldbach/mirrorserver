@@ -8,65 +8,69 @@ import WeatherWidget from "./widgets/WeatherWidget";
 import QRCode from "./QRCode";
 import {bake_cookie, delete_cookie} from 'sfcookies';
 
-import {socket} from './frontendConfig';
+import {socket} from './socketConnection';
 import {getUserData} from "./api/get";
 
 class App extends Component {
 
     state = {
-        horizontal: true,
-        widgets: [],
         htmlElements: [],
-        redirectToQRCode: true
+        redirectToQRCode: true,
+        message: 'test',
+        user_id: ''
     };
 
     async componentDidMount() {
+        const app = this;
         socket.on('handle_session', function (data) {
-            addCookies(data);
+            app.addCookies(data);
         });
 
         socket.on('web_trigger_face_id', function (data) {
-            console.log(data);
+            this.setState({
+                message: data.message
+            })
         });
 
-        const addCookies = async (data) => {
-            if (data) {
-                if (data.motion === "1") {
-                    // set cookie & get widget allignment for this user
-                    bake_cookie("token", data.token);
-                    let response = await getUserData(data.user_id);
-                    this.setState({
-                        user_id: data.user_data.user_id,
-                        widgets: response.user_data.widgets,
-                        redirectToQRCode: false
-                    });
-                    this.resolveWidgets(this.state.widgets);
-                } else if (data.motion === "0") {
-                    this.setState({
-                        redirectToQRCode: true
-                    });
-                    delete_cookie('token');
-                }
-            }
-        };
-
-        const app = this;
-        socket.on('web_drop_event', async function (data) {
-            if (data.user_id === this.state.user_id) {
-                let response = await getUserData(this.state.user_id);
+        socket.on('web_update_widgets', async function (data) {
+            if (data.user_id === app.state.user_id) {
+                let response = await getUserData(app.state.user_id);
                 app.setState({
-                    widgets: response.data.widgets
+                    widgets: response.user_data.widgets
                 });
-                app.resolveWidgets(app.state.widgets);
+                app.renderWidgets();
             }
         });
     }
 
-    async resolveWidgets(widgets) {
+    async addCookies(data) {
+        if (data) {
+            if (data.motion === "1") {
+                // set cookie & get widget allignment for this user
+                bake_cookie("token", data.token);
+                this.setState({
+                    user_id: data.user_id,
+                    redirectToQRCode: false
+                });
+                this.renderWidgets();
+            } else if (data.motion === "0") {
+                this.setState({
+                    user_id: null,
+                    htmlElements: [],
+                    redirectToQRCode: true
+                });
+                delete_cookie('token');
+            }
+        }
+    }
+
+    async renderWidgets() {
+        let response = await getUserData(this.state.user_id);
+
         let htmlElements = [];
-        widgets.forEach(function (widget) {
+        response.user_data.widgets.forEach(function (widget) {
             if (widget) {
-                switch (widget.widget_name) {
+                switch (widget.name) {
                     case "ClockWidget":
                         htmlElements.push(<ClockWidget style={{color: 'white'}}/>);
                         break;
@@ -114,7 +118,7 @@ class App extends Component {
                             {this.state.htmlElements[3]}
                         </div>
                     </div>
-
+                    <p>{this.state.message}</p>
                     <div className="lower-row">
                         <div id="widget">
                             {this.state.htmlElements[4]}
