@@ -3,6 +3,31 @@
 ## What does this Repository contain?
 This repository holds code for the Smart Mirror Backend and Frontend. This application is implemented with the MERN Stack
 
+## Setup the Raspberry Pi:
+Make sure the Raspberry Pi has a Wi-Fi connection and you have installed these application:
+```
+- Node.js
+- MongoDB (& dirmngr)
+- xdotool
+- curl
+- git
+- jq
+```
+
+Then make sure that you have configured the Raspberry Pi with a static IP address:
+```
+sudo nano /etc/dhcpcd.conf
+
+interface wlan0
+static ip_address=192.168.x.x/24
+static routers=192.168.x.1
+static domain_name_servers=192.168.x.1
+
+Save & Reboot
+
+Important! Do not touch /etc/network/interfaces
+```
+
 ## Backend
 The backend is written in Express and Node.js. It is distributed on a Raspberry Pi which runs the MongoDB database and establishes a REST, Socket.io and Broker connectivity.
 
