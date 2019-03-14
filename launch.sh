@@ -72,7 +72,7 @@ then
 	ip_address_django="$(hostname -I | awk '{print $1}')"
 
 	ip_address_host+=:5000
-	ip_address_django+=:5000
+	ip_address_django+=:8000
 
 	ip_address_host="${ip_address_host//[[:space:]]/}"
 	ip_address_django="${ip_address_django//[[:space:]]/}"
