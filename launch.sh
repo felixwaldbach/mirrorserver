@@ -68,33 +68,33 @@ then
 	# Not working yet, not supported???
 
 	# Set IP address of host and django server
-	ip_address_host="http://"
-	ip_address_django="http://"
+	host_address="http://"
+	django_address="http://"
 
 	ip="$(hostname -I | awk '{print $1}')"
 	ip="${ip//[[:space:]]/}"
 
-	ip_address_host+=ip
-	ip_address_django+=ip
+	host_address+=ip
+	django_address+=ip
 
-	ip_address_host+=:5000
-	ip_address_django+=:8000
+	host_address+=:5000
+	django_address+=:8000
 
-	ip_address_host+=:5000
-	ip_address_django+=:8000
+	host_address+=:5000
+	django_address+=:8000
 
 
 	uuid=$(cat /proc/sys/kernel/random/uuid)
 
-	echo $ip_address_host
-	echo $ip_address_django
+	echo $host_address
+	echo $django_address
 	echo $uuid
 
 	# write this new configuration into config.json which is created before
 
 	configuration=$( jq -n \
-                  --arg bn "$ip_address_host" \
-                  --arg on "$ip_address_django" \
+                  --arg bn "$host_address" \
+                  --arg on "$django_address" \
                   --arg tl "$uuid" \
                   '{ip_host: $bn, ip_django: $on, uuid: $tl}' )
 
