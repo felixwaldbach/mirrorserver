@@ -9,7 +9,7 @@
 
 # production
 /build
-/public/uploads
+/public
 
 # misc
 .DS_Store

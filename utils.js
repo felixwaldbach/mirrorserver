@@ -1,10 +1,11 @@
 const responseMessages = require('./responseMessages');
 const RaspiCam = require('raspicam');
-const config = require('./client/src/config');
 const request = require('request');
 const fs = require('fs-extra');
 const NodeWebcam = require("node-webcam");
 const os = require('os')
+const TRAIN_IMAGE_NUMBER = 20;
+var config = require('./config');
 
 const mac_opts = {
     width: 640,
@@ -85,13 +86,13 @@ function takeImage(Webcam, os, counter, mirror_uuid, user_id) {
 
 function sendImageToServer(base64, filename, mirror_uuid, user_id) {
     return new Promise(async (resolve, reject) => {
-        await request.post(config.DJANGO_SERVER_ADDRESS + ':' + config.DJANGO_SERVER_PORT + '/face/storetrain', {
+        await request.post(config.ip_django + '/face/storetrain', {
             json: {
                 mirror_uuid: mirror_uuid,
                 user_id: user_id,
                 base64: base64,
                 filename: filename,
-                last_image: filename.replace('.png', '').endsWith(config.TRAIN_IMAGE_NUMBER) ? true : false
+                last_image: filename.replace('.png', '').endsWith(TRAIN_IMAGE_NUMBER) ? true : false
             }
         }, (error, django_response, body) => {
             resolve({
@@ -105,7 +106,7 @@ function sendImageToServer(base64, filename, mirror_uuid, user_id) {
 
 function recognizeImage(mirror_uuid, base64) {
     return new Promise(async (resolve, reject) => {
-        await request.post(config.DJANGO_SERVER_ADDRESS + ':' + config.DJANGO_SERVER_PORT + '/face/recognizeimage', {
+        await request.post(config.ip_django + '/face/recognizeimage', {
             json: {
                 mirror_uuid: mirror_uuid,
                 image_base64: base64
@@ -124,7 +125,7 @@ function recognizeImage(mirror_uuid, base64) {
 
 async function storeFaceDataset(mirror_uuid, user_id) {
     let response;
-    for (let i = 1; i <= config.TRAIN_IMAGE_NUMBER; i++) {
+    for (let i = 1; i <= TRAIN_IMAGE_NUMBER; i++) {
         response = await initializeWebcam(os.platform());
         response = await takeImage(response.Webcam, os.platform(), i, mirror_uuid);
         response = sendImageToServer(response.base64, response.filename, mirror_uuid, user_id);
