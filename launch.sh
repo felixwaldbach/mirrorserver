@@ -74,11 +74,8 @@ then
 	ip="$(hostname -I | awk '{print $1}')"
 	ip="${ip//[[:space:]]/}"
 
-	host_address+=ip
-	django_address+=ip
-
-	host_address+=:5000
-	django_address+=:8000
+	host_address+=$ip
+	django_address+=$ip
 
 	host_address+=:5000
 	django_address+=:8000
