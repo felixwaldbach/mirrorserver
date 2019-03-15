@@ -68,14 +68,21 @@ then
 	# Not working yet, not supported???
 
 	# Set IP address of host and django server
-	ip_address_host="$(hostname -I | awk '{print $1}')"
-	ip_address_django="$(hostname -I | awk '{print $1}')"
+	ip_address_host="http://"
+	ip_address_django="http://"
+
+	ip="$(hostname -I | awk '{print $1}')"
+	ip="${ip//[[:space:]]/}"
+
+	ip_address_host+=ip
+	ip_address_django+=ip
 
 	ip_address_host+=:5000
 	ip_address_django+=:8000
 
-	ip_address_host="${ip_address_host//[[:space:]]/}"
-	ip_address_django="${ip_address_django//[[:space:]]/}"
+	ip_address_host+=:5000
+	ip_address_django+=:8000
+
 
 	uuid=$(cat /proc/sys/kernel/random/uuid)
 
