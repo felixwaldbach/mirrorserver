@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {socket} from '../frontendConfig';
+import {socket} from '../socketConnection';
 
 class QuotesWidget extends Component {
 

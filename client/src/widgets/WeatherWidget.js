@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {socket} from '../frontendConfig';
+import {socket} from '../socketConnection';
 import '../font/css/weather-icons.css';
 import '../font/css/custom.css';
 
