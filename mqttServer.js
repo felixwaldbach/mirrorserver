@@ -21,8 +21,6 @@ function start(http, io) {
 
     // fired when a message is received
     mqttServer.on('published', async function (packet, client) {
-        console.log(packet.topic);
-        console.log(packet.payload.toString('utf8'));
         switch (packet.topic) {
             case 'temperature/inside':
                 io.emit('temperature_inside_data', packet.payload.toString('utf8'));
@@ -37,12 +35,8 @@ function start(http, io) {
                     let response = await utils.initializeWebcam(os.platform());
                     response = await utils.takeImage(response.Webcam, os.platform(), 0, config.uuid);
                     response = await utils.recognizeImage(config.uuid, response.base64);
-                    console.log(response);
-                    //res.send(JSON.stringify(response)); // coming from django server
 
-                    // create no expiring session token with the user_id of the recognized user
-                    response.status = true;
-                    if (response.status) {
+                    if (response.user_id) {
                         jwt.sign({
                             user_id: response.user_id
                         }, process.env.secretkey, (err, token) => {
@@ -54,12 +48,12 @@ function start(http, io) {
                             });
                         });
                     } else {
-                        console.log("Something went wrong during face recognition...");
-                        io.emit('handle_session', {user_id: "empty", motion: "0"});     // kill session because error happened, try again in 3 minutes...
+                        console.log("Face recognition did not work: " + JSON.stringify(response));
+                        io.emit('handle_session', {user_id: null, motion: "0"});     // kill session because error happened, try again in 3 minutes...
                     }
                 } else {
                     // kill session because no one is in front of the mirror
-                    io.emit('handle_session', {user_id: "empty", motion: packet.payload.toString('utf8')});
+                    io.emit('handle_session', {user_id: null, motion: packet.payload.toString('utf8')});
                 }
                 break;
         }

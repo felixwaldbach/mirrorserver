@@ -86,7 +86,7 @@ function takeImage(Webcam, os, counter, mirror_uuid, user_id) {
 
 function sendImageToServer(base64, filename, mirror_uuid, user_id) {
     return new Promise(async (resolve, reject) => {
-        await request.post(config.ip_django + '/face/storetrain', {
+        await request.post(config.django_address + '/face/storetrain', {
             json: {
                 mirror_uuid: mirror_uuid,
                 user_id: user_id,
@@ -106,7 +106,7 @@ function sendImageToServer(base64, filename, mirror_uuid, user_id) {
 
 function recognizeImage(mirror_uuid, base64) {
     return new Promise(async (resolve, reject) => {
-        await request.post(config.ip_django + '/face/recognizeimage', {
+        await request.post(config.django_address + '/face/recognizeimage', {
             json: {
                 mirror_uuid: mirror_uuid,
                 image_base64: base64
@@ -115,7 +115,8 @@ function recognizeImage(mirror_uuid, base64) {
             if (error) {
                 resolve({
                     status: false,
-                    message: responseMessages.FACE_RECOGNITION_ERROR
+                    message: responseMessages.FACE_RECOGNITION_ERROR,
+                    error: error
                 })
             }
             resolve(body);

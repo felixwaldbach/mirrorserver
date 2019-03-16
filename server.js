@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const uuidv1 = require('uuid/v1');
 
 const os = require('os');
 const qr = require('qr-image');
@@ -58,8 +59,9 @@ if (os.platform() === 'darwin') {
         });
     });
     config.ip_host = ip_host;
-    config.django_address = 'http://' + ip_host + ':8000';
+    config.django_address = 'http://localhost:8000';
     config.host_address = 'http://' + ip_host + ':' + port;
+    if (!config.uuid) config.uuid = uuidv1();
     fs.writeFileSync('./config.json', JSON.stringify(config));
 }
 

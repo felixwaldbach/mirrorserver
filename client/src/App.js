@@ -23,11 +23,13 @@ class App extends Component {
     async componentDidMount() {
         const app = this;
         socket.on('handle_session', function (data) {
-            app.addCookies(data);
+            if (data.user_id) {
+                app.addCookies(data);
+            }
         });
 
         socket.on('web_trigger_face_id', function (data) {
-            this.setState({
+            app.setState({
                 message: data.message
             })
         });

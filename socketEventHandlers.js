@@ -4,6 +4,7 @@ const fetch = require('node-fetch');
 const wunderlistCollectionUtils = require('./database/wunderlistCollectionUtils');
 const weatherCollectionUtils = require('./database/weatherCollectionUtils');
 const usersCollectionUtils = require('./database/usersCollectionUtils');
+const config = require('./config');
 
 const weatherIcons = require('./jsonModels/weatherIcons');
 
@@ -156,13 +157,10 @@ module.exports = function (socket, io) {
                     data.message = "Processing images. Keep smiling!";
                     io.emit('web_trigger_face_id', data);
                     await utils.storeFaceDataset(config.uuid, authData.user_id).then(() => {
-                        data.message = "Processing images done. Keep smiling though :)";
+                        data.message = "";
                         io.emit('web_trigger_face_id', data);
                     });
                 }, 10);
-                io.emit('web_trigger_face_id', {
-                    message: ''
-                });
             }
         });
     });
