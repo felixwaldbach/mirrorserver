@@ -27,5 +27,5 @@ yarn-error.log*
 # idea
 .idea
 
-.config.json
-/client/src/savedQrCode/*
+config.json
+
