@@ -1,23 +1,37 @@
+/**
+ * Event Handlers for the Socket IO Server created in entry file server.js
+ */
+
 const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
 
+// Database Functions
 const wunderlistCollectionUtils = require('./database/wunderlistCollectionUtils');
 const weatherCollectionUtils = require('./database/weatherCollectionUtils');
 const usersCollectionUtils = require('./database/usersCollectionUtils');
-const config = require('./config');
 
-const weatherIcons = require('./jsonModels/weatherIcons');
+const config = require('./config'); // config file for IP Addresses and Mirror UUID
+const utils = require('./utils'); // general utility functions
+const responseMessages = require('./responseMessages'); // Standard response messages for HTTP requests websocket messages
+const weatherIcons = require('./jsonModels/weatherIcons'); // Blueprint JSON Object for weather icons
 
-const utils = require('./utils');
-const responseMessages = require('./responseMessages');
-
+/**
+ * Function that is exported than this file is required
+ * @param socket Socket Client Object
+ * @param io Socket Server Object
+ */
 module.exports = function (socket, io) {
 
+    /**
+     * Plain message handler used for testing purposes
+     */
     socket.on('message', function (data) {
         console.log(data)
     })
 
-    // Weather Forecast
+    /**
+     * Weather forecast message handler
+     */
     socket.on('send_weather_forecast', async function (data) {
         // get city of user
         let response = await weatherCollectionUtils.getWeatherSettings(userId);
@@ -114,7 +128,7 @@ module.exports = function (socket, io) {
         io.emit('required_city_weather', {forecast: forecast, city: requiredCity});
     });
 
-    // Quotes Widget
+    // Quotes Widget message handler
     // Send random quotes to UI. Use CURL and GET
     socket.on('send_quotes', async function (data) {
         await fetch("http://quotesondesign.com/wp-json/posts", {
@@ -136,15 +150,21 @@ module.exports = function (socket, io) {
         io.emit('new_quotes', quote[0]);
     });
 
-    // Wunderlist Widget
+    // Wunderlist Settings message handler
     socket.on('send_wunderlist_settings', async function (data) {
         const response = await wunderlistCollectionUtils.sendCredentials(currentUser);
         io.emit('wunderlist_settings', response);
     });
 
+    /**
+     * Trigger face id message handler
+     * Sent when a new face id is created
+     * sends a status string to the frontend
+     */
     socket.on('app_trigger_face_id', function (data) {
         jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
             if (err) {
+                // Send error message to client if not authorized
                 socket.send({
                     status: false,
                     message: responseMessages.USER_DATA_INVALID
@@ -152,32 +172,38 @@ module.exports = function (socket, io) {
             } else {
                 data.user_id = authData.user_id;
                 data.message = "Face ID will be created shortly. Get ready and smile!";
-                io.emit('web_trigger_face_id', data);
+                io.emit('web_trigger_face_id', data); // Send new status string to frontend
                 setTimeout(async () => {
                     data.message = "Processing images. Keep smiling!";
-                    io.emit('web_trigger_face_id', data);
+                    io.emit('web_trigger_face_id', data); // Send new status string to frontend
                     await utils.storeFaceDataset(config.uuid, authData.user_id).then(() => {
                         data.message = "";
-                        io.emit('web_trigger_face_id', data);
-                    });
-                }, 10);
+                        io.emit('web_trigger_face_id', data); // Send new status string to frontend
+                    }); // Create a new face dataset for the user on the external server
+                }, 10); // Wait 10 seconds so the user in front of the mirror can get ready
             }
         });
     });
 
+    /**
+     * Update widgets message handler
+     * Sent when a drag drop event is triggered in the Smartphone App
+     */
     socket.on('app_update_widgets', function (data) {
         jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
             if (err) {
+                // Send error message to client if not authorized
                 socket.send(({
                     status: false,
                     message: responseMessages.USER_NOT_AUTHORIZED
                 }))
             } else {
                 const user_id = authData.user_id;
+                // update the user entry in the database with the new widget arrangement
                 let response = await usersCollectionUtils.updateUserWidgets(user_id, data.widget_name, data.previous_slot, data.slot);
                 io.emit('web_update_widgets', {
                     user_id: user_id
-                });
+                }); // Send message to frontend to render new widgets for the authorized user
                 socket.send(response);
             }
         });

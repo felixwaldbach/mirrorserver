@@ -1,72 +1,60 @@
+/**
+ * Main entry point of the application, creating the http server and setting everything up
+ */
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const uuidv1 = require('uuid/v1');
-
 const os = require('os');
 const qr = require('qr-image');
 const fs = require('fs');
 const path = require('path');
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 5000; // Port on which the HTTP Server listens
 
-var apiRouter = require('./routes/api');
-var nativeRouter = require('./routes/native');
-var config = require('./config');
-const mqttServer = require('./mqttServer');
+// Routers for incoming HTTP requests
+var apiRouter = require('./routes/api'); // Incoming requests from the Frontend React App
+var nativeRouter = require('./routes/native'); // Incoming requests from the Smartphone React-Native App
 
-const app = express();
-const http = require('http').Server(app);
-const io = require('socket.io')(http);
+var config = require('./config'); // config file for IP Addresses and Mirror UUID
+const utils = require('./utils'); // general utility functions
 
-app.use("/public", express.static(__dirname + '/public'));
+const mqttServer = require('./mqttServer'); // MQTT Server
 
-require('dotenv').load();
+const app = express(); // Create a new express instance
+const http = require('http').Server(app); // Wrap HTTP Server around express instance
+const io = require('socket.io')(http); // Wrap Socket IO Websocket Server around HTTP Server
 
-app.use(bodyParser.json());
+app.use("/public", express.static(__dirname + '/public')); // Make public folder accessible via HTTP requests
+
+require('dotenv').load(); // Loads environment variables from .env file
+
+app.use(bodyParser.json()); // only parse JSON
 app.use(cors());
 
+// Using routers
 app.use('/api', apiRouter);
 app.use('/native', nativeRouter);
 
+// Adding Socket Event Handlers to the Socket IO Server
 io.on('connection', function (socket) {
     console.log('a user has connected');
     require('./socketEventHandlers')(socket, io);
 });
 
+// Starting MQTT Server
 mqttServer.start(http, io);
 
+// If OS is MacOS execute MacOS init function
 if (os.platform() === 'darwin') {
-    let ip_host;
-    let ifaces = os.networkInterfaces();
-
-    Object.keys(ifaces).forEach(function (ifname) {
-        var alias = 0;
-        ifaces[ifname].forEach(function (iface) {
-            if ('IPv4' !== iface.family || iface.internal !== false) {
-                // skip over internal (i.e. 127.0.0.1) and non-ipv4 addresses
-                return;
-            }
-
-            if (alias >= 1) {
-                // this single interface has multiple ipv4 addresses
-                console.log("WARNING: This system has multiple IPv4 addresses.")
-                console.log(ifname + ':' + alias, iface.address);
-            } else {
-                ip_host = iface.address;
-            }
-            ++alias;
-        });
-    });
-    config.ip_host = ip_host;
-    config.django_address = 'http://localhost:8000';
-    config.host_address = 'http://' + ip_host + ':' + port;
-    if (!config.uuid) config.uuid = uuidv1();
-    fs.writeFileSync('./config.json', JSON.stringify(config));
+    utils.initMacServer(port);
 }
 
+// Generate QR Code with host ip address to be displayed in the frontend
 var qr_svg = qr.image(config.host_address, {type: 'svg'});
 var jsonPath = path.join(__dirname, '.', 'public', 'savedQrCode', 'qrcode.svg');
 qr_svg.pipe(fs.createWriteStream(jsonPath));
 
+// Bind HTTP Server to Port
 http.listen(port, () => console.log(`Listening on port ${port}`));
