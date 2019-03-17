@@ -40,6 +40,9 @@ app.use('/native', nativeRouter);
 // Adding Socket Event Handlers to the Socket IO Server
 io.on('connection', function (socket) {
     console.log('a user has connected');
+    socket.send('test', {
+        message: 'test'
+    })
     require('./socketEventHandlers')(socket, io);
 });
 

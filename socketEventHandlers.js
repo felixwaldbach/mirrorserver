@@ -189,7 +189,7 @@ module.exports = function (socket, io) {
      * Update widgets message handler
      * Sent when a drag drop event is triggered in the Smartphone App
      */
-    socket.on('app_update_widgets', function (data) {
+    socket.on('app_update_widgets', function (data, callback) {
         jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
             if (err) {
                 // Send error message to client if not authorized
@@ -204,7 +204,7 @@ module.exports = function (socket, io) {
                 io.emit('web_update_widgets', {
                     user_id: user_id
                 }); // Send message to frontend to render new widgets for the authorized user
-                socket.send(response);
+                callback(response);
             }
         });
     })
