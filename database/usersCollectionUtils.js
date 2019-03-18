@@ -177,16 +177,16 @@ const funcall = module.exports = {
 
 
     //----------------------Set User Widget ids----------------------//
-    updateUserWidgets: async function (user_id, widget_name, previous_slot, slot) {
+    updateUserWidgets: async function (user_id, widgetName, previousSlot, slot) {
         return new Promise(async (resolve, reject) => {
             let entry = await this.getUserData(user_id);
             let widgets = JSON.parse(entry).user_data.widgets;
-            if (previous_slot) {
-                widgets[previous_slot] = null;
+            if (previousSlot >= 0) {
+                widgets[previousSlot] = null;
             }
-            if (slot>=0) {
+            if (slot >= 0) {
                 widgets[slot] = {
-                    name: widget_name
+                    name: widgetName
                 };
             }
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {

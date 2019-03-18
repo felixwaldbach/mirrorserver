@@ -71,7 +71,7 @@ router.post('/updateUserWidgets', verifyToken, async (req, res) => {
             }));
         } else {
             const userId = authData.user_id;
-            let response = await usersCollectionUtils.updateUserWidgets(userId, req.body.widget_name, req.body.previous_slot, req.body.slot);
+            let response = await usersCollectionUtils.updateUserWidgets(userId, req.body.widgetName, req.body.previousSlot, req.body.slot);
             res.send(response);
         }
     });

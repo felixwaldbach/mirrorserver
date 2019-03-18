@@ -200,7 +200,7 @@ module.exports = function (socket, io) {
             } else {
                 const user_id = authData.user_id;
                 // update the user entry in the database with the new widget arrangement
-                let response = await usersCollectionUtils.updateUserWidgets(user_id, data.widget_name, data.previous_slot, data.slot);
+                let response = await usersCollectionUtils.updateUserWidgets(user_id, data.widgetName, data.previousSlot, data.slot);
                 io.emit('web_update_widgets', {
                     user_id: user_id
                 }); // Send message to frontend to render new widgets for the authorized user
