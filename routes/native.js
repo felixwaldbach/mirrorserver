@@ -1,23 +1,34 @@
+/**
+ * Route handlers for all incoming requests on routes starting with /native/
+ * Incoming requests are sent from the MirrorApp
+ */
+
 var express = require('express');
 var router = express.Router();
+const jwt = require('jsonwebtoken');
+
+// Database utility functions Imports
 const usersCollectionUtils = require('../database/usersCollectionUtils');
 const widgetsCollectionUtils = require('../database/widgetsCollectionUtils');
 const wunderlistCollectionUtils = require('../database/wunderlistCollectionUtils');
 const weatherCollectionUtils = require('../database/weatherCollectionUtils');
-const jwt = require('jsonwebtoken');
-const responseMessages = require('../responseMessages');
-var verifyToken = require('../utils').verifyToken;
 
-// HTTP Requests
-// check if token is authorized
+const responseMessages = require('../responseMessages'); // Predefined response messages to send with responses
+var verifyToken = require('../utils').verifyToken; // Utility function to verify the token sent together with requests for identity verification
+
+/**
+ * Route: /authizeToken
+ * Parameters: -
+ * Function: Checks if the provided web token is valid
+ */
 router.post('/authizeToken', verifyToken, (req, res) => {
-    jwt.verify(req.token, process.env.secretkey, (err, authData) => {
-        if (err) {
+    jwt.verify(req.token, process.env.secretkey, (err, authData) => { // Checks if provided token is valid
+        if (err) { // If token is invalid, send error message back
             res.send(JSON.stringify({
                 authorized: false,
                 message: responseMessages.TOKEN_ERROR
             }));
-        } else {
+        } else {  // If token is valid, send success message back
             res.send(JSON.stringify({
                 authorized: true,
                 message: responseMessages.TOKEN_SUCCESS
@@ -26,27 +37,39 @@ router.post('/authizeToken', verifyToken, (req, res) => {
     });
 });
 
-// Register, check user credentials and create user with jwt
+/**
+ * Route: /signup
+ * Parameters: username: username to register, passsword: password to save with username
+ * Function: Executes Register Function to insert a new document into the users collection
+ */
 router.post('/signup', async (req, res) => {
     let response = await usersCollectionUtils.registerUser(req.body.username, req.body.password);
     res.send(response);
 });
 
-// Login, check if credentials are correct and send back access_token
+/**
+ * Route: /signin
+ * Parameters: username: username to log in, password: password to check with username
+ * Function: Executes Login Function to check credentials and log user in, sending a token if successful
+ */
 router.post('/signin', async (req, res) => {
     let response = await usersCollectionUtils.signInUser(req.body.username, req.body.password);
     res.send(response);
 });
 
-// Get user data
+/**
+ * Route: /getUserData
+ * Parameters: -
+ * Function: Gets Data from a user depending on the provided web token
+ */
 router.get('/getUserData', verifyToken, async (req, res) => {
-    jwt.verify(req.token, process.env.secretkey, async (err, authData) => {
-        if (err) {
+    jwt.verify(req.token, process.env.secretkey, async (err, authData) => { // check if provided token is valid
+        if (err) { // If token is invalid, send error message back
             res.send(JSON.stringify({
                 status: false,
                 message: responseMessages.USER_NOT_AUTHORIZED
             }));
-        } else {
+        } else { // If token is valid, get user data from database with user id from the token
             const userId = authData.user_id;
             let response = await usersCollectionUtils.getUserData(userId);
             res.send(response);
@@ -54,22 +77,30 @@ router.get('/getUserData', verifyToken, async (req, res) => {
     });
 });
 
-// Get user data
+/**
+ * Route: /getWidgets
+ * Parameters: -
+ * Function: Gets All Widgets available in the widgets collection
+ */
 router.get('/getWidgets', verifyToken, async (req, res) => {
-    let response = await widgetsCollectionUtils.getWidgets();
+    let response = await widgetsCollectionUtils.getWidgets(); // Call function to get all documents from widgets collection
     res.send(response);
 });
 
 
-// Login, check if credentials are correct and send back access_token
+/**
+ * Route: /updateUserWidgets
+ * Parameters: widgetName: Name of the widget to update, previousSlot: Slot the widget was placed in , slot: Slot the widget is moved to
+ * Function: Updates the users widget arrangement, moving a widget from previousSlot to slot position
+ */
 router.post('/updateUserWidgets', verifyToken, async (req, res) => {
-    jwt.verify(req.token, process.env.secretkey, async (err, authData) => {
-        if (err) {
+    jwt.verify(req.token, process.env.secretkey, async (err, authData) => { // Check if token is valid
+        if (err) { // If token is invalid, send error message back
             res.send(JSON.stringify({
                 status: false,
                 message: responseMessages.USER_NOT_AUTHORIZED
             }));
-        } else {
+        } else { // If token is valid, call function to update user document inside users collection with new wiget arrangement
             const userId = authData.user_id;
             let response = await usersCollectionUtils.updateUserWidgets(userId, req.body.widgetName, req.body.previousSlot, req.body.slot);
             res.send(response);
@@ -78,7 +109,7 @@ router.post('/updateUserWidgets', verifyToken, async (req, res) => {
 
 });
 
-// Upload Wunderlist Settings and clientid
+
 router.post('/uploadWunderlistSettings', verifyToken, async (req, res) => {
     jwt.verify(req.token, process.env.secretkey, async (err, authData) => {
         if (err) {

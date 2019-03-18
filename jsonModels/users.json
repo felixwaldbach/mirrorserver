@@ -1,3 +1,7 @@
+/*
+Example users collection document
+JSON objects like this are stored in the users collection
+*/
 {
   "_id": "ObjectId",
   "username": "username",

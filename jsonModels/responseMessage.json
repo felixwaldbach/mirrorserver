@@ -1,3 +1,7 @@
+/*
+Example error object
+JSON objects like this are sent as a response to HTTP requests or socket messages
+*/
 {
   status: false,
   message: "Custom Error Message",

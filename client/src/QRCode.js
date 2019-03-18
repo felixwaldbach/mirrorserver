@@ -2,7 +2,6 @@ import * as React from "react";
 import Clock from 'clock-react';
 
 import {socket} from './socketConnection';
-import {getUserData} from "./api/get";
 
 export default class QRCode extends React.Component {
 
