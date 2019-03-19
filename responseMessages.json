@@ -1,7 +1,3 @@
-/*
-Preset response messages
-Response messages are sent together with responses for HTTP Requests and Socket Messages
-*/
 {
   "DATABASE_CONNECTION_ERROR": "Database connection could not be established",
   "DATABASE_COLLECTION_FIND_ERROR": "An error occured during executing collection.find function.",
