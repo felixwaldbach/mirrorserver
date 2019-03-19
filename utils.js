@@ -126,7 +126,7 @@ function takeImage(Webcam, os, counter, mirror_uuid) {
 }
 
 /**
- * Function to send an image to the external server with HTTP Post Request
+ * Function to send an image to the external server with HTTP Post Request to store it
  * @param base64 Image base64 string
  * @param filename file name to save the image on the server
  * @param mirror_uuid to store image in correct mirror folder
@@ -154,7 +154,7 @@ function sendImageToServer(base64, filename, mirror_uuid, userId) {
 }
 
 /**
- *
+ * Function to send an image to the external server with HTTP Post Request for face recognition
  * @param mirror_uuid
  * @param base64
  * @returns {Promise<any>} Returns JSOB object with status, message, error and body data sent back from the external server
@@ -180,10 +180,10 @@ function recognizeImage(mirror_uuid, base64) {
 }
 
 /**
- *
+ * Function to execute the above function in a loop to create a face dataset
  * @param mirror_uuid
  * @param userId
- * @returns {Promise<*>}
+ * @returns {Promise<any>} Returns JSOB object with response from the called functions
  */
 async function storeFaceDataset(mirror_uuid, userId) {
     let response;
