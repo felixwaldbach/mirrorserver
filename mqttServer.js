@@ -65,17 +65,20 @@ function start(http, io) {
                             client.close();
                             io.emit('handle_session', { // Send token and user_id as socket message
                                 token: token,
-                                user_id: response.user_id
+                                user_id: response.user_id,
+                                motion: packet.payload.toString('utf8')
                             });
                         });
                     } else { // If no user recognized, send empty user id as socket message
                         io.emit('handle_session', {
-                            user_id: null
+                            user_id: null,
+                            motion: '0'
                         });
                     }
                 } else { // If no motion detected, send empty user id as socket message
                     io.emit('handle_session', {
-                        user_id: null
+                        user_id: null,
+                        motion: packet.payload.toString('utf8')
                     });
                 }
                 break;
