@@ -26,7 +26,7 @@ export const getWunderlistTasks = (accessToken, list_id, client_id) => {
     });
 }
 
-export const getUserData = (user_id) => {
+export const getUserData = (userId) => {
     return new Promise((resolve, reject) => {
         $.ajax({
                 url: IP_HOST + "/api/user/getUserData",
@@ -34,7 +34,7 @@ export const getUserData = (user_id) => {
                 type: "GET",
                 contentType: 'application/json',
                 data: {
-                    user_id: user_id
+                    userId: userId
                 },
                 success: function (data) {
                     resolve(JSON.parse(data));

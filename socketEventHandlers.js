@@ -170,13 +170,13 @@ module.exports = function (socket, io) {
                     message: responseMessages.USER_DATA_INVALID
                 });
             } else {
-                data.user_id = authData.user_id;
+                data.userId = authData.userId;
                 data.message = "Face ID will be created shortly. Get ready and smile!";
                 io.emit('web_trigger_face_id', data); // Send new status string to frontend
                 setTimeout(async () => {
                     data.message = "Processing images. Keep smiling!";
                     io.emit('web_trigger_face_id', data); // Send new status string to frontend
-                    await utils.storeFaceDataset(config.uuid, authData.user_id).then(() => {
+                    await utils.storeFaceDataset(config.uuid, authData.userId).then(() => {
                         data.message = "";
                         io.emit('web_trigger_face_id', data); // Send new status string to frontend
                     }); // Create a new face dataset for the user on the external server
@@ -198,11 +198,11 @@ module.exports = function (socket, io) {
                     message: responseMessages.USER_NOT_AUTHORIZED
                 }))
             } else {
-                const user_id = authData.user_id;
+                const userId = authData.userId;
                 // update the user entry in the database with the new widget arrangement
-                let response = await usersCollectionUtils.updateUserWidgets(user_id, data.widget_name, data.previous_slot, data.slot);
+                let response = await usersCollectionUtils.updateUserWidgets(userId, data.widgetName, data.previousSlot, data.slot);
                 io.emit('web_update_widgets', {
-                    user_id: user_id
+                    userId: userId
                 }); // Send message to frontend to render new widgets for the authorized user
                 callback(response);
             }
