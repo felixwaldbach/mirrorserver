@@ -70,7 +70,7 @@ router.get('/getUserData', verifyToken, async (req, res) => {
                 message: responseMessages.USER_NOT_AUTHORIZED
             }));
         } else { // If token is valid, get user data from database with user id from the token
-            const userId = authData.user_id;
+            const userId = authData.userId;
             let response = await usersCollectionUtils.getUserData(userId);
             res.send(response);
         }
@@ -101,7 +101,7 @@ router.post('/updateUserWidgets', verifyToken, async (req, res) => {
                 message: responseMessages.USER_NOT_AUTHORIZED
             }));
         } else { // If token is valid, call function to update user document inside users collection with new wiget arrangement
-            const userId = authData.user_id;
+            const userId = authData.userId;
             let response = await usersCollectionUtils.updateUserWidgets(userId, req.body.widgetName, req.body.previousSlot, req.body.slot);
             res.send(response);
         }
@@ -118,7 +118,7 @@ router.post('/uploadWunderlistSettings', verifyToken, async (req, res) => {
                 message: responseMessages.USER_NOT_AUTHORIZED
             }));
         } else {
-            const userId = authData.user_id;
+            const userId = authData.userId;
             let response = await wunderlistCollectionUtils.uploadWunderlistSettings(req.body, userId);
             res.send(response);
         }
@@ -134,7 +134,7 @@ router.post('/getWunderlistSettings', verifyToken, async (req, res) => {
                 message: responseMessages.USER_NOT_AUTHORIZED
             }));
         } else {
-            const userId = authData.user_id;
+            const userId = authData.userId;
             let response = await wunderlistCollectionUtils.getWunderlistSettings(userId);
             res.send(response);
         }
@@ -150,7 +150,7 @@ router.post('/uploadWeatherSettings', verifyToken, async (req, res) => {
                 message: responseMessages.USER_NOT_AUTHORIZED
             }));
         } else {
-            const userId = authData.user_id;
+            const userId = authData.userId;
             let response = await weatherCollectionUtils.uploadWeatherSettings(req.body, userId);
             res.send(response);
         }
@@ -166,7 +166,7 @@ router.get('/getWeatherSettings', verifyToken, async (req, res) => {
                 message: responseMessages.USER_NOT_AUTHORIZED
             }));
         } else {
-            const userId = authData.user_id;
+            const userId = authData.userId;
             let response = await weatherCollectionUtils.getWeatherSettings(userId);
             res.send(response);
         }

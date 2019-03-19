@@ -104,7 +104,7 @@ const funcall = module.exports = {
                                     // Check if account password of username is right
                                     if (JSON.stringify(SHA256(password).words) === JSON.stringify(docs.password)) {
                                         jwt.sign({
-                                            user_id: docs._id
+                                            userId: docs._id
                                         }, process.env.secretkey, (err, token) => {
                                             client.close();
                                             resolve(JSON.stringify({
@@ -137,7 +137,7 @@ const funcall = module.exports = {
 
 
     //----------------------Get Current User----------------------//
-    getUserData: function (user_id) {
+    getUserData: function (userId) {
         return new Promise((resolve, reject) => {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                 if (err) resolve(JSON.stringify({
@@ -147,7 +147,7 @@ const funcall = module.exports = {
                 }));
                 else {
                     let db = client.db('smartmirror');
-                    db.collection('users').findOne({"_id": new ObjectId(user_id)}, (err, res) => {
+                    db.collection('users').findOne({"_id": new ObjectId(userId)}, (err, res) => {
                         if (err) {
                             client.close();
                             resolve(JSON.stringify({
@@ -177,9 +177,9 @@ const funcall = module.exports = {
 
 
     //----------------------Set User Widget ids----------------------//
-    updateUserWidgets: async function (user_id, widgetName, previousSlot, slot) {
+    updateUserWidgets: async function (userId, widgetName, previousSlot, slot) {
         return new Promise(async (resolve, reject) => {
-            let entry = await this.getUserData(user_id);
+            let entry = await this.getUserData(userId);
             let widgets = JSON.parse(entry).user_data.widgets;
             if (previousSlot >= 0) {
                 widgets[previousSlot] = null;
@@ -197,7 +197,7 @@ const funcall = module.exports = {
                 }));
                 else {
                     let db = client.db('smartmirror');
-                    await db.collection('users').updateOne({"_id": new ObjectId(user_id)}, {$set: {widgets: widgets}}, (err, result) => {
+                    await db.collection('users').updateOne({"_id": new ObjectId(userId)}, {$set: {widgets: widgets}}, (err, result) => {
                         if (err) resolve(JSON.stringify({
                             status: false,
                             message: responseMessages.DATABASE_COLLECTION_UPDATE_ERROR,

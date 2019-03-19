@@ -58,26 +58,26 @@ function start(http, io) {
                     response = await utils.takeImage(response.Webcam, os.platform(), 0, config.uuid); // take an image of the current scene
                     response = await utils.recognizeImage(config.uuid, response.base64); // send image to the external server for face recognition
                     // Check if a user was detected on the image
-                    if (response.user_id) { // If a user was detected, start session and create webtoken
+                    if (response.userId) { // If a user was detected, start session and create webtoken
                         jwt.sign({
-                            user_id: response.user_id
+                            userId: response.userId
                         }, process.env.secretkey, (err, token) => {
                             client.close();
-                            io.emit('handle_session', { // Send token and user_id as socket message
+                            io.emit('handle_session', { // Send token and userId as socket message
                                 token: token,
-                                user_id: response.user_id,
+                                userId: response.userId,
                                 motion: packet.payload.toString('utf8')
                             });
                         });
                     } else { // If no user recognized, send empty user id as socket message
                         io.emit('handle_session', {
-                            user_id: null,
+                            userId: null,
                             motion: '0'
                         });
                     }
                 } else { // If no motion detected, send empty user id as socket message
                     io.emit('handle_session', {
-                        user_id: null,
+                        userId: null,
                         motion: packet.payload.toString('utf8')
                     });
                 }

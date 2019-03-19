@@ -17,13 +17,13 @@ class App extends Component {
         htmlElements: [],
         redirectToQRCode: true,
         message: 'test',
-        user_id: ''
+        userId: ''
     };
 
     async componentDidMount() {
         const app = this;
         socket.on('handle_session', function (data) {
-            if (data.user_id) {
+            if (data.userId) {
                 app.addCookies(data);
             }
         });
@@ -35,8 +35,8 @@ class App extends Component {
         });
 
         socket.on('web_update_widgets', async function (data) {
-            if (data.user_id === app.state.user_id) {
-                let response = await getUserData(app.state.user_id);
+            if (data.userId === app.state.userId) {
+                let response = await getUserData(app.state.userId);
                 app.setState({
                     widgets: response.user_data.widgets
                 });
@@ -51,13 +51,13 @@ class App extends Component {
                 // set cookie & get widget allignment for this user
                 bake_cookie("token", data.token);
                 this.setState({
-                    user_id: data.user_id,
+                    userId: data.userId,
                     redirectToQRCode: false
                 });
                 this.renderWidgets();
             } else if (data.motion === "0") {
                 this.setState({
-                    user_id: null,
+                    userId: null,
                     htmlElements: [],
                     redirectToQRCode: true
                 });
@@ -67,7 +67,7 @@ class App extends Component {
     }
 
     async renderWidgets() {
-        let response = await getUserData(this.state.user_id);
+        let response = await getUserData(this.state.userId);
 
         let htmlElements = [];
         response.user_data.widgets.forEach(function (widget) {

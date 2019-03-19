@@ -20,7 +20,7 @@ const funcall = module.exports = {
                     }));
                     else {
                         let db = client.db('smartmirror');
-                        db.collection('weather').findOne({"user_id": new ObjectId(userId)}, (err, docs) => {
+                        db.collection('weather').findOne({"userId": new ObjectId(userId)}, (err, docs) => {
                             if (err) resolve(JSON.stringify({
                                 status: false,
                                 message: responseMessages.DATABASE_COLLECTION_FIND_ERROR,
@@ -28,7 +28,7 @@ const funcall = module.exports = {
                             }));
                             if (docs) {
                                 // UPDATE current settings
-                                db.collection("weather").updateOne({"user_id": new ObjectId(userId)},
+                                db.collection("weather").updateOne({"userId": new ObjectId(userId)},
                                     {
                                         $set: {city: city}
                                     }, (err, response) => {
@@ -58,7 +58,7 @@ const funcall = module.exports = {
                             } else {
                                 // Add new entry
                                 db.collection('weather').insertOne({
-                                    "user_id": new ObjectId(userId),
+                                    "userId": new ObjectId(userId),
                                     "city": city
                                 }, function (err, result) {
                                     if (err) {
@@ -94,7 +94,7 @@ const funcall = module.exports = {
                 if (err) {
                     console.log('Unable to connect to MongoDB');
                 } else {
-                    client.db('smartmirror').collection('weather').findOne({"user_id": new ObjectId(userId)}, (err, res_find_weather_setup) => {
+                    client.db('smartmirror').collection('weather').findOne({"userId": new ObjectId(userId)}, (err, res_find_weather_setup) => {
                         if (err) {
                             client.close();
                             throw err;

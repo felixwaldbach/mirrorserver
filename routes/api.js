@@ -11,11 +11,11 @@ const usersCollectionUtils = require('../database/usersCollectionUtils');
 
 /**
  * Route: /user/getUserData
- * Parameters: user_id: user id to get the data from
+ * Parameters: userId: user id to get the data from
  * Function: Executes get user data function to get user data from a document inside the users collection with matching _id
  */
 router.get('/user/getUserData', async (req, res) => {
-    let response = await usersCollectionUtils.getUserData(req.query.user_id); // Execute function to get user data from the users collection
+    let response = await usersCollectionUtils.getUserData(req.query.userId); // Execute function to get user data from the users collection
     res.send(response);
 });
 

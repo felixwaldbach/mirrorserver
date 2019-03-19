@@ -22,7 +22,7 @@ const funcall = module.exports = {
                     }));
                     else {
                         let db = client.db('smartmirror');
-                        db.collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, docs) => {
+                        db.collection('wunderlist').findOne({"userId": new ObjectId(userId)}, (err, docs) => {
                             if (err) resolve(JSON.stringify({
                                 status: false,
                                 message: responseMessages.DATABASE_COLLECTION_FIND_ERROR,
@@ -30,7 +30,7 @@ const funcall = module.exports = {
                             }));
                             if (docs) {
                                 // UPDATE current settings
-                                db.collection("wunderlist").updateOne({"user_id": new ObjectId(userId)},
+                                db.collection("wunderlist").updateOne({"userId": new ObjectId(userId)},
                                     {
                                         $set: {todo_list: todo_list, client_secret: client_secret, client_id: client_id}
                                     }, (err, response) => {
@@ -60,7 +60,7 @@ const funcall = module.exports = {
                             } else {
                                 // Add new entry
                                 db.collection('wunderlist').insertOne({
-                                    "user_id": new ObjectId(userId),
+                                    "userId": new ObjectId(userId),
                                     "todo_list": todo_list,
                                     "client_secret": client_secret,
                                     "client_id": client_id
@@ -109,7 +109,7 @@ const funcall = module.exports = {
                             $lookup:
                                 {
                                     from: "users",
-                                    localField: "user_id",
+                                    localField: "userId",
                                     foreignField: "_id",
                                     as: "user"
                                 }
@@ -161,7 +161,7 @@ const funcall = module.exports = {
                             throw err;
                         } else {
                             let userId = res_find_user._id;
-                            client.db('smartmirror').collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
+                            client.db('smartmirror').collection('wunderlist').findOne({"userId": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
                                 if (err) {
                                     client.close();
                                     throw err;

@@ -130,15 +130,15 @@ function takeImage(Webcam, os, counter, mirror_uuid) {
  * @param base64 Image base64 string
  * @param filename file name to save the image on the server
  * @param mirror_uuid to store image in correct mirror folder
- * @param user_id to store image in correct user folder inside the mirror folder
+ * @param userId to store image in correct user folder inside the mirror folder
  * @returns {Promise<any>} returns JSON object with error, response and body sent back from the external server
  */
-function sendImageToServer(base64, filename, mirror_uuid, user_id) {
+function sendImageToServer(base64, filename, mirror_uuid, userId) {
     return new Promise(async (resolve, reject) => {
         await request.post(config.django_address + '/face/storetrain', {
             json: {
                 mirror_uuid: mirror_uuid,
-                user_id: user_id,
+                userId: userId,
                 base64: base64,
                 filename: filename,
                 last_image: filename.replace('.png', '').endsWith(TRAIN_IMAGE_NUMBER) ? true : false
@@ -182,15 +182,15 @@ function recognizeImage(mirror_uuid, base64) {
 /**
  *
  * @param mirror_uuid
- * @param user_id
+ * @param userId
  * @returns {Promise<*>}
  */
-async function storeFaceDataset(mirror_uuid, user_id) {
+async function storeFaceDataset(mirror_uuid, userId) {
     let response;
     for (let i = 1; i <= TRAIN_IMAGE_NUMBER; i++) {
         response = await initializeWebcam(os.platform());
         response = await takeImage(response.Webcam, os.platform(), i, mirror_uuid);
-        response = sendImageToServer(response.base64, response.filename, mirror_uuid, user_id);
+        response = sendImageToServer(response.base64, response.filename, mirror_uuid, userId);
     }
     if (response.last_image) {
         if (response.error) {

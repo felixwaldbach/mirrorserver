@@ -1,5 +1,5 @@
 {
   "_id": "ObjectId",
-  "user_id": ObjectId(userId),
+  "userId": ObjectId(userId),
   "city": Stuttgart
 }
