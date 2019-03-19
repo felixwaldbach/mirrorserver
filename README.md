@@ -11,7 +11,7 @@ This project was created in the scope a selfmade smart mirror application we are
 Follow these general steps to get this project running.
 1. Install [Node](https://nodejs.org/en/), [NPM](https://www.npmjs.com/), [MongoDB](https://www.mongodb.com/)
 2. Run an instance of MongoDB on port 27017 (default port)
-3 Clone this Repo
+3. Clone this Repo
 4. ```cd mirrorserver && npm install```
 5. ```cd client && npm install```
 6. ```cd .. & npm run dev```
