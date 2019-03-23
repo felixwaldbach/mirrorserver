@@ -5,7 +5,6 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const uuidv1 = require('uuid/v1');
 const os = require('os');
 const qr = require('qr-image');
 const fs = require('fs');
