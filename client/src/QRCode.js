@@ -9,27 +9,32 @@ export default class QRCode extends React.Component {
         super(props);
         this.state = {
             qrcode_available: true,
-            message: ''
+            message: '',
+            displayMessage: false
         }
     }
 
     async componentDidMount() {
         const app = this;
 
-        socket.on('web_trigger_face_id', function (data) {
+        socket.on('wait_trigger_face_id', function (data) {
+            console.log(data)
             app.setState({
-                message: data.message
-            })
+                message: data.message,
+                displayMessage: data.displayMessage
+            });
         });
     }
 
     render() {
+
         return (
             <div className="qr-screen">
                 {
                     this.state.qrcode_available ?
                         <div id={'qrcode-container'}>
                             <p id={'qrcode-description'}>Scan QR-Code to start!</p>
+                            {this.state.displayMessage ? <p className={'faceIdMessage'}>{this.state.message}</p> : null}
                             <img src={'http://localhost:5000/public/savedQRCode/qrcode.svg'} alt={"QRCode"}
                                  id={'qrcode-image'}/>
                         </div>
@@ -37,8 +42,8 @@ export default class QRCode extends React.Component {
                 }
                 <div id="qr-time-container">
                     <Clock/>
+
                 </div>
-                <p>{this.state.message}</p>
             </div>
         )
     }

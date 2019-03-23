@@ -13,7 +13,8 @@ const RaspiCam = require('raspicam');
 const request = require('request');
 const fs = require('fs-extra');
 const NodeWebcam = require("node-webcam");
-const os = require('os')
+const os = require('os');
+const uuidv1 = require('uuid/v1');
 const TRAIN_IMAGE_NUMBER = 20;
 
 var config = require('./config'); // config file for IP Addresses and Mirror UUID
@@ -141,14 +142,13 @@ function sendImageToServer(base64, filename, mirror_uuid, userId) {
                 userId: userId,
                 base64: base64,
                 filename: filename,
-                last_image: filename.replace('.png', '').endsWith(TRAIN_IMAGE_NUMBER) ? true : false
+                lastImage: filename.replace('.png', '').endsWith(TRAIN_IMAGE_NUMBER)
             }
-        }, (error, django_response, body) => {
-            resolve({
-                error: error,
-                django_response: django_response,
-                body: body
-            });
+        }, async (error, django_response, body) => {
+            if (body.lastImage) {
+                await fs.removeSync("./public/uploads/temporary");
+            }
+            resolve(body);
         });
     });
 }
@@ -192,15 +192,7 @@ async function storeFaceDataset(mirror_uuid, userId) {
         response = await takeImage(response.Webcam, os.platform(), i, mirror_uuid);
         response = sendImageToServer(response.base64, response.filename, mirror_uuid, userId);
     }
-    if (response.last_image) {
-        if (response.error) {
-            return {
-                status: false,
-                message: responseMessages.FACE_TRAIN_ERROR
-            };
-        }
-        return response;
-    }
+    return response;
 }
 
 /**

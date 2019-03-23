@@ -5,7 +5,6 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const uuidv1 = require('uuid/v1');
 const os = require('os');
 const qr = require('qr-image');
 const fs = require('fs');
@@ -54,9 +53,14 @@ if (os.platform() === 'darwin') {
     utils.initMacServer(port);
 }
 
+// Check if public folders are created. If not, do so
+!fs.existsSync('./public') && fs.mkdirSync('./public');
+!fs.existsSync('./public/savedQrCode') && fs.mkdirSync('./public/savedQrCode');
+!fs.existsSync('./public/uploads') && fs.mkdirSync('./public/uploads');
+
 // Generate QR Code with host ip address to be displayed in the frontend
 var qr_svg = qr.image(config.host_address, {type: 'svg'});
-!fs.existsSync('./public/savedQrCode') && fs.mkdirSync('./public/savedQrCode');
+
 var jsonPath = path.join(__dirname, '.', 'public', 'savedQrCode', 'qrcode.svg');
 qr_svg.pipe(fs.createWriteStream(jsonPath));
 
