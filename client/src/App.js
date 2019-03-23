@@ -16,7 +16,8 @@ class App extends Component {
     state = {
         htmlElements: [],
         redirectToQRCode: true,
-        message: 'test',
+        message: '',
+        displayMessage: true,
         userId: ''
     };
 
@@ -28,9 +29,10 @@ class App extends Component {
             }
         });
 
-        socket.on('web_trigger_face_id', function (data) {
+        socket.on('wait_trigger_face_id', function (data) {
             app.setState({
-                message: data.message
+                message: data.message,
+                displayMessage: data.displayMessage
             })
         });
 
@@ -106,6 +108,8 @@ class App extends Component {
             this.state.redirectToQRCode ?
                 <QRCode/> :
                 <div className="container">
+                    {this.state.displayMessage ? <p className={'faceIdMessage'}>{this.state.message}</p> : null}
+
                     <div className="upper-row">
                         <div id="widget">
                             {this.state.htmlElements[0]}
@@ -120,7 +124,7 @@ class App extends Component {
                             {this.state.htmlElements[3]}
                         </div>
                     </div>
-                    <p>{this.state.message}</p>
+
                     <div className="lower-row">
                         <div id="widget">
                             {this.state.htmlElements[4]}

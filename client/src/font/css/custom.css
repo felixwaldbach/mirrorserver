@@ -106,3 +106,9 @@ li {
   margin: 0 auto;
   font-size: 7vw;
 }
+
+.faceIdMessage {
+  color: white;
+  text-align: center;
+  font-size: 1.5vw;
+}

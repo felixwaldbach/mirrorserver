@@ -172,13 +172,17 @@ module.exports = function (socket, io) {
             } else {
                 data.userId = authData.userId;
                 data.message = "Face ID will be created shortly. Get ready and smile!";
-                io.emit('web_trigger_face_id', data); // Send new status string to frontend
+                data.displayMessage = true;
+                io.emit('wait_trigger_face_id', data); // Send new status string to frontend
                 setTimeout(async () => {
                     data.message = "Processing images. Keep smiling!";
-                    io.emit('web_trigger_face_id', data); // Send new status string to frontend
-                    await utils.storeFaceDataset(config.uuid, authData.userId).then(() => {
+                    data.displayMessage = true;
+                    io.emit('wait_trigger_face_id', data); // Send new status string to frontend
+                    await utils.storeFaceDataset(config.uuid, authData.userId).then((response) => {
+                        console.log(response);
                         data.message = "";
-                        io.emit('web_trigger_face_id', data); // Send new status string to frontend
+                        data.displayMessage = false;
+                        io.emit('wait_trigger_face_id', data); // Send new status string to frontend
                     }); // Create a new face dataset for the user on the external server
                 }, 10); // Wait 10 seconds so the user in front of the mirror can get ready
             }
