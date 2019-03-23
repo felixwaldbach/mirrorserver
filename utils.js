@@ -142,10 +142,10 @@ function sendImageToServer(base64, filename, mirror_uuid, userId) {
                 userId: userId,
                 base64: base64,
                 filename: filename,
-                last_image: filename.replace('.png', '').endsWith(TRAIN_IMAGE_NUMBER)
+                lastImage: filename.replace('.png', '').endsWith(TRAIN_IMAGE_NUMBER)
             }
         }, async (error, django_response, body) => {
-            if (body.last_image) {
+            if (body.lastImage) {
                 await fs.removeSync("./public/uploads/temporary");
             }
             resolve(body);
