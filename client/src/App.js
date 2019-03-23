@@ -17,7 +17,7 @@ class App extends Component {
         htmlElements: [],
         redirectToQRCode: true,
         message: '',
-        displayMessage: true,
+        displayMessage: false,
         userId: ''
     };
 

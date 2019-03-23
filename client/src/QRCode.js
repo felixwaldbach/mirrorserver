@@ -10,7 +10,7 @@ export default class QRCode extends React.Component {
         this.state = {
             qrcode_available: true,
             message: '',
-            displayMessage: true
+            displayMessage: false
         }
     }
 
