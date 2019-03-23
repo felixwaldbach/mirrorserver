@@ -61,7 +61,7 @@ if (os.platform() === 'darwin') {
 // Generate QR Code with host ip address to be displayed in the frontend
 var qr_svg = qr.image(config.host_address, {type: 'svg'});
 
-var jsonPath = path.join(__dirname, '.', 'public', 'savedQrCode', 'qrcode.svg');
+var jsonPath = path.join(__dirname, '.', 'public', 'savedQRCode', 'qrcode.svg');
 qr_svg.pipe(fs.createWriteStream(jsonPath));
 
 // Bind HTTP Server to Port
