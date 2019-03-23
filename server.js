@@ -55,7 +55,7 @@ if (os.platform() === 'darwin') {
 
 // Check if public folders are created. If not, do so
 !fs.existsSync('./public') && fs.mkdirSync('./public');
-!fs.existsSync('./public/savedQrCode') && fs.mkdirSync('./public/savedQrCode');
+!fs.existsSync('./public/savedQRCode') && fs.mkdirSync('./public/savedQRCode');
 !fs.existsSync('./public/uploads') && fs.mkdirSync('./public/uploads');
 
 // Generate QR Code with host ip address to be displayed in the frontend
