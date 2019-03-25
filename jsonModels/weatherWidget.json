@@ -1,5 +1,6 @@
 {
   "_id": "ObjectId",
   "userId": ObjectId(userId),
-  "city": Stuttgart
+  "city": Stuttgart,
+  "weatherkey": "key123key123"
 }

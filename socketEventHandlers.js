@@ -36,10 +36,11 @@ module.exports = function (socket, io) {
         // get city of user
         let response = await weatherCollectionUtils.getWeatherSettings(userId);
         let requiredCity = JSON.parse(response).settings.city;
+        let weatherkey = JSON.parse(response).settings.weatherkey;
 
         // with this city, fetch weather forecast from openweathermap
         let responseForecast = {};
-        await fetch("http://api.openweathermap.org/data/2.5/forecast?q=" + requiredCity + "&APPID=" + process.env.weatherkey + "&units=metric", {
+        await fetch("http://api.openweathermap.org/data/2.5/forecast?q=" + requiredCity + "&APPID=" + weatherkey + "&units=metric", {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
