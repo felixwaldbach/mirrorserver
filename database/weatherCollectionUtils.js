@@ -8,6 +8,7 @@ const funcall = module.exports = {
     uploadWeatherSettings: function (settings, userId) {
         return new Promise((resolve, reject) => {
             let city = settings.city;
+            let weatherkey = settings.weatherkey;
 
             // Check for empty or blank entries
             if (city.trim().length !== 0 && city !== null) {
@@ -59,7 +60,8 @@ const funcall = module.exports = {
                                 // Add new entry
                                 db.collection('weather').insertOne({
                                     "userId": new ObjectId(userId),
-                                    "city": city
+                                    "city": city,
+                                    "weatherkey": weatherkey
                                 }, function (err, result) {
                                     if (err) {
                                         client.close();
