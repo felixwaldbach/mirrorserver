@@ -153,8 +153,21 @@ module.exports = function (socket, io) {
 
     // Wunderlist Settings message handler
     socket.on('send_wunderlist_settings', async function (data) {
-        const response = await wunderlistCollectionUtils.sendCredentials(currentUser);
-        io.emit('wunderlist_settings', response);
+        jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
+            if (err) {
+                // Send error message to client if not authorized
+                socket.send(({
+                    status: false,
+                    message: responseMessages.USER_NOT_AUTHORIZED
+                }))
+            } else {
+                const userId = authData.userId;
+                const response = await wunderlistCollectionUtils.sendCredentials(userId);
+                io.emit('wunderlist_settings', response);
+            }
+        });
+
+
     });
 
     /**

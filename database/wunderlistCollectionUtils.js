@@ -93,7 +93,7 @@ const funcall = module.exports = {
     },
 
     //----------------------Get Wunderlist settings from current user----------------------//
-    getWunderlistSettings: function (userid) {
+    getWunderlistSettings: function (userId) {
         return new Promise((resolve, reject) => {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                 if (err) resolve(JSON.stringify({
@@ -103,59 +103,32 @@ const funcall = module.exports = {
                 }));
                 else {
                     let db = client.db('smartmirror');
-                    // JOIN in MongoDB
-                    db.collection('wunderlist').aggregate([
-                        {
-                            $lookup:
-                                {
-                                    from: "users",
-                                    localField: "userId",
-                                    foreignField: "_id",
-                                    as: "user"
-                                }
-                        },
-                        {
-                            $project:
-                                {
-                                    "todo_list": 1,
-                                    "client_secret": 1,
-                                    "client_id": 1,
-                                    "username": "$user.username",
-                                    "face_image": "$user.face_image",
-                                }
+
+                    client.db('smartmirror').collection('wunderlist').findOne({"userId": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
+                        if (err) {
+                            client.close();
+                            throw err;
+                        } else {
+                            client.close();
+                            resolve(JSON.stringify({
+                                status: true,
+                                settings: res_find_wunderlist_settings,
+                                message: responseMessages.DATABASE_COLLECTION_AGGREGATE_SUCCESS
+                            }));
                         }
-                    ]).toArray((err_settings, res_settings) => {
-                        if (err_settings) resolve(JSON.stringify({
-                            status: false,
-                            message: responseMessages.DATABASE_COLLECTION_AGGREGATE_ERROR,
-                            error: err
-                        }));
-                        res_settings.map(item => {
-                            item.todo_list = item.todo_list;
-                            item.client_secret = item.client_secret;
-                            item.client_id = item.client_id;
-                            item.face_image = item.face_image[0];
-                            item.username = item.username[0];
-                        });
-                        client.close();
-                        resolve(JSON.stringify({
-                            status: true,
-                            settings: res_settings[0],
-                            message: responseMessages.DATABASE_COLLECTION_AGGREGATE_SUCCESS
-                        }));
                     });
                 }
             });
         });
     },
 
-    sendCredentials: function (currentUser) {
+    sendCredentials: function (userId) {
         return new Promise((resolve, reject) => {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
                 if (err) {
                     console.log('Unable to connect to MongoDB');
                 } else {
-                    client.db('smartmirror').collection('users').findOne({"username": currentUser}, (err, res_find_user) => {
+                    client.db('smartmirror').collection('users').findOne({"_id": new ObjectId(userId)}, (err, res_find_user) => {
                         if (err) {
                             client.close();
                             throw err;
