@@ -69,6 +69,7 @@ class App extends Component {
     }
 
     async renderWidgets() {
+        let app = this;
         let response = await getUserData(this.state.userId);
 
         let htmlElements = [];
@@ -79,7 +80,7 @@ class App extends Component {
                         htmlElements.push(<ClockWidget style={{color: 'white'}}/>);
                         break;
                     case "NewsFeed":
-                        htmlElements.push(<NewsFeed/>);
+                        htmlElements.push(<NewsFeed userId={app.state.userId}/>);
                         break;
                     case "QuotesWidget":
                         htmlElements.push(<QuotesWidget/>);

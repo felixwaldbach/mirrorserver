@@ -52,7 +52,8 @@ function registerUser(username, password) {
                             db.collection('users').insertOne({
                                 "username": username,
                                 "password": SHA256(password).words, // hash password with SHA256
-                                "widgets": new Array(8) // create an array with 8 empty fields for the widget arrangement
+                                "widgets": new Array(8), // create an array with 8 empty fields for the widget arrangement
+                                "newsFeedItems": [] // create an empty array for news feed
                             }, async function (err, res) {
                                 if (err) { // Send error message if error occurs
                                     client.close();
@@ -238,9 +239,55 @@ function updateUserWidgets(userId, widgetName, previousSlot, slot) {
     });
 }
 
+/**
+ * Function to update the news feed items of a user (documents from the users collection)
+ * @param userId: user whose items will be updated, url: url to be inserted (null if delete), _id: id to delete an item with (null if insert)
+ * @returns {Promise<any>} Returns JSOB object with status, message and error message if applicable
+ */
+function updateNewsFeedItems(userId, url, _id) {
+    return new Promise(async (resolve, reject) => {
+        let entry = await this.getUserData(userId); // Get user data
+        let newsFeedItems = JSON.parse(entry).user_data.newsFeedItems; // Handle variable for news feed items
+        if (url) {
+            newsFeedItems.push({
+                url: url,
+                _id: ObjectId()
+            })
+        } else if (_id) {
+            newsFeedItems.splice(newsFeedItems.findIndex(item => item._id === _id), 1);
+        }
+        MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
+            if (err) resolve(JSON.stringify({ // Send error message if error occurs
+                status: false,
+                message: responseMessages.DATABASE_CONNECTION_ERROR,
+                error: err
+            }));
+            else {
+                let db = client.db('smartmirror');
+                // Update user document with new news feed items
+                await db.collection('users').updateOne({"_id": new ObjectId(userId)}, {$set: {newsFeedItems: newsFeedItems}}, (err, result) => {
+                    if (err) resolve(JSON.stringify({ // send error message if error occurs during update process
+                        status: false,
+                        message: responseMessages.DATABASE_COLLECTION_UPDATE_ERROR,
+                        error: err
+                    }));
+                    else {
+                        client.close();
+                        resolve(JSON.stringify({ // Success message if no error occurs
+                            status: true,
+                            message: responseMessages.DATABASE_COLLECTION_UPDATE_SUCCESS
+                        }));
+                    }
+                });
+            }
+        });
+    });
+}
+
 module.exports = {
     registerUser,
     signInUser,
     getUserData,
-    updateUserWidgets
+    updateUserWidgets,
+    updateNewsFeedItems
 }

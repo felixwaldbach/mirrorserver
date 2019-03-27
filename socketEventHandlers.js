@@ -4,11 +4,15 @@
 
 const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
+let RssFeedEmitter = require('rss-feed-emitter');
 
 // Database Functions
 const wunderlistCollectionUtils = require('./database/wunderlistCollectionUtils');
 const weatherCollectionUtils = require('./database/weatherCollectionUtils');
 const usersCollectionUtils = require('./database/usersCollectionUtils');
+
+// News Feed Manager
+const newsFeedManager = require('./newsFeedManager');
 
 const config = require('./config'); // config file for IP Addresses and Mirror UUID
 const utils = require('./utils'); // general utility functions
@@ -211,6 +215,46 @@ module.exports = function (socket, io) {
             }
         });
     })
+
+    /**
+     * Update newsFeedItems message handler
+     * Sent when a new list item is added to the news feed url list in the Smartphone App
+     */
+    socket.on('app_update_newsFeedItems', function (data, callback) {
+        jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
+            if (err) {
+                // Send error message to client if not authorized
+                socket.send(({
+                    status: false,
+                    message: responseMessages.USER_NOT_AUTHORIZED
+                }))
+            } else {
+                const userId = authData.userId;
+                // update the user entry in the database with the new news feed items
+                let response = await usersCollectionUtils.updateNewsFeedItems(userId, data.url, data._id);
+                newsFeedManager.setNewsFeedEmitter(userId, io);
+                callback(response);
+            }
+        });
+    })
+
+    /**
+     * Web set newsFeedEmitter message handler for Frontend
+     * Sent when the Frontend requests news for the currently logged in user
+     * Creates a new RSS emitter object in the newsFeedManager file that constantly sends new news
+     */
+    socket.on('web_set_newsFeedEmitter', async function (data) {
+        newsFeedManager.setNewsFeedEmitter(data.userId, io);
+    });
+
+    /**
+     * Web destroy newsFeedEmitter message handler for Frontend
+     * Sent when the Frontend requests news for the currently logged in user
+     * Creates a new RSS emitter object in the newsFeedManager file that constantly sends new news
+     */
+    socket.on('web_destroy_newsFeedEmitter', async function (data) {
+        newsFeedManager.destroyNewsFeedEmitter();
+    });
 
 
 };
