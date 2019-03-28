@@ -24,8 +24,21 @@ class App extends Component {
     async componentDidMount() {
         const app = this;
         socket.on('handle_session', function (data) {
-            if (data.userId) {
-                app.addCookies(data);
+            if (data.motion === "1") {
+                // set cookie & get widget allignment for this user
+                bake_cookie("token", data.token);
+                app.setState({
+                    userId: data.userId,
+                    redirectToQRCode: false
+                });
+                app.renderWidgets();
+            } else if (data.motion === "0") {
+                app.setState({
+                    userId: null,
+                    htmlElements: [],
+                    redirectToQRCode: true
+                });
+                delete_cookie('token');
             }
         });
 
@@ -45,27 +58,6 @@ class App extends Component {
                 app.renderWidgets();
             }
         });
-    }
-
-    async addCookies(data) {
-        if (data) {
-            if (data.motion === "1") {
-                // set cookie & get widget allignment for this user
-                bake_cookie("token", data.token);
-                this.setState({
-                    userId: data.userId,
-                    redirectToQRCode: false
-                });
-                this.renderWidgets();
-            } else if (data.motion === "0") {
-                this.setState({
-                    userId: null,
-                    htmlElements: [],
-                    redirectToQRCode: true
-                });
-                delete_cookie('token');
-            }
-        }
     }
 
     async renderWidgets() {
