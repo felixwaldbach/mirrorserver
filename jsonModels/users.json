@@ -28,5 +28,11 @@ JSON objects like this are stored in the users collection
     null,
     null,
     null
+  ],
+  "newsFeedItems": [
+    {
+      "_id": "ObjectId",
+      "url": "https://www.example.com"
+    }
   ]
 }
