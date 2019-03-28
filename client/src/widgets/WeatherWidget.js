@@ -20,7 +20,7 @@ class WeatherWidget extends Component {
             message: "send me forecast please!"
         });
 
-        socket.on('temperature_inside_data', function (data) {
+        socket.on('indoor_dht22_temperature', function (data) {
             addDataToInsideTemperature(data);
         });
 
