@@ -38,6 +38,8 @@ class ToDoWidget extends Component {
         });
 
         socket.on('wunderlist_settings', function (data) {
+            console.log(data);
+
             refreshList();
             addListToUI(data);
         });
@@ -88,9 +90,10 @@ class ToDoWidget extends Component {
         mylist.slice(0, 5);
         return (
             <div className="todo-container">
-                {this.state.list_name ? <span id="todo-title">{this.state.list_name}</span>: <span id="todo-title">To Do List</span>}
                 {mylist.length > 0 ?
                     <div>
+                        {this.state.list_name ? <h2>{this.state.list_name}</h2>: <h2>To Do List</h2>}
+
                         {mylist.map((item, index) => {
                                 return (
                                     <div key={index}>
@@ -100,8 +103,8 @@ class ToDoWidget extends Component {
                             }
                         )}
                     </div>
-                    : <span>Nothing to do - Well done!</span>}
-
+                    :
+                    <h2>Nothing to do - Well done!</h2>}
             </div>
         );
     }

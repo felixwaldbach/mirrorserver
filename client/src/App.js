@@ -5,6 +5,7 @@ import NewsFeed from "./widgets/NewsFeed";
 import QuotesWidget from "./widgets/QuotesWidget";
 import ToDoWidget from "./widgets/ToDoWidget";
 import WeatherWidget from "./widgets/WeatherWidget";
+import CalenderWidget from "./widgets/CalenderWidget";
 import QRCode from "./QRCode";
 import {bake_cookie, delete_cookie} from 'sfcookies';
 
@@ -82,6 +83,9 @@ class App extends Component {
                         break;
                     case "WeatherWidget":
                         htmlElements.push(<WeatherWidget userId={app.state.userId}/>);
+                        break;
+                    case "CalenderWidget":
+                        htmlElements.push(<CalenderWidget userId={app.state.userId}/>);
                         break;
                     default:
                         htmlElements.push(null);

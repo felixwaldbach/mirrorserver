@@ -12,6 +12,7 @@ const usersCollectionUtils = require('../database/usersCollectionUtils');
 const widgetsCollectionUtils = require('../database/widgetsCollectionUtils');
 const wunderlistCollectionUtils = require('../database/wunderlistCollectionUtils');
 const weatherCollectionUtils = require('../database/weatherCollectionUtils');
+const calenderCollectionUtils = require('../database/calenderCollectionUtils');
 
 const responseMessages = require('../responseMessages'); // Predefined response messages to send with responses
 var verifyToken = require('../utils').verifyToken; // Utility function to verify the token sent together with requests for identity verification
@@ -168,6 +169,38 @@ router.get('/getWeatherSettings', verifyToken, async (req, res) => {
         } else {
             const userId = authData.userId;
             let response = await weatherCollectionUtils.getWeatherSettings(userId);
+            res.send(response);
+        }
+    });
+});
+
+// Upload Calender Settings and clientid
+router.post('/uploadCalenderSettings', verifyToken, async (req, res) => {
+    jwt.verify(req.token, process.env.secretkey, async (err, authData) => {
+        if (err) {
+            res.send(JSON.stringify({
+                status: false,
+                message: responseMessages.USER_NOT_AUTHORIZED
+            }));
+        } else {
+            const userId = authData.userId;
+            let response = await calenderCollectionUtils.uploadCalenderSettings(req.body, userId);
+            res.send(response);
+        }
+    });
+});
+
+// Getting Calender Settings and clientid
+router.get('/getCalenderSettings', verifyToken, async (req, res) => {
+    jwt.verify(req.token, process.env.secretkey, async (err, authData) => {
+        if (err) {
+            res.send(JSON.stringify({
+                status: false,
+                message: responseMessages.USER_NOT_AUTHORIZED
+            }));
+        } else {
+            const userId = authData.userId;
+            let response = await calenderCollectionUtils.getCalenderSettings(userId);
             res.send(response);
         }
     });
