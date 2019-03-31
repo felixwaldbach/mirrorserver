@@ -69,6 +69,17 @@ li {
     float: left;
 }
 
+#calender-container {
+    font-size: 14px;
+}
+
+#calender-list {
+    padding-left: 0;
+}
+
+.calender-item {
+    text-indent: 1em;
+}
 
 .qr-screen {
     margin-top: 10%;

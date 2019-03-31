@@ -4,14 +4,12 @@ const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
 const responseMessages = require('../responseMessages');
 
 const funcall = module.exports = {
-    uploadWunderlistSettings: function (settings, userId) {
+    uploadCalenderSettings: function (settings, userId) {
         return new Promise((resolve, reject) => {
-            let todo_list = settings.todoList;
-            let client_secret = settings.wl_access_token;
-            let client_id = settings.wl_client_id;
+            let calenderICS = settings.calenderICS;
 
             // Check for empty or blank entries
-            if (todo_list.trim().length !== 0 && client_secret.trim().length !== 0 && client_id.trim().length !== 0 && todo_list !== null && client_secret !== null && client_id !== null) {
+            if (calenderICS.trim().length !== 0 && calenderICS !== null) {
                 // Check if has already settings
                 MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                     if (err) resolve(JSON.stringify({
@@ -21,7 +19,7 @@ const funcall = module.exports = {
                     }));
                     else {
                         let db = client.db('smartmirror');
-                        db.collection('wunderlist').findOne({"userId": new ObjectId(userId)}, (err, docs) => {
+                        db.collection('calender').findOne({"userId": new ObjectId(userId)}, (err, docs) => {
                             if (err) resolve(JSON.stringify({
                                 status: false,
                                 message: responseMessages.DATABASE_COLLECTION_FIND_ERROR,
@@ -29,9 +27,9 @@ const funcall = module.exports = {
                             }));
                             if (docs) {
                                 // UPDATE current settings
-                                db.collection("wunderlist").updateOne({"userId": new ObjectId(userId)},
+                                db.collection("calender").updateOne({"userId": new ObjectId(userId)},
                                     {
-                                        $set: {todo_list: todo_list, client_secret: client_secret, client_id: client_id}
+                                        $set: {calenderICS: calenderICS}
                                     }, (err, response) => {
                                         if (err) {
                                             client.close();
@@ -58,11 +56,9 @@ const funcall = module.exports = {
                                     });
                             } else {
                                 // Add new entry
-                                db.collection('wunderlist').insertOne({
+                                db.collection('calender').insertOne({
                                     "userId": new ObjectId(userId),
-                                    "todo_list": todo_list,
-                                    "client_secret": client_secret,
-                                    "client_id": client_id
+                                    "calenderICS": calenderICS
                                 }, function (err, result) {
                                     if (err) {
                                         client.close();
@@ -85,14 +81,13 @@ const funcall = module.exports = {
             } else {
                 resolve(JSON.stringify({
                     status: false,
-                    message: responseMessages.WUNDERLIST_DATA_INVALID
+                    message: responseMessages.CALENDER_DATA_INVALID
                 }));
             }
         });
     },
 
-    //----------------------Get Wunderlist settings from current user----------------------//
-    getWunderlistSettings: function (userId) {
+    getCalenderSettings: function (userId) {
         return new Promise((resolve, reject) => {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                 if (err) resolve(JSON.stringify({
@@ -103,7 +98,7 @@ const funcall = module.exports = {
                 else {
                     let db = client.db('smartmirror');
 
-                    client.db('smartmirror').collection('wunderlist').findOne({"userId": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
+                    client.db('smartmirror').collection('calender').findOne({"userId": new ObjectId(userId)}, (err, res_find_calender_settings) => {
                         if (err) {
                             client.close();
                             throw err;
@@ -111,7 +106,7 @@ const funcall = module.exports = {
                             client.close();
                             resolve(JSON.stringify({
                                 status: true,
-                                settings: res_find_wunderlist_settings,
+                                settings: res_find_calender_settings,
                                 message: responseMessages.DATABASE_COLLECTION_AGGREGATE_SUCCESS
                             }));
                         }
@@ -121,7 +116,7 @@ const funcall = module.exports = {
         });
     },
 
-    sendCredentials: function (userId) {
+    sendCalender: function (userId) {
         return new Promise((resolve, reject) => {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
                 if (err) {
@@ -133,13 +128,13 @@ const funcall = module.exports = {
                             throw err;
                         } else {
                             let userId = res_find_user._id;
-                            client.db('smartmirror').collection('wunderlist').findOne({"userId": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
+                            client.db('smartmirror').collection('calender').findOne({"userId": new ObjectId(userId)}, (err, res_find_calender_settings) => {
                                 if (err) {
                                     client.close();
                                     throw err;
                                 } else {
                                     client.close();
-                                    resolve(res_find_wunderlist_settings);
+                                    resolve(res_find_calender_settings);
                                 }
                             });
                         }
