@@ -145,10 +145,18 @@ function sendImageToServer(base64, filename, mirror_uuid, userId) {
                 lastImage: filename.replace('.png', '').endsWith(TRAIN_IMAGE_NUMBER)
             }
         }, async (error, django_response, body) => {
-            if (body.lastImage) {
-                await fs.removeSync("./public/uploads/temporary");
+            if (error) {
+                resolve({
+                    status: false,
+                    message: responseMessages.FACE_RECOGNITION_ERROR,
+                    error: error
+                });
+            } else {
+                if (body.lastImage) {
+                    await fs.removeSync("./public/uploads/temporary");
+                }
+                resolve(body);
             }
-            resolve(body);
         });
     });
 }
@@ -173,8 +181,9 @@ function recognizeImage(mirror_uuid, base64) {
                     message: responseMessages.FACE_RECOGNITION_ERROR,
                     error: error
                 })
+            } else {
+                resolve(body);
             }
-            resolve(body);
         });
     });
 }
