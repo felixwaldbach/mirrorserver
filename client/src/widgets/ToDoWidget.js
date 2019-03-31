@@ -21,6 +21,7 @@ class ToDoWidget extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            userId: props.userId,
             wunderlist_settings: [],
             list_name: "",
             lists: [],
@@ -32,9 +33,9 @@ class ToDoWidget extends Component {
     }
 
     componentDidMount() {
-        // socket.emit('send_wunderlist_settings', {
-        //     message: "send me credentials please!"
-        // });
+        socket.emit('send_wunderlist_settings', {
+            userId: this.state.userId
+        });
 
         socket.on('wunderlist_settings', function (data) {
             refreshList();

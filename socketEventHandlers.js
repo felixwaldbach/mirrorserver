@@ -38,7 +38,7 @@ module.exports = function (socket, io) {
      */
     socket.on('send_weather_forecast', async function (data) {
         // get city of user
-        let response = await weatherCollectionUtils.getWeatherSettings(userId);
+        let response = await weatherCollectionUtils.getWeatherSettings(data.userId);
         let requiredCity = JSON.parse(response).settings.city;
         let weatherkey = JSON.parse(response).settings.weatherkey;
 
@@ -157,7 +157,7 @@ module.exports = function (socket, io) {
 
     // Wunderlist Settings message handler
     socket.on('send_wunderlist_settings', async function (data) {
-        jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
+        jwt.verify(data.userId, process.env.secretkey, async (err, authData) => {
             if (err) {
                 // Send error message to client if not authorized
                 socket.send(({

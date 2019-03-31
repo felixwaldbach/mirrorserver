@@ -10,6 +10,7 @@ class WeatherWidget extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            userId: props.userId,
             city: "",
             forecast: []
         }
@@ -17,7 +18,7 @@ class WeatherWidget extends Component {
 
     componentDidMount() {
         socket.emit('send_weather_forecast', {
-            message: "send me forecast please!"
+            userId: this.state.userId
         });
 
         socket.on('indoor_dht22_temperature', function (data) {

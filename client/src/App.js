@@ -78,10 +78,10 @@ class App extends Component {
                         htmlElements.push(<QuotesWidget/>);
                         break;
                     case "ToDoWidget":
-                        htmlElements.push(<ToDoWidget/>);
+                        htmlElements.push(<ToDoWidget userId={app.state.userId}/>);
                         break;
                     case "WeatherWidget":
-                        htmlElements.push(<WeatherWidget/>);
+                        htmlElements.push(<WeatherWidget userId={app.state.userId}/>);
                         break;
                     default:
                         htmlElements.push(null);
