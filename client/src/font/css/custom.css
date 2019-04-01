@@ -69,15 +69,15 @@ li {
     float: left;
 }
 
-#calender-container {
+#calendar-container {
     font-size: 14px;
 }
 
-#calender-list {
+#calendar-list {
     padding-left: 0;
 }
 
-.calender-item {
+.calendar-item {
     text-indent: 1em;
 }
 
