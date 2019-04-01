@@ -2,41 +2,41 @@ import React, {Component} from 'react';
 import {socket} from '../socketConnection';
 import '../font/css/custom.css';
 
-var calender = [];
+var calendar = [];
 
-class CalenderWidget extends Component {
+class CalendarWidget extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
             userId: props.userId,
-            calender: []
+            calendar: []
         }
     }
 
     componentDidMount() {
-        socket.emit('send_calender_entries', {
+        socket.emit('send_calendar_entries', {
             userId: this.state.userId
         });
 
-        socket.on('calender_entries', function (data) {
+        socket.on('calendar_entries', function (data) {
             refreshList();
             addDataToUI(data);
         });
 
         const addDataToUI = data => {
             if (data) {
-                this.setState({calender: data});
+                this.setState({calendar: data});
             }
         };
 
         const refreshList = () => {
-            this.setState({calender: []});
+            this.setState({calendar: []});
         }
 
         this.intervalID = setInterval(() => {
-                socket.emit('send_calender_entries', {
-                    message: "send me calender please!"
+                socket.emit('send_calendar_entries', {
+                    message: "send me calendar please!"
                 })
             },
             900000 // 1 hour = 3600 seconds = 3 600 000 milliseconds, 900 000 = 15 min
@@ -48,18 +48,18 @@ class CalenderWidget extends Component {
     }
 
     render() {
-        calender = this.state.calender;
+        calendar = this.state.calendar;
 
         return (
-            <div className="calender-container">
+            <div className="calendar-container">
 
-                {calender.length == 0 ? <h2>No Calender set up!</h2>
+                {calendar.length == 0 ? <h2>No calendar set up!</h2>
                 :
                     <div>
-                        <h2>Calender for today:</h2>
-                        <ul id={'calender-list'}>
+                        <h2>Calendar for today:</h2>
+                        <ul id={'calendar-list'}>
                             {
-                                calender.map(item => <li className={'calender-item'}>{item.description} on {item.time}</li>)
+                                calendar.map(item => <li className={'calendar-item'}>{item.description} at {item.time}</li>)
                             }
                         </ul>
                     </div>
@@ -71,4 +71,4 @@ class CalenderWidget extends Component {
     }
 }
 
-export default CalenderWidget;
+export default CalendarWidget;
