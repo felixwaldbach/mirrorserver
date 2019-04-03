@@ -13,7 +13,7 @@ let RssFeedEmitter = require('rss-feed-emitter');
 const wunderlistCollectionUtils = require('./database/wunderlistCollectionUtils');
 const weatherCollectionUtils = require('./database/weatherCollectionUtils');
 const usersCollectionUtils = require('./database/usersCollectionUtils');
-const calenderCollectionUtils = require('./database/calenderCollectionUtils');
+const calendarCollectionUtils = require('./database/calendarCollectionUtils');
 
 // News Feed Manager
 const newsFeedManager = require('./newsFeedManager');
@@ -44,111 +44,100 @@ module.exports = function (socket, io) {
      * Weather forecast message handler
      */
     socket.on('send_weather_forecast', async function (data) {
-        jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
-            if (err) {
-                // Send error message to client if not authorized
-                socket.send(({
-                    status: false,
-                    message: responseMessages.USER_NOT_AUTHORIZED
-                }))
-            } else {
-                const userId = authData.userId;
-                // get city of user
-                let response = await weatherCollectionUtils.getWeatherSettings(userId);
-                let requiredCity = JSON.parse(response).settings.city;
-                let weatherkey = JSON.parse(response).settings.weatherkey;
+        // get city of user
+        let response = await weatherCollectionUtils.getWeatherSettings(data.userId);
+        let requiredCity = JSON.parse(response).settings.city;
+        let weatherkey = JSON.parse(response).settings.weatherkey;
 
-                // with this city, fetch weather forecast from openweathermap
-                let responseForecast = {};
-                await fetch("http://api.openweathermap.org/data/2.5/forecast?q=" + requiredCity + "&APPID=" + weatherkey + "&units=metric", {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                })
-                    .then(res =>
-                        res.json()
-                    )
-                    .then(json => {
-                        responseForecast = json;
-                    });
+        // with this city, fetch weather forecast from openweathermap
+        let responseForecast = {};
+        await fetch("http://api.openweathermap.org/data/2.5/forecast?q=" + requiredCity + "&APPID=" + weatherkey + "&units=metric", {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+            .then(res =>
+                res.json()
+            )
+            .then(json => {
+                responseForecast = json;
+            });
 
-                // calculate next five days to extract from the list
-                let today = new Date();
-                let tomorrow = new Date();
-                let dayThree = new Date();
-                let dayFour = new Date();
-                let dayFive = new Date();
-                tomorrow.setDate(today.getDate() + 1);
-                dayThree.setDate(today.getDate() + 2);
-                dayFour.setDate(today.getDate() + 3);
-                dayFive.setDate(today.getDate() + 4);
+        // calculate next five days to extract from the list
+        let today = new Date();
+        let tomorrow = new Date();
+        let dayThree = new Date();
+        let dayFour = new Date();
+        let dayFive = new Date();
+        tomorrow.setDate(today.getDate() + 1);
+        dayThree.setDate(today.getDate() + 2);
+        dayFour.setDate(today.getDate() + 3);
+        dayFive.setDate(today.getDate() + 4);
 
-                today = today.toJSON().slice(0, 10).replace(/-/g, '-');
-                tomorrow = tomorrow.toJSON().slice(0, 10).replace(/-/g, '-');
-                dayThree = dayThree.toJSON().slice(0, 10).replace(/-/g, '-');
-                dayFour = dayFour.toJSON().slice(0, 10).replace(/-/g, '-');
-                dayFive = dayFive.toJSON().slice(0, 10).replace(/-/g, '-');
+        today = today.toJSON().slice(0, 10).replace(/-/g, '-');
+        tomorrow = tomorrow.toJSON().slice(0, 10).replace(/-/g, '-');
+        dayThree = dayThree.toJSON().slice(0, 10).replace(/-/g, '-');
+        dayFour = dayFour.toJSON().slice(0, 10).replace(/-/g, '-');
+        dayFive = dayFive.toJSON().slice(0, 10).replace(/-/g, '-');
 
-                let today_selected = false;
-                let forecast = [];
-                const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thurdsay", "Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thurdsay", "Friday", "Saturday"];
+        let today_selected = false;
+        let forecast = [];
+        const weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thurdsay", "Friday", "Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thurdsay", "Friday", "Saturday"];
 
-                // extract five days, take 12pm of every day and connect with className of weather icons
-                // push these into the new array
-                for (x in responseForecast.list) {
-                    // get weather from today, get the next timestamp -> first one in the main array
-                    if (today_selected === false) {
-                        forecast.push({
-                            "weekday": weekdays[new Date().getDay()],
-                            "temp": responseForecast.list[0].main.temp,
-                            "weather": responseForecast.list[0].weather[0].main,
-                            "icon": weatherIcons[responseForecast.list[0].weather[0].main]
-                        });
-                        today_selected = true;
-                    }
-                    // get weather for tomorrow
-                    if (responseForecast.list[x].dt_txt === tomorrow + ' 15:00:00') {
-                        forecast.push({
-                            "weekday": weekdays[new Date().getDay() + 1],
-                            "temp": responseForecast.list[x].main.temp,
-                            "weather": responseForecast.list[x].weather[0].main,
-                            "icon": weatherIcons[responseForecast.list[x].weather[0].main]
-                        });
-                    }
-                    // get weather for day 3
-                    if (responseForecast.list[x].dt_txt === dayThree + ' 15:00:00') {
-                        forecast.push({
-                            "weekday": weekdays[new Date().getDay() + 2],
-                            "temp": responseForecast.list[x].main.temp,
-                            "weather": responseForecast.list[x].weather[0].main,
-                            "icon": weatherIcons[responseForecast.list[x].weather[0].main]
-                        });
-                    }
-                    // get weather for day 4
-                    if (responseForecast.list[x].dt_txt === dayFour + ' 15:00:00') {
-                        forecast.push({
-                            "weekday": weekdays[new Date().getDay() + 3],
-                            "temp": responseForecast.list[x].main.temp,
-                            "weather": responseForecast.list[x].weather[0].main,
-                            "icon": weatherIcons[responseForecast.list[x].weather[0].main]
-                        });
-                    }
-                    // get weather for day 5
-                    if (responseForecast.list[x].dt_txt === dayFive + ' 15:00:00') {
-                        forecast.push({
-                            "weekday": weekdays[new Date().getDay() + 4],
-                            "temp": responseForecast.list[x].main.temp,
-                            "weather": responseForecast.list[x].weather[0].main,
-                            "icon": weatherIcons[responseForecast.list[x].weather[0].main]
-                        });
-                    }
-                }
-
-                // send list to ui
-                io.emit('required_city_weather', {forecast: forecast, city: requiredCity});
+        // extract five days, take 12pm of every day and connect with className of weather icons
+        // push these into the new array
+        for (x in responseForecast.list) {
+            // get weather from today, get the next timestamp -> first one in the main array
+            if (today_selected === false) {
+                forecast.push({
+                    "weekday": weekdays[new Date().getDay()],
+                    "temp": responseForecast.list[0].main.temp,
+                    "weather": responseForecast.list[0].weather[0].main,
+                    "icon": weatherIcons[responseForecast.list[0].weather[0].main]
+                });
+                today_selected = true;
             }
-        });
+            // get weather for tomorrow
+            if (responseForecast.list[x].dt_txt === tomorrow + ' 15:00:00') {
+                forecast.push({
+                    "weekday": weekdays[new Date().getDay() + 1],
+                    "temp": responseForecast.list[x].main.temp,
+                    "weather": responseForecast.list[x].weather[0].main,
+                    "icon": weatherIcons[responseForecast.list[x].weather[0].main]
+                });
+            }
+            // get weather for day 3
+            if (responseForecast.list[x].dt_txt === dayThree + ' 15:00:00') {
+                forecast.push({
+                    "weekday": weekdays[new Date().getDay() + 2],
+                    "temp": responseForecast.list[x].main.temp,
+                    "weather": responseForecast.list[x].weather[0].main,
+                    "icon": weatherIcons[responseForecast.list[x].weather[0].main]
+                });
+            }
+            // get weather for day 4
+            if (responseForecast.list[x].dt_txt === dayFour + ' 15:00:00') {
+                forecast.push({
+                    "weekday": weekdays[new Date().getDay() + 3],
+                    "temp": responseForecast.list[x].main.temp,
+                    "weather": responseForecast.list[x].weather[0].main,
+                    "icon": weatherIcons[responseForecast.list[x].weather[0].main]
+                });
+            }
+            // get weather for day 5
+            if (responseForecast.list[x].dt_txt === dayFive + ' 15:00:00') {
+                forecast.push({
+                    "weekday": weekdays[new Date().getDay() + 4],
+                    "temp": responseForecast.list[x].main.temp,
+                    "weather": responseForecast.list[x].weather[0].main,
+                    "icon": weatherIcons[responseForecast.list[x].weather[0].main]
+                });
+            }
+        }
+
+        // send list to ui
+        io.emit('required_city_weather', {forecast: forecast, city: requiredCity});
     });
 
     // Quotes Widget message handler
@@ -175,21 +164,8 @@ module.exports = function (socket, io) {
 
     // Wunderlist Settings message handler
     socket.on('send_wunderlist_settings', async function (data) {
-        jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
-            if (err) {
-                // Send error message to client if not authorized
-                socket.send(({
-                    status: false,
-                    message: responseMessages.USER_NOT_AUTHORIZED
-                }))
-            } else {
-                const userId = authData.userId;
-                const response = await wunderlistCollectionUtils.sendCredentials(userId);
-                io.emit('wunderlist_settings', response);
-            }
-        });
-
-
+        const response = await wunderlistCollectionUtils.sendCredentials(data.userId);
+        io.emit('wunderlist_settings', response);
     });
 
     /**
@@ -289,50 +265,38 @@ module.exports = function (socket, io) {
     });
 
     /**
-     * Calender iCal handler
+     * Calendar iCal handler
      */
-    socket.on('send_calender_entries', async function (data) {
-        jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
-            if (err) {
-                // Send error message to client if not authorized
-                socket.send(({
-                    status: false,
-                    message: responseMessages.USER_NOT_AUTHORIZED
-                }))
-            } else {
-                const userId = authData.userId;
-                // update the user entry in the database with the new widget arrangement
-                let response = await calenderCollectionUtils.sendCalender(userId);
-                let calender = [];
-                let today = format.asString('yyyy-MM-dd', new Date());
+    socket.on('send_calendar_entries', async function (data) {
+        // update the user entry in the database with the new widget arrangement
+        let response = await calendarCollectionUtils.sendcalendar(data.userId);
+        let calendar = [];
+        let today = format.asString('yyyy-MM-dd', new Date());
 
-                ical.fromURL(response.calenderICS, {}, function (err, data) {
+        ical.fromURL(response.calendarICS, {}, function (err, data) {
 
-                    for (let k in data) {
-                        if (data.hasOwnProperty(k)) {
-                            var ev = data[k];
-                            if (data[k].type == 'VEVENT') {
-                                let ev_start = ev.start;
-                                ev_start = JSON.stringify(ev_start);
-                                ev_start = ev_start.substring(1, 11);
-                                console.log(today);
-                                console.log(ev_start);
-                                console.log("...");
-                                if (today === ev_start) {
-                                    calender.push({
-                                        "description": ev.summary,
-                                        "time": ev.start.toLocaleTimeString('en-GB'),
-                                    });
-                                }
-                            }
+            for (let k in data) {
+                if (data.hasOwnProperty(k)) {
+                    var ev = data[k];
+                    if (data[k].type == 'VEVENT') {
+                        let ev_start = ev.start;
+                        ev_start = JSON.stringify(ev_start);
+                        ev_start = ev_start.substring(1, 11);
+                        console.log(today);
+                        console.log(ev_start);
+                        console.log("...");
+                        if (today === ev_start) {
+                            calendar.push({
+                                "description": ev.summary,
+                                "time": ev.start.toLocaleTimeString('en-GB'),
+                            });
                         }
                     }
-                    console.log(calender);
-                    io.emit('calender_entries', calender);
-                });
+                }
             }
+            console.log(calendar);
+            io.emit('calendar_entries', calendar);
         });
     });
-
 
 };

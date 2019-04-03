@@ -28,5 +28,5 @@
   "FACE_RECOGNITION_ERROR": "An error occured during face detection",
   "FACE_TRAIN_ERROR": "An error occured during training the face recognition model",
   "QRCODE_SUCCESS": "QR Code successfully generated",
-  "CALENDER_DATA_INVALID": "Provided calender iCal link is invalid"
+  "CALENDAR_DATA_INVALID": "Provided calender iCal link is invalid"
 }
