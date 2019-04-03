@@ -12,7 +12,7 @@ const usersCollectionUtils = require('../database/usersCollectionUtils');
 const widgetsCollectionUtils = require('../database/widgetsCollectionUtils');
 const wunderlistCollectionUtils = require('../database/wunderlistCollectionUtils');
 const weatherCollectionUtils = require('../database/weatherCollectionUtils');
-const calenderCollectionUtils = require('../database/calenderCollectionUtils');
+const calendarCollectionUtils = require('../database/calendarCollectionUtils');
 
 const responseMessages = require('../responseMessages'); // Predefined response messages to send with responses
 var verifyToken = require('../utils').verifyToken; // Utility function to verify the token sent together with requests for identity verification
@@ -175,7 +175,7 @@ router.get('/getWeatherSettings', verifyToken, async (req, res) => {
 });
 
 // Upload Calender Settings and clientid
-router.post('/uploadCalenderSettings', verifyToken, async (req, res) => {
+router.post('/uploadCalendarSettings', verifyToken, async (req, res) => {
     jwt.verify(req.token, process.env.secretkey, async (err, authData) => {
         if (err) {
             res.send(JSON.stringify({
@@ -184,7 +184,7 @@ router.post('/uploadCalenderSettings', verifyToken, async (req, res) => {
             }));
         } else {
             const userId = authData.userId;
-            let response = await calenderCollectionUtils.uploadCalenderSettings(req.body, userId);
+            let response = await calendarCollectionUtils.uploadCalendarSettings(req.body, userId);
             res.send(response);
         }
     });
@@ -200,7 +200,7 @@ router.get('/getCalenderSettings', verifyToken, async (req, res) => {
             }));
         } else {
             const userId = authData.userId;
-            let response = await calenderCollectionUtils.getCalenderSettings(userId);
+            let response = await calendarCollectionUtils.getCalenderSettings(userId);
             res.send(response);
         }
     });

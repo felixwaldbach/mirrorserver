@@ -84,7 +84,7 @@ class App extends Component {
                     case "WeatherWidget":
                         htmlElements.push(<WeatherWidget userId={app.state.userId}/>);
                         break;
-                    case "CalenderWidget":
+                    case "CalendarWidget":
                         htmlElements.push(<CalendarWidget userId={app.state.userId}/>);
                         break;
                     default:

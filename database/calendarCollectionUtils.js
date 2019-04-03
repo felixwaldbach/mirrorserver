@@ -4,12 +4,12 @@ const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
 const responseMessages = require('../responseMessages');
 
 const funcall = module.exports = {
-    uploadCalenderSettings: function (settings, userId) {
+    uploadCalendarSettings: function (settings, userId) {
         return new Promise((resolve, reject) => {
-            let calenderICS = settings.calenderICS;
+            let calendarICS = settings.calendarICS;
 
             // Check for empty or blank entries
-            if (calenderICS.trim().length !== 0 && calenderICS !== null) {
+            if (calendarICS.trim().length !== 0 && calendarICS !== null) {
                 // Check if has already settings
                 MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                     if (err) resolve(JSON.stringify({
@@ -19,7 +19,7 @@ const funcall = module.exports = {
                     }));
                     else {
                         let db = client.db('smartmirror');
-                        db.collection('calender').findOne({"userId": new ObjectId(userId)}, (err, docs) => {
+                        db.collection('calendar').findOne({"userId": new ObjectId(userId)}, (err, docs) => {
                             if (err) resolve(JSON.stringify({
                                 status: false,
                                 message: responseMessages.DATABASE_COLLECTION_FIND_ERROR,
@@ -27,9 +27,9 @@ const funcall = module.exports = {
                             }));
                             if (docs) {
                                 // UPDATE current settings
-                                db.collection("calender").updateOne({"userId": new ObjectId(userId)},
+                                db.collection("calendar").updateOne({"userId": new ObjectId(userId)},
                                     {
-                                        $set: {calenderICS: calenderICS}
+                                        $set: {calendarICS: calendarICS}
                                     }, (err, response) => {
                                         if (err) {
                                             client.close();
@@ -56,9 +56,9 @@ const funcall = module.exports = {
                                     });
                             } else {
                                 // Add new entry
-                                db.collection('calender').insertOne({
+                                db.collection('calendar').insertOne({
                                     "userId": new ObjectId(userId),
-                                    "calenderICS": calenderICS
+                                    "calendarICS": calendarICS
                                 }, function (err, result) {
                                     if (err) {
                                         client.close();
@@ -81,13 +81,13 @@ const funcall = module.exports = {
             } else {
                 resolve(JSON.stringify({
                     status: false,
-                    message: responseMessages.CALENDER_DATA_INVALID
+                    message: responseMessages.CALENDAR_DATA_INVALID
                 }));
             }
         });
     },
 
-    getCalenderSettings: function (userId) {
+    getCalendarSettings: function (userId) {
         return new Promise((resolve, reject) => {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                 if (err) resolve(JSON.stringify({
@@ -98,7 +98,7 @@ const funcall = module.exports = {
                 else {
                     let db = client.db('smartmirror');
 
-                    client.db('smartmirror').collection('calender').findOne({"userId": new ObjectId(userId)}, (err, res_find_calender_settings) => {
+                    client.db('smartmirror').collection('calendar').findOne({"userId": new ObjectId(userId)}, (err, res_find_calendar_settings) => {
                         if (err) {
                             client.close();
                             throw err;
@@ -106,7 +106,7 @@ const funcall = module.exports = {
                             client.close();
                             resolve(JSON.stringify({
                                 status: true,
-                                settings: res_find_calender_settings,
+                                settings: res_find_calendar_settings,
                                 message: responseMessages.DATABASE_COLLECTION_AGGREGATE_SUCCESS
                             }));
                         }
@@ -116,7 +116,7 @@ const funcall = module.exports = {
         });
     },
 
-    sendCalender: function (userId) {
+    sendCalendar: function (userId) {
         return new Promise((resolve, reject) => {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
                 if (err) {
@@ -128,13 +128,13 @@ const funcall = module.exports = {
                             throw err;
                         } else {
                             let userId = res_find_user._id;
-                            client.db('smartmirror').collection('calender').findOne({"userId": new ObjectId(userId)}, (err, res_find_calender_settings) => {
+                            client.db('smartmirror').collection('calendar').findOne({"userId": new ObjectId(userId)}, (err, res_find_calendar_settings) => {
                                 if (err) {
                                     client.close();
                                     throw err;
                                 } else {
                                     client.close();
-                                    resolve(res_find_calender_settings);
+                                    resolve(res_find_calendar_settings);
                                 }
                             });
                         }
