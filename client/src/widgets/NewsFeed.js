@@ -43,24 +43,26 @@ class NewsFeed extends Component {
         Events.scrollEvent.register('end', function (to, element) {
             console.log('end')
             console.log(app.state.scrollToBottom)
-            if (app.state.scrollToBottom) {
-                console.log('Scroll to Bottom')
-                scroll.scrollToBottom({
-                    duration: app.state.durationTime * app.state.newsFeedItems.length,
-                    containerId: app.state.containerId
-                });
-                app.setState({
-                    scrollToBottom: false
-                })
-            } else {
-                console.log('Scroll to Top')
-                scroll.scrollToTop({
-                    duration: app.state.durationTime * app.state.newsFeedItems.length,
-                    containerId: app.state.containerId
-                });
-                app.setState({
-                    scrollToBottom: true
-                })
+            if (app.state.newsFeedItems.length > 0) {
+                if (app.state.scrollToBottom) {
+                    console.log('Scroll to Bottom')
+                    scroll.scrollToBottom({
+                        duration: app.state.durationTime * app.state.newsFeedItems.length,
+                        containerId: app.state.containerId
+                    });
+                    app.setState({
+                        scrollToBottom: false
+                    })
+                } else {
+                    console.log('Scroll to Top')
+                    scroll.scrollToTop({
+                        duration: app.state.durationTime * app.state.newsFeedItems.length,
+                        containerId: app.state.containerId
+                    });
+                    app.setState({
+                        scrollToBottom: true
+                    })
+                }
             }
         });
     }
