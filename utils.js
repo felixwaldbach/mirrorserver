@@ -15,7 +15,7 @@ const fs = require('fs-extra');
 const NodeWebcam = require("node-webcam");
 const os = require('os');
 const uuidv1 = require('uuid/v1');
-const TRAIN_IMAGE_NUMBER = 20;
+const TRAIN_IMAGE_NUMBER = 100;
 
 var config = require('./config'); // config file for IP Addresses and Mirror UUID
 const responseMessages = require('./responseMessages'); // Standard response messages for HTTP requests websocket messages
