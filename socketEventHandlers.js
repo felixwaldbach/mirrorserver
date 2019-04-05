@@ -268,12 +268,12 @@ module.exports = function (socket, io) {
      * Calendar iCal handler
      */
     socket.on('send_calendar_entries', async function (data) {
-        // update the user entry in the database with the new widget arrangement
-        let response = await calendarCollectionUtils.sendcalendar(data.userId);
+
+        let response = await calendarCollectionUtils.sendCalendar(data.userId);
         let calendar = [];
         let today = format.asString('yyyy-MM-dd', new Date());
 
-        ical.fromURL(response.calendarICS, {}, function (err, data) {
+        ical.fromURL(JSON.parse(response).settings.calendarICS, {}, function (err, data) {
 
             for (let k in data) {
                 if (data.hasOwnProperty(k)) {
@@ -282,9 +282,6 @@ module.exports = function (socket, io) {
                         let ev_start = ev.start;
                         ev_start = JSON.stringify(ev_start);
                         ev_start = ev_start.substring(1, 11);
-                        console.log(today);
-                        console.log(ev_start);
-                        console.log("...");
                         if (today === ev_start) {
                             calendar.push({
                                 "description": ev.summary,
@@ -294,7 +291,6 @@ module.exports = function (socket, io) {
                     }
                 }
             }
-            console.log(calendar);
             io.emit('calendar_entries', calendar);
         });
     });

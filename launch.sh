@@ -43,6 +43,11 @@ then
 	sudo apt-get install git
 	sudo apt-get install mongodb
 
+
+	echo "Setting up database"
+	node mongoWidgetScript.js
+
+
 	# check if project exists: yes = direct to that folder, no = git clone
 	if [ -d "mirrorserver" ];
 	then
@@ -71,7 +76,10 @@ then
 	else
 		echo ".env does not exist, creating now...!"
 		$(touch .env)
-		echo $(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 100 | head -n 1) >> .env
+		secretkey="secretkey"
+		key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 100 | head -n 1)
+		secretkey+=$key
+		echo $secretkey >> .env
 	fi
 
 
@@ -111,7 +119,7 @@ then
 		ip="${ip//[[:space:]]/}"
 
 		host_address+=$ip
-		django_address+=$ip
+		django_address+="192.169.172.20"
 
 		host_address+=:5000
 		django_address+=:8000
