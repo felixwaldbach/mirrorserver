@@ -22,7 +22,7 @@
     "jquery": "^3.3.1",
     "jsonwebtoken": "^8.4.0",
     "kelvin-to-celsius": "^1.1.0",
-    "mongodb": "^3.1.13",
+    "mongodb": "^2.2.16",
     "mosca": "^2.8.3",
     "multer": "^1.4.1",
     "node-fetch": "^2.3.0",
