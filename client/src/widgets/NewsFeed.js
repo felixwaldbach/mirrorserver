@@ -80,8 +80,6 @@ class NewsFeed extends Component {
                     }
                 </ul>
             </div>
-
-
         );
     }
 }
