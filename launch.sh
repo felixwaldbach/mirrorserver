@@ -44,10 +44,6 @@ then
 	sudo apt-get install mongodb
 
 
-	echo "Setting up database"
-	node mongoWidgetScript.js
-
-
 	# check if project exists: yes = direct to that folder, no = git clone
 	if [ -d "mirrorserver" ];
 	then
@@ -68,6 +64,8 @@ then
 	# change to project directory
 	cd ~/Desktop/mirrorserver
 
+	echo "Setting up database"
+	node mongoWidgetScript.js
 
 	# check if .env for environment variables exists
 	if [ -e .env ]
@@ -76,7 +74,7 @@ then
 	else
 		echo ".env does not exist, creating now...!"
 		$(touch .env)
-		secretkey="secretkey"
+		secretkey="secretkey="
 		key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 100 | head -n 1)
 		secretkey+=$key
 		echo $secretkey >> .env
