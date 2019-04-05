@@ -53,10 +53,10 @@ class CalendarWidget extends Component {
         return (
             <div className="calendar-container">
 
-                {calendar.length == 0 ? <h2>No calendar set up!</h2>
+                {calendar.length == 0 ? <h2>No Appointments for today</h2>
                 :
                     <div>
-                        <h2>Calendar for today:</h2>
+                        <h2>Calendar for today</h2>
                         <ul id={'calendar-list'}>
                             {
                                 calendar.map(item => <li className={'calendar-item'}>{item.description} at {item.time}</li>)

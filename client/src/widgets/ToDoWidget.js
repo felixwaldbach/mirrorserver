@@ -104,7 +104,7 @@ class ToDoWidget extends Component {
                         )}
                     </div>
                     :
-                    <h2>Nothing to do - Well done!</h2>}
+                    <h2>This To Do List does not contain Items</h2>}
             </div>
         );
     }

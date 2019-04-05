@@ -1,9 +1,11 @@
 .quotes-container {
     font-size: 14px;
+    margin-top: 10px;
 }
 
 .clock-container {
     text-align: center;
+    margin-top: 20%;
 }
 
 #clock {
@@ -15,12 +17,7 @@ li {
     list-style-position: inside;
 }
 
-.weather-container {
-    font-size: 14px;
-}
-
 #weather-city {
-    font-size: 1.5vw;
     display: inline-block;
     margin-bottom: 2%;
 }
@@ -28,6 +25,7 @@ li {
 .weather-container table {
     width: 100%;
     color: white;
+    font-size: 15px;
 }
 
 .weather-container td, th {
@@ -38,17 +36,13 @@ li {
     color: white;
 }
 
-.todo-container {
-    font-size: 14px;
-}
-
 #todo-title {
-    font-size: 1.5vw;
     display: inline-block;
     margin-bottom: 2%;
 }
 
 #todo-items {
+    font-size: 13px;
     text-indent: 1em;
 }
 
@@ -57,7 +51,8 @@ li {
     margin: 0 auto;
     height: 100%;
     width: 100%;
-    overflow: auto;
+    overflow: hidden;
+    margin-top: 30px;
 }
 
 #news-feed-list {
@@ -75,6 +70,7 @@ li {
 
 #calendar-list {
     padding-left: 0;
+    font-size: 13px;
 }
 
 .calendar-item {
@@ -82,9 +78,9 @@ li {
 }
 
 .qr-screen {
-    margin-top: 10%;
+    margin-top: 30%;
     margin-left: 10%;
-    margin-right: 5%;
+    margin-right: 10%;
     width: 100%;
     text-align: center;
     display: flex;
@@ -92,32 +88,29 @@ li {
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    font-size: 12px;
+    font-size: 18px;
     list-style-type: circle;
 }
 
 #qrcode-container {
     float: left;
-    width: 25%;
+    width: 40%;
 }
 
 #qrcode-description {
     text-align: center;
     color: white;
-    font-size: 2.4vw;
+    font-size: 3.7vw;
 }
 
 #qrcode-image {
     background: white;
 }
 
-#qrcode-container::after {
-
-}
-
 .qr-screen #qr-time-container {
     display: table;
     margin: 0 auto;
+    margin-right: 22%;
     font-size: 7vw;
 }
 
