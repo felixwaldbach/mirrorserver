@@ -1,10 +1,11 @@
 .quotes-container {
     font-size: 14px;
+    margin-top: 10px;
 }
 
 .clock-container {
     text-align: center;
-    margin-top: 30%;
+    margin-top: 20%;
 }
 
 #clock {
@@ -51,6 +52,7 @@ li {
     height: 100%;
     width: 100%;
     overflow: auto;
+    margin-top: 30px;
 }
 
 #news-feed-list {
@@ -76,7 +78,7 @@ li {
 }
 
 .qr-screen {
-    margin-top: 50%;
+    margin-top: 30%;
     margin-left: 10%;
     margin-right: 10%;
     width: 100%;
