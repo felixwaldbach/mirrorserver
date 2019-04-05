@@ -82,7 +82,7 @@ class WeatherWidget extends Component {
             <div className="weather-container">
 
                 {forecast.length == 0 ? <h2>No forecast available!</h2> :
-                    <span id="weather-city">Weather for {this.state.city}</span>}
+                    <h2>Weather for {this.state.city}</h2>}
 
                 <table>
                     <tr id="head-border">
