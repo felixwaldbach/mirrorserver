@@ -4,7 +4,8 @@ const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
 const responseMessages = require('../responseMessages');
 
 const funcall = module.exports = {
-    uploadCalendarSettings: function (settings, userId) {
+
+    uploadCalendarSettings(settings, userId)  {
         return new Promise((resolve, reject) => {
             let calendarICS = settings.calendarICS;
 
@@ -87,17 +88,12 @@ const funcall = module.exports = {
         });
     },
 
-    getCalendarSettings: function (userId) {
+    getCalenderSettings: function (userId) {
         return new Promise((resolve, reject) => {
-            MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
-                if (err) resolve(JSON.stringify({
-                    status: false,
-                    message: responseMessages.DATABASE_CONNECTION_ERROR,
-                    error: err
-                }));
-                else {
-                    let db = client.db('smartmirror');
-
+            MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
+                if (err) {
+                    console.log('Unable to connect to MongoDB');
+                } else {
                     client.db('smartmirror').collection('calendar').findOne({"userId": new ObjectId(userId)}, (err, res_find_calendar_settings) => {
                         if (err) {
                             client.close();
@@ -122,26 +118,22 @@ const funcall = module.exports = {
                 if (err) {
                     console.log('Unable to connect to MongoDB');
                 } else {
-                    client.db('smartmirror').collection('users').findOne({"_id": new ObjectId(userId)}, (err, res_find_user) => {
+                    client.db('smartmirror').collection('calendar').findOne({"userId": new ObjectId(userId)}, (err, res_find_calendar_settings) => {
                         if (err) {
                             client.close();
                             throw err;
                         } else {
-                            let userId = res_find_user._id;
-                            client.db('smartmirror').collection('calendar').findOne({"userId": new ObjectId(userId)}, (err, res_find_calendar_settings) => {
-                                if (err) {
-                                    client.close();
-                                    throw err;
-                                } else {
-                                    client.close();
-                                    resolve(res_find_calendar_settings);
-                                }
-                            });
+                            client.close();
+                            resolve(JSON.stringify({
+                                status: true,
+                                settings: res_find_calendar_settings,
+                                message: responseMessages.DATABASE_COLLECTION_AGGREGATE_SUCCESS
+                            }));
                         }
                     });
                 }
             });
         });
-    }
+    },
 
 }
