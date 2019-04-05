@@ -15,14 +15,14 @@ else
 	if [ -z $display_rotation ]
 	then
 		echo "Setting display rotation"
-		sudo echo display_rotate=1 >> /boot/config.txt
+		#sudo echo display_rotate=1 >> /boot/config.txt
 	else
 		echo "Setting display rotation"
-		sudo sed -i -e 's/display_rotate=0/display_rotate=1/g' /boot/config.txt
-		sudo sed -i -e 's/display_rotate=2/display_rotate=1/g' /boot/config.txt
-		sudo sed -i -e 's/display_rotate=3/display_rotate=1/g' /boot/config.txt
+		#sudo sed -i -e 's/display_rotate=0/display_rotate=1/g' /boot/config.txt
+		#sudo sed -i -e 's/display_rotate=2/display_rotate=1/g' /boot/config.txt
+		#sudo sed -i -e 's/display_rotate=3/display_rotate=1/g' /boot/config.txt
 	fi
-	sudo reboot
+	#sudo reboot
 fi
 
 
@@ -34,14 +34,13 @@ if [ $(ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && 
 then
 	echo "Internet connection okay"
 
-
 	# important package installations
 	sudo apt-get install jq
 	sudo apt-get install dirmngr
 	sudo apt-get install xdotool
 	sudo apt-get install curl
 	sudo apt-get install git
-	sudo apt-get install mongodb
+	#udo apt-get install mongodb
 
 
 	# check if project exists: yes = direct to that folder, no = git clone
@@ -64,8 +63,10 @@ then
 	# change to project directory
 	cd ~/Desktop/mirrorserver
 
+
 	echo "Setting up database"
 	node mongoWidgetScript.js
+
 
 	# check if .env for environment variables exists
 	if [ -e .env ]
@@ -141,6 +142,7 @@ then
 	else
 		# check for IPs and uuid
 		echo $config
+	fi
 
 	# Start express server and frontend
 	echo "Starting Application..."

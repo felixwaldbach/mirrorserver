@@ -19,7 +19,7 @@ async.waterfall([
         function (callback) {
             //database connect
             console.log("DB Connect");
-            mongoClient.connect(mongoURL, function (err, mgo) {
+            mongoClient.connect(mongoURL, { useNewUrlParser: true }, function (err, mgo) {
                 if (err) callback(err, mgo);
                 callback(null, mgo);
             });
@@ -88,4 +88,3 @@ async.waterfall([
         else console.log("Done without Errors");
     }
 );
-
