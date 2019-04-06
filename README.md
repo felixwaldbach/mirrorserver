@@ -1,7 +1,7 @@
 # mirrorserver
 
 ## What does this Repository contain?
-This repository holds code for a Smart Mirror application using the Node.js MERN Stack. The project contains an Express Backend providing an HTTP Server, HTTP Request Handlers, a Socket.IO Server and an MQTT Server. It works with a MongoDB database and contains files to access a local MongoDB database. 
+This repository holds code for a Smart Mirror application using the Node.js MERN Stack. The project contains an Express Backend providing an HTTP Server, HTTP Request Handlers, a Socket.IO Server and an MQTT Server. It works with a MongoDB database and contains files to access a local MongoDB database.
 
 It is designed to be configured by a React-Native Smartphone application we are currently building. [Go check it out!](https://github.com/emrebesogul/mirrorapp)
 
@@ -25,17 +25,13 @@ brew imagesnap
 When using one of the camera features for the first time, MacOS will ask for access to the camera. It has to be granted in order for this feature to work. If not granted, this feature will not work. Another tip: When taking cameras in front of the mirror, make sure to have right lighting and standing in front of the camera properly. The feature has not been tested with multiple people being in the camera scope so far. We are working on it!
 
 ## Additional Steps on a Raspberry Pi:
-This project is designed to work on a Raspberry Pi. Additional setup steps are following shortly. Meanwhile, these dependencies should be installed to run it somehow.
+This project is designed to work on a Raspberry Pi. Additional setup steps are following shortly. Meanwhile, these Node.js and npm should be installed to run it somehow.
 ```
-- Node.js
-- MongoDB (& dirmngr)
-- xdotool
-- curl
-- git
-- jq
+curl -sL http://deb.nodesource.com/setup_8.x | sudo bash -
+sudo apt-get install -y nodejs
 ```
 
-Then make sure that you have configured the Raspberry Pi with a static IP address:
+Also make sure that you have configured the Raspberry Pi with a static IP address:
 ```
 sudo nano /etc/dhcpcd.conf
 
@@ -49,7 +45,9 @@ Save & Reboot
 Important! Do not touch /etc/network/interfaces
 ```
 
-If executed correctly, an instance of the frontend will appear in your default browser listening on port 3000 after starting the application.
+If executed correctly, an instance of the frontend will appear in your default browser in fullscreen listening on port 3000 after starting the launch.sh. Launch.sh will first rotate your display for the mirror itself, then check your internet connection. If you Pi is not connected with the internet, a wifiManager.js script should let you setup Wifi over the smartphone (not implemented yet!). If your Pi has internet access, the script will install important dependencies (jq, mongodb, git, xdotool, curl and dirmngr), look for the Github repo on the Desktop and install its dependencies. Then it will configure the database, config.json and .env and launch the application in fullscreen in chromium.
+
+Since the launch.sh script should start after every boot, it should be configured in the auto-script.
 
 ## Contributors
 This project is developed and maintained by [Emre Besogul](https://github.com/emrebesogul) and [Felix Waldbach](https://github.com/felixwaldbach).

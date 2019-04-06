@@ -7,22 +7,21 @@ echo "Starting Configuration Script for Smart Mirror..."
 
 # check display rotation
 display_rotation="$(grep "display_rotate" /boot/config.txt)"
-if [ $display_rotation == "display_rotate=1" ]
+if [ -z $display_rotation ]
 then
-	echo "Display rotation correct"
+	echo "display_rotation empty, setting now."
+	sudo sh -c "echo 'display_rotate=1' >> /boot/config.txt"
 else
-	echo "Display rotation wrong, setting up..."
-	if [ -z $display_rotation ]
+	if [ $display_rotation == "display_rotate=1" ]
 	then
-		echo "Setting display rotation"
-		#sudo echo display_rotate=1 >> /boot/config.txt
+		echo "Display rotation correct"
 	else
-		echo "Setting display rotation"
-		#sudo sed -i -e 's/display_rotate=0/display_rotate=1/g' /boot/config.txt
-		#sudo sed -i -e 's/display_rotate=2/display_rotate=1/g' /boot/config.txt
-		#sudo sed -i -e 's/display_rotate=3/display_rotate=1/g' /boot/config.txt
+		echo "Setting display rotation for all"
+		sudo sed -i -e 's/display_rotate=0/display_rotate=1/g' /boot/config.txt
+		sudo sed -i -e 's/display_rotate=2/display_rotate=1/g' /boot/config.txt
+		sudo sed -i -e 's/display_rotate=3/display_rotate=1/g' /boot/config.txt
 	fi
-	#sudo reboot
+	sudo reboot
 fi
 
 
@@ -34,13 +33,16 @@ if [ $(ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && 
 then
 	echo "Internet connection okay"
 
+	# update npm
+	sudo npm install -g npm
+
 	# important package installations
-	sudo apt-get install jq
-	sudo apt-get install dirmngr
-	sudo apt-get install xdotool
-	sudo apt-get install curl
-	sudo apt-get install git
-	#udo apt-get install mongodb
+	sudo apt-get -y install jq
+	sudo apt-get -y install dirmngr
+	sudo apt-get -y install xdotool
+	sudo apt-get -y install curl
+	sudo apt-get -y install git
+	sudo apt-get -y install mongodb
 
 
 	# check if project exists: yes = direct to that folder, no = git clone
@@ -53,11 +55,11 @@ then
 		cd mirrorserver
 		nohup npm install &
 		# wait some time till installation of packages is done...
-		sleep 2m
+		sleep 3m
 		cd client
 		nohup npm install &
 		# wait some time till installation of packages is done...
-		sleep 2m
+		sleep 8m
 	fi
 
 	# change to project directory
@@ -145,8 +147,9 @@ then
 	fi
 
 	# Start express server and frontend
-	echo "Starting Application..."
+	echo "Starting Backend..."
 	nohup node server.js &
+	echo "Starting Frontend..."
 	cd client
 	nohup npm start &
 	cd ~/Desktop
@@ -160,13 +163,9 @@ then
 	xdotool key "F11" &
 
 
-fi
-
-###
-
-	else
-		echo "No Internet connection"
-		node wifiManager.js
+else
+	echo "No Internet connection"
+	node wifiManager.js
 fi
 
 exec bash
