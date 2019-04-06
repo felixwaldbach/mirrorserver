@@ -9,6 +9,7 @@ const os = require('os');
 
 const utils = require('./utils'); // general utility functions
 const config = require('./config'); // config file for IP Addresses and Mirror UUID
+const usersCollectionUtils = require('./database/usersCollectionUtils'); // config file for IP Addresses and Mirror UUID
 
 var mqttServer = new mosca.Server({}); // Create MQTT Server instance with mosca
 
@@ -65,23 +66,28 @@ function start(http, io) {
                     response = await utils.recognizeImage(config.uuid, response.base64); // send image to the external server for face recognition
                     // Check if a user was detected on the image
                     if (response.userId && response.userId !== 'unknown') { // If a user was detected, start session and create webtoken
-                        jwt.sign({
-                            userId: response.userId
-                        }, process.env.secretkey, (err, token) => {
-                            io.emit('handle_session', { // Send token and userId as socket message
-                                token: token,
-                                userId: response.userId,
-                                motion: packet.payload.toString('utf8')
-                            });
+                        let user = await usersCollectionUtils.getUserData(response.userId)
+                        if (user.user_data) {
+                            jwt.sign({
+                                userId: response.userId
+                            }, process.env.secretkey, (err, token) => {
+                                io.emit('handle_session', { // Send token and userId as socket message
+                                    token: token,
+                                    userId: response.userId,
+                                    motion: packet.payload.toString('utf8')
+                                });
 
-                            mqttServer.publish({
-                                topic: 'indoor/pir/receive/timeout',
-                                payload: 'true',
-                                qos: 0,
-                                retain: false
-                            })
-                            processingFaceRecognition = false
-                        });
+                                mqttServer.publish({
+                                    topic: 'indoor/pir/receive/timeout',
+                                    payload: 'true',
+                                    qos: 0,
+                                    retain: false
+                                })
+                                processingFaceRecognition = false
+                            });
+                        } else {
+                            console.log("No real user identified. No user Profile will be loaded.")
+                        }
                     } else { // If no user recognized, send empty user id as socket message
                         io.emit('handle_session', {
                             userId: null,

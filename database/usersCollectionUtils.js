@@ -165,29 +165,37 @@ function getUserData(userId) {
             }));
             else {
                 let db = client.db('smartmirror');
-                db.collection('users').findOne({"_id": new ObjectId(userId)}, (err, res) => {
-                    if (err) { // Send error message if error occurs
-                        client.close();
-                        resolve(JSON.stringify({
-                            message: responseMessages.USER_DATA_INVALID,
-                            error: err
-                        }));
-                    }
-                    if (res) { // If no error occurs, send user data as a result
-                        client.close();
-                        resolve(JSON.stringify({
-                            status: true,
-                            user_data: res,
-                            message: responseMessages.USER_DATA_SUCCESS
-                        }));
-                    } else { // If no user data was found, send error message
-                        client.close();
-                        resolve(JSON.stringify({
-                            status: false,
-                            message: responseMessages.USER_DATA_INVALID
-                        }));
-                    }
-                })
+                if (ObjectId.isValid(userId)) {
+                    db.collection('users').findOne({"_id": new ObjectId(userId)}, (err, res) => {
+                        if (err) { // Send error message if error occurs
+                            client.close();
+                            resolve(JSON.stringify({
+                                message: responseMessages.USER_DATA_INVALID,
+                                error: err
+                            }));
+                        }
+                        if (res) { // If no error occurs, send user data as a result
+                            client.close();
+                            resolve(JSON.stringify({
+                                status: true,
+                                user_data: res,
+                                message: responseMessages.USER_DATA_SUCCESS
+                            }));
+                        } else { // If no user data was found, send error message
+                            client.close();
+                            resolve(JSON.stringify({
+                                status: false,
+                                message: responseMessages.USER_DATA_INVALID
+                            }));
+                        }
+                    })
+                } else {
+                    resolve(JSON.stringify({
+                        status: false,
+                        user_data: null,
+                        message: responseMessages.USER_DATA_INVALID
+                    }));
+                }
             }
         })
     })
