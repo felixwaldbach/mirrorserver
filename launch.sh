@@ -33,10 +33,44 @@ if [ $(ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && 
 then
 	echo "Internet connection okay"
 
-	# update npm
-	sudo npm install -g npm
+	# get ip...
+	ip_router="$(netstat -r -n)"
+	ip_static="${ip_router%.*}.200"
 
-	# important package installations
+	# setup static ip address
+	static_ip_address="$(grep "static ip_address=" /etc/dhcpcd.conf)"
+	static_routers="$(grep "static_routers=" /etc/dhcpcd.conf)"
+	static_domain_name_servers="$(grep "static domain_name_servers=" /etc/dhcpcd.conf)"
+
+	if [ -z $static_ip_address ] && [ -z $static_routers ] && [ -z $static_domain_name_servers ]
+	then
+		echo "static ip empty, setting now."
+		static_ip_address=$ip_static
+		static_routers=$ip_router
+		static_domain_name_servers=$ip_router
+
+		echo '# Static IP' >> /etc/dhcpcd.conf
+		echo $static_ip_address >> /etc/dhcpcd.conf
+		echo $static_routers >> /etc/dhcpcd.conf
+		echo $static_domain_name_servers >> /etc/dhcpcd.conf
+		sudo reboot
+	else
+		echo "static ip is fine..."
+		echo $ip_static
+	fi
+
+	node_version="$(node -v)"
+	if [ -z $node_version ]
+	then
+		curl -sL http://deb.nodesource.com/setup_8.x | sudo bash -
+		sudo apt-get install -y nodejs
+		# update npm
+		sudo npm install -g npm
+	else
+		echo "Node.js already setup"
+	fi
+
+	# important package installations and updates
 	sudo apt-get -y install jq
 	sudo apt-get -y install dirmngr
 	sudo apt-get -y install xdotool
@@ -109,15 +143,13 @@ then
 	if [ "$configIsEmpty" = true ]
 	then
 		echo "Setting up new config.json..."
-		# Set static IP
-		# Not working yet, not supported???
+
+		ip="$(hostname -I | awk '{print $1}')"
+		ip="${ip//[[:space:]]/}"
 
 		# Set IP address of host and django server
 		host_address="http://"
 		django_address="http://"
-
-		ip="$(hostname -I | awk '{print $1}')"
-		ip="${ip//[[:space:]]/}"
 
 		host_address+=$ip
 		django_address+="192.169.172.20"
