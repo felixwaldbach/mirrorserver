@@ -165,7 +165,7 @@ function getUserData(userId) {
             }));
             else {
                 let db = client.db('smartmirror');
-                if (ObjectId.isValid(userId)) {
+                try {
                     db.collection('users').findOne({"_id": new ObjectId(userId)}, (err, res) => {
                         if (err) { // Send error message if error occurs
                             client.close();
@@ -189,12 +189,12 @@ function getUserData(userId) {
                             }));
                         }
                     })
-                } else {
+                } catch (err) {
                     resolve(JSON.stringify({
                         status: false,
-                        user_data: null,
-                        message: responseMessages.USER_DATA_INVALID
-                    }));
+                        message: responseMessages.USER_DATA_INVALID,
+                        error: err
+                    }))
                 }
             }
         })

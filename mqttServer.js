@@ -66,8 +66,8 @@ function start(http, io) {
                     response = await utils.recognizeImage(config.uuid, response.base64); // send image to the external server for face recognition
                     // Check if a user was detected on the image
                     if (response.userId && response.userId !== 'unknown') { // If a user was detected, start session and create webtoken
-                        let user = await usersCollectionUtils.getUserData(response.userId)
-                        if (user.user_data) {
+                        let user = await usersCollectionUtils.getUserData(response.userId);
+                        if (JSON.parse(user).user_data) {
                             jwt.sign({
                                 userId: response.userId
                             }, process.env.secretkey, (err, token) => {
@@ -87,6 +87,20 @@ function start(http, io) {
                             });
                         } else {
                             console.log("No real user identified. No user Profile will be loaded.")
+
+                            // If no user recognized, send empty user id as socket message
+                            io.emit('handle_session', {
+                                userId: null,
+                                motion: '0'
+                            });
+
+                            mqttServer.publish({
+                                topic: 'indoor/pir/receive/timeout',
+                                payload: 'false',
+                                qos: 0,
+                                retain: false
+                            })
+                            processingFaceRecognition = false
                         }
                     } else { // If no user recognized, send empty user id as socket message
                         io.emit('handle_session', {
