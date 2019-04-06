@@ -165,7 +165,6 @@ then
 
 else
 	echo "No Internet connection"
-	node wifiManager.js
 fi
 
 exec bash
