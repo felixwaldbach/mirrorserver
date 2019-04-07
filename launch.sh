@@ -190,12 +190,14 @@ then
 	echo "Opening Browser..."
 	chromium-browser --start-fullscreen &
 	xdg-open http://localhost:3000 &
-	sleep 5
+	sleep 30
 	xdotool key "F11" &
 
 
 else
 	echo "No Internet connection"
+	sleep 60
+	sudo reboot
 fi
 
 exec bash
