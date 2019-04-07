@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# This script is in the mirrorserver repository just to distribute the launch script.
-# node.js needs to be installed already...
-
 echo "Starting Configuration Script for Smart Mirror..."
 
 # check display rotation
@@ -11,6 +8,7 @@ if [ -z $display_rotation ]
 then
 	echo "display_rotation empty, setting now."
 	sudo sh -c "echo 'display_rotate=1' >> /boot/config.txt"
+	sudo reboot
 else
 	if [ $display_rotation == "display_rotate=1" ]
 	then
@@ -20,10 +18,12 @@ else
 		sudo sed -i -e 's/display_rotate=0/display_rotate=1/g' /boot/config.txt
 		sudo sed -i -e 's/display_rotate=2/display_rotate=1/g' /boot/config.txt
 		sudo sed -i -e 's/display_rotate=3/display_rotate=1/g' /boot/config.txt
+		sudo reboot
 	fi
-	sudo reboot
 fi
 
+# some sleeping time till wifi connects
+sleep 10
 
 #change to directory where the code folder is based
 cd ~/Desktop
@@ -34,15 +34,17 @@ then
 	echo "Internet connection okay"
 
 	# get ip...
-	ip_router="$(netstat -r -n)"
-	ip_static="${ip_router%.*}.200"
+	ip="$(hostname -I | awk '{print $1}')"
+	ip="${ip//[[:space:]]/}"
+	ip_router="${ip%.*}.1"
+	ip_static="${ip%.*}.200"
 
 	# setup static ip address
 	static_ip_address="$(grep "static ip_address=" /etc/dhcpcd.conf)"
 	static_routers="$(grep "static_routers=" /etc/dhcpcd.conf)"
 	static_domain_name_servers="$(grep "static domain_name_servers=" /etc/dhcpcd.conf)"
 
-	if [ -z $static_ip_address ] && [ -z $static_routers ] && [ -z $static_domain_name_servers ]
+	if [[ (-z $static_ip_address && -z $static_routers && -z $static_domain_name_servers) ]]
 	then
 		echo "static ip empty, setting now."
 		static_ip_address=$ip_static
@@ -56,6 +58,10 @@ then
 		sudo reboot
 	else
 		echo "static ip is fine..."
+		echo $static_ip_address
+		echo $static_routers
+		echo $static_domain_name_servers
+		echo $ip_router
 		echo $ip_static
 	fi
 
@@ -164,7 +170,6 @@ then
 		echo $uuid
 
 		# write this new configuration into config.json which is created before
-
 		configuration=$( jq -n \
 	                  --arg ip "$ip" \
 	                  --arg bn "$host_address" \
