@@ -16,17 +16,9 @@ export default class IndoorWidget extends Component {
     componentDidMount() {
 
         let app = this;
-        socket.on('indoor_temperature', function (data) {
-            app.setState({
-                temperature: Math.round(data.temperature)
-            })
-        });
+        socket.on('indoor_temperature', this.indoorTemperatureListener.bind(this));
 
-        socket.on('indoor_humidity', function (data) {
-            app.setState({
-                humidity: Math.round(data.humidity)
-            })
-        });
+        socket.on('indoor_humidity', this.indoorHumidityListener.bind(this));
 
         const requestDhtValues = () => {
             console.log("Requesting values")
@@ -34,12 +26,26 @@ export default class IndoorWidget extends Component {
             this.setState({
                 timeout: setTimeout(requestDhtValues, 120000)
             })
-        }
+        };
         requestDhtValues(this.state.timeout);
     }
 
     componentWillUnmount() {
         clearTimeout(this.state.timeout)
+        socket.off('indoor_temperature', this.indoorTemperatureListener);
+        socket.off('indoor_humidity', this.indoorHumidityListener);
+    }
+
+    indoorHumidityListener(data) {
+        this.setState({
+            humidity: Math.round(data.humidity)
+        })
+    }
+
+    indoorTemperatureListener(data) {
+        this.setState({
+            temperature: Math.round(data.temperature)
+        })
     }
 
 

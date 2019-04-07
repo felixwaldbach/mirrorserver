@@ -14,19 +14,9 @@ export default class OutdoorWidget extends Component {
     }
 
     componentDidMount() {
+        socket.on('outdoor_temperature', this.outdoorTemperatureListener.bind(this));
 
-        let app = this;
-        socket.on('outdoor_temperature', function (data) {
-            app.setState({
-                temperature: Math.round(data.temperature)
-            })
-        });
-
-        socket.on('outdoor_humidity', function (data) {
-            app.setState({
-                humidity: Math.round(data.humidity)
-            })
-        });
+        socket.on('outdoor_humidity', this.outdoorHumidityListener.bind(this));
 
         const requestDhtValues = () => {
             console.log("Requesting values")
@@ -40,6 +30,20 @@ export default class OutdoorWidget extends Component {
 
     componentWillUnmount() {
         clearTimeout(this.state.timeout)
+        socket.off('outdoor_temperature', this.outdoorTemperatureListener);
+        socket.off('outdoor_humidity', this.outdoorHumidityListener);
+    }
+
+    outdoorHumidityListener(data) {
+        this.setState({
+            humidity: Math.round(data.humidity)
+        })
+    }
+
+    outdoorTemperatureListener(data) {
+        this.setState({
+            temperature: Math.round(data.temperature)
+        })
     }
 
 
