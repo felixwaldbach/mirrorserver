@@ -47,14 +47,6 @@ function start(http, io) {
         console.log(packet.topic + ", " + packet.payload.toString('utf8'));
 
         switch (packet.topic) {
-            // Incoming temperature data from the DHT22
-            case 'indoor/dht22/send/temperature':
-                io.emit('indoor_dht22_temperature', packet.payload.toString('utf8')); // send payload as socket message
-                break;
-            // Incoming temperature data from the DHT22
-            case 'outdoor/dht22/send/temperature':
-                io.emit('outdoor_dht22_temperature', packet.payload.toString('utf8')); // send payload as socket message
-                break;
             // Incoming PIR motion data from the PIR
             case 'indoor/pir/send/motion':
                 // Check if a motion has been detected
@@ -107,7 +99,6 @@ function start(http, io) {
                             userId: null,
                             motion: '0'
                         });
-
                         mqttServer.publish({
                             topic: 'indoor/pir/receive/timeout',
                             payload: 'false',
@@ -123,10 +114,35 @@ function start(http, io) {
                     });
                 }
                 break;
+            case 'indoor/dht22/send/temperature':
+                io.emit('indoor_temperature', {
+                    temperature: packet.payload.toString('utf8')
+                });
+                break;
+            case 'indoor/dht22/send/humidity':
+                io.emit('indoor_humidity', {
+                    humidity: packet.payload.toString('utf8')
+                });
+                break;
+            case 'outdoor/dht22/send/temperature':
+                io.emit('outdoor_temperature', {
+                    temperature: packet.payload.toString('utf8')
+                });
+                break;
+            case 'outdoor/dht22/send/humidity':
+                io.emit('outdoor_humidity', {
+                    humidity: packet.payload.toString('utf8')
+                });
+                break;
         }
     });
 }
 
+function publishMessage(packet) {
+    mqttServer.publish(packet);
+}
+
 module.exports = {
-    start
+    start,
+    publishMessage
 }

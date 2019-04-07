@@ -29,7 +29,6 @@ class QuotesWidget extends Component {
 
         const addQuotesToUI = data => {
             if (data) {
-                console.log(data);
                 this.setState({quote: data});
             }
         };

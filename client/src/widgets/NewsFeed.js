@@ -41,8 +41,6 @@ class NewsFeed extends Component {
 
         scroll.scrollTo(1);
         Events.scrollEvent.register('end', function (to, element) {
-            console.log('end')
-            console.log(app.state.scrollToBottom)
             if (app.state.newsFeedItems.length > 15) {
                 if (app.state.scrollToBottom) {
                     console.log('Scroll to Bottom')
