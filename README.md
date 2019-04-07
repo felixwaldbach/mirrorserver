@@ -41,9 +41,17 @@ Save it by pressing Ctrl+X, " Y", ENTER & Re-boot
 **Important! Do not touch /etc/network/interfaces**
 ```
 
-The Raspberry Pi should also come with the launch.sh script on the Desktop. This script is setup as an auto script that runs after every boot automatically. This can be achieved by running following steps:
+Go to Desktop and run following:
+```
+cd Desktop
+touch launch.sh
+chmod 777 launch.sh
+```
 
-Type
+Then copy the content of launch.sh from Github...
+
+The Raspberry Pi should also come with the launch.sh script on the Desktop. This script is setup as an auto script that runs after every boot automatically.
+**This can be achieved by running following steps:**
 ```
 sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
 ```
@@ -52,7 +60,7 @@ Add following line:
 @lxterminal -e /home/pi/Desktop/launch.sh
 ```
 
-Save it by pressing Ctrl+X, " Y", ENTER. Re-boot and the auto-script is setup.
+Save it by pressing Ctrl+X, " Y", ENTER. Re-boot and the auto-script is setup. This will auto-run the launch.sh script after the Pi boot is finished and the GUI is loaded.
 
 
 If executed correctly, an instance of the frontend will appear in your default browser in fullscreen listening on port 3000 after bootin the Pi. Launch.sh will first rotate your display for the mirror itself, then check your internet connection. If your Pi is not connected with the internet, another script should let you setup Wifi over the smartphone (not implemented yet, not planned, just documented for now!). If your Pi has internet access, the script will install important dependencies (nodejs, jq, mongodb, git, xdotool, curl and dirmngr), look for the Github repo on the Desktop and install its dependencies. Then it will configure the database, config.json and .env and launch the application in fullscreen in a browser.
