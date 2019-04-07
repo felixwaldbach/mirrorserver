@@ -18,7 +18,6 @@ export default class QRCode extends React.Component {
         const app = this;
 
         socket.on('wait_trigger_face_id', function (data) {
-            console.log(data)
             app.setState({
                 message: data.message,
                 displayMessage: data.displayMessage

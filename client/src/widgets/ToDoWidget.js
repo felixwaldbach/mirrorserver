@@ -38,7 +38,6 @@ class ToDoWidget extends Component {
         });
 
         socket.on('wunderlist_settings', function (data) {
-            console.log(data);
 
             refreshList();
             addListToUI(data);

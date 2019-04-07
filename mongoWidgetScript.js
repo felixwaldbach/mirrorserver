@@ -10,7 +10,9 @@ const myDocs = [
     {"name": "QuotesWidget"},
     {"name": "ToDoWidget"},
     {"name": "WeatherWidget"},
-    {"name": "CalendarWidget"}
+    {"name": "CalendarWidget"},
+    {"name": "IndoorWidget"},
+    {"name": "OutdoorWidget"}
 ];
 
 //mongo DB insertion (using async series)

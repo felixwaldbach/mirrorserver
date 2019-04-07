@@ -23,6 +23,8 @@ const utils = require('./utils'); // general utility functions
 const responseMessages = require('./responseMessages'); // Standard response messages for HTTP requests websocket messages
 const weatherIcons = require('./jsonModels/weatherIcons'); // Blueprint JSON Object for weather icons
 
+const mqttServer = require('./mqttServer');
+
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 
@@ -138,6 +140,24 @@ module.exports = function (socket, io) {
 
         // send list to ui
         io.emit('required_city_weather', {forecast: forecast, city: requiredCity});
+    });
+
+    socket.on('web_indoor_values', function () {
+        mqttServer.publishMessage({
+            topic: 'indoor/dht22/receive/values',
+            payload: 'true',
+            qos: 0,
+            retain: false
+        });
+    });
+
+    socket.on('web_outdoor_values', function () {
+        mqttServer.publishMessage({
+            topic: 'outdoor/dht22/receive/values',
+            payload: 'true',
+            qos: 0,
+            retain: false
+        });
     });
 
     // Quotes Widget message handler
