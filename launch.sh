@@ -2,6 +2,9 @@
 
 echo "Starting Configuration Script for Smart Mirror..."
 
+# some sleeping time till wifi connects
+sleep 20
+
 # check display rotation
 display_rotation="$(grep "display_rotate" /boot/config.txt)"
 if [ -z $display_rotation ]
@@ -22,9 +25,6 @@ else
 	fi
 fi
 
-# some sleeping time till wifi connects
-sleep 10
-
 #change to directory where the code folder is based
 cd ~/Desktop
 
@@ -44,36 +44,30 @@ then
 	static_routers="$(grep "static_routers=" /etc/dhcpcd.conf)"
 	static_domain_name_servers="$(grep "static domain_name_servers=" /etc/dhcpcd.conf)"
 
-	if [[ (-z $static_ip_address && -z $static_routers && -z $static_domain_name_servers) ]]
+	if [[ ($static_ip_address=$ip+"/24" || $static_routers=$ip_router+"/24" || $static_domain_name_servers=$ip_router) ]]
 	then
-		echo "static ip empty, setting now."
+		sudo rm -rf /etc/dhcpcd.conf
+
+		echo "static ip empty or wrong, setting now."
 		static_ip_address=$ip_static
+		static_ip_address+="/24"
 		static_routers=$ip_router
 		static_domain_name_servers=$ip_router
 
-		echo '# Static IP' >> /etc/dhcpcd.conf
-		echo $static_ip_address >> /etc/dhcpcd.conf
-		echo $static_routers >> /etc/dhcpcd.conf
-		echo $static_domain_name_servers >> /etc/dhcpcd.conf
-		sudo reboot
-	else
-		echo "static ip is fine..."
 		echo $static_ip_address
 		echo $static_routers
 		echo $static_domain_name_servers
+
+		sudo touch /etc/dhcpcd.conf
+
+		sudo sh -c "echo '# Static IP' >> /etc/dhcpcd.conf"
+		sudo sh -c "echo 'static ip_address=$static_ip_address' >> /etc/dhcpcd.conf"
+		sudo sh -c "echo 'static routers=$static_routers' >> /etc/dhcpcd.conf"
+		sudo sh -c "echo 'static domain_name_servers=$static_domain_name_servers' >> /etc/dhcpcd.conf"
+	else
+		echo "static ip is fine..."
 		echo $ip_router
 		echo $ip_static
-	fi
-
-	node_version="$(node -v)"
-	if [ -z $node_version ]
-	then
-		curl -sL http://deb.nodesource.com/setup_8.x | sudo bash -
-		sudo apt-get install -y nodejs
-		# update npm
-		sudo npm install -g npm
-	else
-		echo "Node.js already setup"
 	fi
 
 	# important package installations and updates
