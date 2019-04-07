@@ -25,13 +25,9 @@ brew imagesnap
 When using one of the camera features for the first time, MacOS will ask for access to the camera. It has to be granted in order for this feature to work. If not granted, this feature will not work. Another tip: When taking cameras in front of the mirror, make sure to have right lighting and standing in front of the camera properly. The feature has not been tested with multiple people being in the camera scope so far. We are working on it!
 
 ## Additional Steps on a Raspberry Pi:
-This project is designed to work on a Raspberry Pi. Additional setup steps are following shortly. Meanwhile, these Node.js and npm should be installed to run it somehow.
-```
-curl -sL http://deb.nodesource.com/setup_8.x | sudo bash -
-sudo apt-get install -y nodejs
-```
+This project is designed to work on a Raspberry Pi
 
-Also make sure that you have configured the Raspberry Pi with a static IP address:
+Make sure that you configure the Raspberry Pi with a static IP address. This is automatically done by the launch-script, but if it fails, take over manually:
 ```
 sudo nano /etc/dhcpcd.conf
 
@@ -40,14 +36,35 @@ static ip_address=192.168.x.x/24
 static routers=192.168.x.1
 static domain_name_servers=192.168.x.1
 
-Save & Reboot
+Save it by pressing Ctrl+X, " Y", ENTER & Re-boot
 
-Important! Do not touch /etc/network/interfaces
+**Important! Do not touch /etc/network/interfaces**
 ```
 
-If executed correctly, an instance of the frontend will appear in your default browser in fullscreen listening on port 3000 after starting the launch.sh. Launch.sh will first rotate your display for the mirror itself, then check your internet connection. If you Pi is not connected with the internet, a wifiManager.js script should let you setup Wifi over the smartphone (not implemented yet!). If your Pi has internet access, the script will install important dependencies (jq, mongodb, git, xdotool, curl and dirmngr), look for the Github repo on the Desktop and install its dependencies. Then it will configure the database, config.json and .env and launch the application in fullscreen in chromium.
+Go to Desktop and run following:
+```
+cd Desktop
+touch launch.sh
+chmod 777 launch.sh
+```
 
-Since the launch.sh script should start after every boot, it should be configured in the auto-script.
+Then copy the content of launch.sh from Github...
+
+The Raspberry Pi should also come with the launch.sh script on the Desktop. This script is setup as an auto script that runs after every boot automatically.
+**This can be achieved by running following steps:**
+```
+sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
+```
+Add following line:
+```
+@lxterminal -e /home/pi/Desktop/launch.sh
+```
+
+Save it by pressing Ctrl+X, " Y", ENTER. Re-boot and the auto-script is setup. This will auto-run the launch.sh script after the Pi boot is finished and the GUI is loaded.
+
+
+If executed correctly, an instance of the frontend will appear in your default browser in fullscreen listening on port 3000 after bootin the Pi. Launch.sh will first rotate your display for the mirror itself, then check your internet connection. If your Pi is not connected with the internet, another script should let you setup Wifi over the smartphone (not implemented yet, not planned, just documented for now!). If your Pi has internet access, the script will install important dependencies (nodejs, jq, mongodb, git, xdotool, curl and dirmngr), look for the Github repo on the Desktop and install its dependencies. Then it will configure the database, config.json and .env and launch the application in fullscreen in a browser.
+
 
 ## Contributors
 This project is developed and maintained by [Emre Besogul](https://github.com/emrebesogul) and [Felix Waldbach](https://github.com/felixwaldbach).

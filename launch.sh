@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# This script is in the mirrorserver repository just to distribute the launch script.
-# node.js needs to be installed already...
-
 echo "Starting Configuration Script for Smart Mirror..."
+
+# some sleeping time till wifi connects
+sleep 20
 
 # check display rotation
 display_rotation="$(grep "display_rotate" /boot/config.txt)"
@@ -11,6 +11,7 @@ if [ -z $display_rotation ]
 then
 	echo "display_rotation empty, setting now."
 	sudo sh -c "echo 'display_rotate=1' >> /boot/config.txt"
+	sudo reboot
 else
 	if [ $display_rotation == "display_rotate=1" ]
 	then
@@ -20,10 +21,9 @@ else
 		sudo sed -i -e 's/display_rotate=0/display_rotate=1/g' /boot/config.txt
 		sudo sed -i -e 's/display_rotate=2/display_rotate=1/g' /boot/config.txt
 		sudo sed -i -e 's/display_rotate=3/display_rotate=1/g' /boot/config.txt
+		sudo reboot
 	fi
-	sudo reboot
 fi
-
 
 #change to directory where the code folder is based
 cd ~/Desktop
@@ -33,10 +33,44 @@ if [ $(ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && 
 then
 	echo "Internet connection okay"
 
-	# update npm
-	sudo npm install -g npm
+	# get ip...
+	ip="$(hostname -I | awk '{print $1}')"
+	ip="${ip//[[:space:]]/}"
+	ip_router="${ip%.*}.1"
+	ip_static="${ip%.*}.200"
 
-	# important package installations
+	# setup static ip address
+	static_ip_address="$(grep "static ip_address=" /etc/dhcpcd.conf)"
+	static_routers="$(grep "static_routers=" /etc/dhcpcd.conf)"
+	static_domain_name_servers="$(grep "static domain_name_servers=" /etc/dhcpcd.conf)"
+
+	if [[ ($static_ip_address=$ip+"/24" || $static_routers=$ip_router+"/24" || $static_domain_name_servers=$ip_router) ]]
+	then
+		sudo rm -rf /etc/dhcpcd.conf
+
+		echo "static ip empty or wrong, setting now."
+		static_ip_address=$ip_static
+		static_ip_address+="/24"
+		static_routers=$ip_router
+		static_domain_name_servers=$ip_router
+
+		echo $static_ip_address
+		echo $static_routers
+		echo $static_domain_name_servers
+
+		sudo touch /etc/dhcpcd.conf
+
+		sudo sh -c "echo '# Static IP' >> /etc/dhcpcd.conf"
+		sudo sh -c "echo 'static ip_address=$static_ip_address' >> /etc/dhcpcd.conf"
+		sudo sh -c "echo 'static routers=$static_routers' >> /etc/dhcpcd.conf"
+		sudo sh -c "echo 'static domain_name_servers=$static_domain_name_servers' >> /etc/dhcpcd.conf"
+	else
+		echo "static ip is fine..."
+		echo $ip_router
+		echo $ip_static
+	fi
+
+	# important package installations and updates
 	sudo apt-get -y install jq
 	sudo apt-get -y install dirmngr
 	sudo apt-get -y install xdotool
@@ -109,15 +143,13 @@ then
 	if [ "$configIsEmpty" = true ]
 	then
 		echo "Setting up new config.json..."
-		# Set static IP
-		# Not working yet, not supported???
+
+		ip="$(hostname -I | awk '{print $1}')"
+		ip="${ip//[[:space:]]/}"
 
 		# Set IP address of host and django server
 		host_address="http://"
 		django_address="http://"
-
-		ip="$(hostname -I | awk '{print $1}')"
-		ip="${ip//[[:space:]]/}"
 
 		host_address+=$ip
 		django_address+="192.169.172.20"
@@ -132,7 +164,6 @@ then
 		echo $uuid
 
 		# write this new configuration into config.json which is created before
-
 		configuration=$( jq -n \
 	                  --arg ip "$ip" \
 	                  --arg bn "$host_address" \
@@ -165,7 +196,6 @@ then
 
 else
 	echo "No Internet connection"
-	node wifiManager.js
 fi
 
 exec bash
