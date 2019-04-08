@@ -76,6 +76,7 @@ then
 	sudo apt-get -y install curl
 	sudo apt-get -y install git
 	sudo apt-get -y install mongodb
+	sudo apt-get -y install unclutter
 
 	# check if project exists: yes = direct to that folder, no = git clone
 	if [ -d "mirrorserver" ];
