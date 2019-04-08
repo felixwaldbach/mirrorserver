@@ -182,7 +182,7 @@ then
 	# Start Browser in fullscreen
 	echo "Opening Browser..."
 	chromium-browser --disable-session-crashed-bubble --disable-infobars &
-	sleep 5
+	sleep 15
 	xdotool key "F11" &
 
 else
