@@ -181,6 +181,8 @@ then
 	# Start Browser in fullscreen
 	echo "Opening Browser..."
 	chromium-browser --start-fullscreen --disable-session-crashed-bubble --disable-infobars &
+	sleep 5
+	xdotool key "F11" &
 
 else
 	echo "No Internet connection"
