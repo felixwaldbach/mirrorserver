@@ -188,8 +188,8 @@ then
 
 	# Start Browser in fullscreen
 	echo "Opening Browser..."
-	chromium-browser --start-fullscreen &
-	xdg-open http://localhost:3000 &
+	chromium-browser --start-fullscreen --disable-session-crashed-bubble --disable-infobars http://localhost:3000 &
+	#xdg-open http://localhost:3000 &
 	sleep 30
 	xdotool key "F11" &
 
