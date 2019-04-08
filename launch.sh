@@ -3,7 +3,7 @@
 echo "Starting Configuration Script for Smart Mirror..."
 
 # some sleeping time till wifi connects
-sleep 15
+sleep 10
 
 # check display rotation
 display_rotation="$(grep "display_rotate" /boot/config.txt)"
