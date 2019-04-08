@@ -4,7 +4,6 @@ const mongoURL = 'mongodb://127.0.0.1:27017/smartmirror';
 const responseMessages = require('../responseMessages');
 
 const funcall = module.exports = {
-    //----------------------Get Wunderlist settings from current user----------------------//
     uploadWunderlistSettings: function (settings, userId) {
         return new Promise((resolve, reject) => {
             let todo_list = settings.todoList;
@@ -22,7 +21,7 @@ const funcall = module.exports = {
                     }));
                     else {
                         let db = client.db('smartmirror');
-                        db.collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, docs) => {
+                        db.collection('wunderlist').findOne({"userId": new ObjectId(userId)}, (err, docs) => {
                             if (err) resolve(JSON.stringify({
                                 status: false,
                                 message: responseMessages.DATABASE_COLLECTION_FIND_ERROR,
@@ -30,7 +29,7 @@ const funcall = module.exports = {
                             }));
                             if (docs) {
                                 // UPDATE current settings
-                                db.collection("wunderlist").updateOne({"user_id": new ObjectId(userId)},
+                                db.collection("wunderlist").updateOne({"userId": new ObjectId(userId)},
                                     {
                                         $set: {todo_list: todo_list, client_secret: client_secret, client_id: client_id}
                                     }, (err, response) => {
@@ -60,7 +59,7 @@ const funcall = module.exports = {
                             } else {
                                 // Add new entry
                                 db.collection('wunderlist').insertOne({
-                                    "user_id": new ObjectId(userId),
+                                    "userId": new ObjectId(userId),
                                     "todo_list": todo_list,
                                     "client_secret": client_secret,
                                     "client_id": client_id
@@ -93,7 +92,7 @@ const funcall = module.exports = {
     },
 
     //----------------------Get Wunderlist settings from current user----------------------//
-    getWunderlistSettings: function (userid) {
+    getWunderlistSettings: function (userId) {
         return new Promise((resolve, reject) => {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                 if (err) resolve(JSON.stringify({
@@ -103,65 +102,38 @@ const funcall = module.exports = {
                 }));
                 else {
                     let db = client.db('smartmirror');
-                    // JOIN in MongoDB
-                    db.collection('wunderlist').aggregate([
-                        {
-                            $lookup:
-                                {
-                                    from: "users",
-                                    localField: "user_id",
-                                    foreignField: "_id",
-                                    as: "user"
-                                }
-                        },
-                        {
-                            $project:
-                                {
-                                    "todo_list": 1,
-                                    "client_secret": 1,
-                                    "client_id": 1,
-                                    "username": "$user.username",
-                                    "face_image": "$user.face_image",
-                                }
+
+                    client.db('smartmirror').collection('wunderlist').findOne({"userId": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
+                        if (err) {
+                            client.close();
+                            throw err;
+                        } else {
+                            client.close();
+                            resolve(JSON.stringify({
+                                status: true,
+                                settings: res_find_wunderlist_settings,
+                                message: responseMessages.DATABASE_COLLECTION_AGGREGATE_SUCCESS
+                            }));
                         }
-                    ]).toArray((err_settings, res_settings) => {
-                        if (err_settings) resolve(JSON.stringify({
-                            status: false,
-                            message: responseMessages.DATABASE_COLLECTION_AGGREGATE_ERROR,
-                            error: err
-                        }));
-                        res_settings.map(item => {
-                            item.todo_list = item.todo_list;
-                            item.client_secret = item.client_secret;
-                            item.client_id = item.client_id;
-                            item.face_image = item.face_image[0];
-                            item.username = item.username[0];
-                        });
-                        client.close();
-                        resolve(JSON.stringify({
-                            status: true,
-                            settings: res_settings[0],
-                            message: responseMessages.DATABASE_COLLECTION_AGGREGATE_SUCCESS
-                        }));
                     });
                 }
             });
         });
     },
 
-    sendCredentials: function (currentUser) {
+    sendCredentials: function (userId) {
         return new Promise((resolve, reject) => {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
                 if (err) {
                     console.log('Unable to connect to MongoDB');
                 } else {
-                    client.db('smartmirror').collection('users').findOne({"username": currentUser}, (err, res_find_user) => {
+                    client.db('smartmirror').collection('users').findOne({"_id": new ObjectId(userId)}, (err, res_find_user) => {
                         if (err) {
                             client.close();
                             throw err;
                         } else {
                             let userId = res_find_user._id;
-                            client.db('smartmirror').collection('wunderlist').findOne({"user_id": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
+                            client.db('smartmirror').collection('wunderlist').findOne({"userId": new ObjectId(userId)}, (err, res_find_wunderlist_settings) => {
                                 if (err) {
                                     client.close();
                                     throw err;

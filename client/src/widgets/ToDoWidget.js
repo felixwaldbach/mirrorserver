@@ -21,6 +21,7 @@ class ToDoWidget extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            userId: props.userId,
             wunderlist_settings: [],
             list_name: "",
             lists: [],
@@ -32,11 +33,12 @@ class ToDoWidget extends Component {
     }
 
     componentDidMount() {
-        // socket.emit('send_wunderlist_settings', {
-        //     message: "send me credentials please!"
-        // });
+        socket.emit('send_wunderlist_settings', {
+            userId: this.state.userId
+        });
 
         socket.on('wunderlist_settings', function (data) {
+
             refreshList();
             addListToUI(data);
         });
@@ -87,20 +89,21 @@ class ToDoWidget extends Component {
         mylist.slice(0, 5);
         return (
             <div className="todo-container">
-                {this.state.list_name ? <span id="todo-title">{this.state.list_name}</span>: <span id="todo-title">To Do List</span>}
                 {mylist.length > 0 ?
                     <div>
+                        {this.state.list_name ? <h2>{this.state.list_name}</h2>: <h2>To Do List</h2>}
+
                         {mylist.map((item, index) => {
                                 return (
                                     <div key={index}>
-                                        {index < 7 ? <li id="todo-items">{item.title}</li> : null}
+                                        {index < 30 ? <li id="todo-items">{item.title}</li> : null}
                                     </div>
                                 )
                             }
                         )}
                     </div>
-                    : <span>Nothing to do - Well done!</span>}
-
+                    :
+                    <h2>This To Do List does not contain Items</h2>}
             </div>
         );
     }

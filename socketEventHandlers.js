@@ -1,30 +1,59 @@
+/**
+ * Event Handlers for the Socket IO Server created in entry file server.js
+ */
+
 const jwt = require('jsonwebtoken');
 const fetch = require('node-fetch');
+const ical = require('node-ical');
+var format = require('date-format');
 
+let RssFeedEmitter = require('rss-feed-emitter');
+
+// Database Functions
 const wunderlistCollectionUtils = require('./database/wunderlistCollectionUtils');
 const weatherCollectionUtils = require('./database/weatherCollectionUtils');
 const usersCollectionUtils = require('./database/usersCollectionUtils');
+const calendarCollectionUtils = require('./database/calendarCollectionUtils');
 
-const weatherIcons = require('./jsonModels/weatherIcons');
+// News Feed Manager
+const newsFeedManager = require('./newsFeedManager');
 
-const utils = require('./utils');
-const responseMessages = require('./responseMessages');
+const config = require('./config'); // config file for IP Addresses and Mirror UUID
+const utils = require('./utils'); // general utility functions
+const responseMessages = require('./responseMessages'); // Standard response messages for HTTP requests websocket messages
+const weatherIcons = require('./jsonModels/weatherIcons'); // Blueprint JSON Object for weather icons
 
+const mqttServer = require('./mqttServer');
+
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+
+/**
+ * Function that is exported than this file is required
+ * @param socket Socket Client Object
+ * @param io Socket Server Object
+ */
 module.exports = function (socket, io) {
 
+    /**
+     * Plain message handler used for testing purposes
+     */
     socket.on('message', function (data) {
         console.log(data)
     })
 
-    // Weather Forecast
+    /**
+     * Weather forecast message handler
+     */
     socket.on('send_weather_forecast', async function (data) {
         // get city of user
-        let response = await weatherCollectionUtils.getWeatherSettings(userId);
+        let response = await weatherCollectionUtils.getWeatherSettings(data.userId);
         let requiredCity = JSON.parse(response).settings.city;
+        let weatherkey = JSON.parse(response).settings.weatherkey;
 
         // with this city, fetch weather forecast from openweathermap
         let responseForecast = {};
-        await fetch("http://api.openweathermap.org/data/2.5/forecast?q=" + requiredCity + "&APPID=" + process.env.weatherkey + "&units=metric", {
+        await fetch("http://api.openweathermap.org/data/2.5/forecast?q=" + requiredCity + "&APPID=" + weatherkey + "&units=metric", {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -113,7 +142,25 @@ module.exports = function (socket, io) {
         io.emit('required_city_weather', {forecast: forecast, city: requiredCity});
     });
 
-    // Quotes Widget
+    socket.on('web_indoor_values', function () {
+        mqttServer.publishMessage({
+            topic: 'indoor/dht22/receive/values',
+            payload: 'true',
+            qos: 0,
+            retain: false
+        });
+    });
+
+    socket.on('web_outdoor_values', function () {
+        mqttServer.publishMessage({
+            topic: 'outdoor/dht22/receive/values',
+            payload: 'true',
+            qos: 0,
+            retain: false
+        });
+    });
+
+    // Quotes Widget message handler
     // Send random quotes to UI. Use CURL and GET
     socket.on('send_quotes', async function (data) {
         await fetch("http://quotesondesign.com/wp-json/posts", {
@@ -135,55 +182,137 @@ module.exports = function (socket, io) {
         io.emit('new_quotes', quote[0]);
     });
 
-    // Wunderlist Widget
+    // Wunderlist Settings message handler
     socket.on('send_wunderlist_settings', async function (data) {
-        const response = await wunderlistCollectionUtils.sendCredentials(currentUser);
+        const response = await wunderlistCollectionUtils.sendCredentials(data.userId);
         io.emit('wunderlist_settings', response);
     });
 
+    /**
+     * Trigger face id message handler
+     * Sent when a new face id is created
+     * sends a status string to the frontend
+     */
     socket.on('app_trigger_face_id', function (data) {
         jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
             if (err) {
+                // Send error message to client if not authorized
                 socket.send({
                     status: false,
                     message: responseMessages.USER_DATA_INVALID
                 });
             } else {
-                data.user_id = authData.user_id;
+                data.userId = authData.userId;
                 data.message = "Face ID will be created shortly. Get ready and smile!";
-                io.emit('web_trigger_face_id', data);
+                data.displayMessage = true;
+                io.emit('wait_trigger_face_id', data); // Send new status string to frontend
                 setTimeout(async () => {
                     data.message = "Processing images. Keep smiling!";
-                    io.emit('web_trigger_face_id', data);
-                    await utils.storeFaceDataset(config.uuid, authData.user_id).then(() => {
-                        data.message = "Processing images done. Keep smiling though :)";
-                        io.emit('web_trigger_face_id', data);
-                    });
-                }, 10);
-                io.emit('web_trigger_face_id', {
-                    message: ''
-                });
+                    data.displayMessage = true;
+                    io.emit('wait_trigger_face_id', data); // Send new status string to frontend
+                    await utils.storeFaceDataset(config.uuid, authData.userId).then(() => {
+                        data.message = "";
+                        data.displayMessage = false;
+                        io.emit('wait_trigger_face_id', data); // Send new status string to frontend
+                    }); // Create a new face dataset for the user on the external server
+                }, 10); // Wait 10 seconds so the user in front of the mirror can get ready
             }
         });
     });
 
-    socket.on('app_update_widgets', function (data) {
+    /**
+     * Update widgets message handler
+     * Sent when a drag drop event is triggered in the Smartphone App
+     */
+    socket.on('app_update_widgets', function (data, callback) {
         jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
             if (err) {
+                // Send error message to client if not authorized
                 socket.send(({
                     status: false,
                     message: responseMessages.USER_NOT_AUTHORIZED
                 }))
             } else {
-                const user_id = authData.user_id;
-                let response = await usersCollectionUtils.updateUserWidgets(user_id, data.widget_name, data.previous_slot, data.slot);
+                const userId = authData.userId;
+                // update the user entry in the database with the new widget arrangement
+                let response = await usersCollectionUtils.updateUserWidgets(userId, data.widgetName, data.previousSlot, data.slot);
                 io.emit('web_update_widgets', {
-                    user_id: user_id
-                });
-                socket.send(response);
+                    userId: userId
+                }); // Send message to frontend to render new widgets for the authorized user
+                callback(response);
             }
         });
     })
 
+    /**
+     * Update newsFeedItems message handler
+     * Sent when a new list item is added to the news feed url list in the Smartphone App
+     */
+    socket.on('app_update_newsFeedItems', function (data, callback) {
+        jwt.verify(data.token, process.env.secretkey, async (err, authData) => {
+            if (err) {
+                // Send error message to client if not authorized
+                socket.send(({
+                    status: false,
+                    message: responseMessages.USER_NOT_AUTHORIZED
+                }))
+            } else {
+                const userId = authData.userId;
+                // update the user entry in the database with the new news feed items
+                let response = await usersCollectionUtils.updateNewsFeedItems(userId, data.url, data._id);
+                newsFeedManager.setNewsFeedEmitter(userId, io);
+                callback(response);
+            }
+        });
+    })
+
+    /**
+     * Web set newsFeedEmitter message handler for Frontend
+     * Sent when the Frontend requests news for the currently logged in user
+     * Creates a new RSS emitter object in the newsFeedManager file that constantly sends new news
+     */
+    socket.on('web_set_newsFeedEmitter', async function (data) {
+        newsFeedManager.setNewsFeedEmitter(data.userId, io);
+    });
+
+    /**
+     * Web destroy newsFeedEmitter message handler for Frontend
+     * Sent when the Frontend requests news for the currently logged in user
+     * Creates a new RSS emitter object in the newsFeedManager file that constantly sends new news
+     */
+    socket.on('web_destroy_newsFeedEmitter', async function (data) {
+        newsFeedManager.destroyNewsFeedEmitter();
+    });
+
+    /**
+     * Calendar iCal handler
+     */
+    socket.on('send_calendar_entries', async function (data) {
+
+        let response = await calendarCollectionUtils.sendCalendar(data.userId);
+        let calendar = [];
+        let today = format.asString('yyyy-MM-dd', new Date());
+
+        ical.fromURL(JSON.parse(response).settings.calendarICS, {}, function (err, data) {
+
+            for (let k in data) {
+                if (data.hasOwnProperty(k)) {
+                    var ev = data[k];
+                    if (data[k].type == 'VEVENT') {
+                        let ev_start = ev.start;
+                        ev_start = JSON.stringify(ev_start);
+                        ev_start = ev_start.substring(1, 11);
+                        if (today === ev_start) {
+                            calendar.push({
+                                "description": ev.summary,
+                                "time": ev.start.toLocaleTimeString('en-GB'),
+                            });
+                        }
+                    }
+                }
+            }
+            io.emit('calendar_entries', calendar);
+        });
+    });
 
 };

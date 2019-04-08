@@ -1,3 +1,7 @@
+/*
+Example users collection document
+JSON objects like this are stored in the users collection
+*/
 {
   "_id": "ObjectId",
   "username": "username",
@@ -11,5 +15,24 @@
     -781400635,
     -1336466072
   ],
-  "face_image": ""
+  "widgets": [
+    {
+      "name": "WidgetName0"
+    },
+    {
+      "name": "WidgetName1"
+    },
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "newsFeedItems": [
+    {
+      "_id": "ObjectId",
+      "url": "https://www.example.com"
+    }
+  ]
 }

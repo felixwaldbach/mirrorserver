@@ -1,6 +1,5 @@
 {
   "_id": "ObjectId",
   "userId": ObjectId(userId),
-  "city": Stuttgart,
-  "weatherkey": "key123key123"
+  "calendarICS": "asd.ics"
 }

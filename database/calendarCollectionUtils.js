@@ -5,13 +5,12 @@ const responseMessages = require('../responseMessages');
 
 const funcall = module.exports = {
 
-    uploadWeatherSettings: function (settings, userId) {
+    uploadCalendarSettings(settings, userId)  {
         return new Promise((resolve, reject) => {
-            let city = settings.city;
-            let weatherkey = settings.weatherkey;
+            let calendarICS = settings.calendarICS;
 
             // Check for empty or blank entries
-            if (city.trim().length !== 0 && city !== null) {
+            if (calendarICS.trim().length !== 0 && calendarICS !== null) {
                 // Check if has already settings
                 MongoClient.connect(mongoURL, {useNewUrlParser: true}, async function (err, client) {
                     if (err) resolve(JSON.stringify({
@@ -21,7 +20,7 @@ const funcall = module.exports = {
                     }));
                     else {
                         let db = client.db('smartmirror');
-                        db.collection('weather').findOne({"userId": new ObjectId(userId)}, (err, docs) => {
+                        db.collection('calendar').findOne({"userId": new ObjectId(userId)}, (err, docs) => {
                             if (err) resolve(JSON.stringify({
                                 status: false,
                                 message: responseMessages.DATABASE_COLLECTION_FIND_ERROR,
@@ -29,9 +28,9 @@ const funcall = module.exports = {
                             }));
                             if (docs) {
                                 // UPDATE current settings
-                                db.collection("weather").updateOne({"userId": new ObjectId(userId)},
+                                db.collection("calendar").updateOne({"userId": new ObjectId(userId)},
                                     {
-                                        $set: {city: city}
+                                        $set: {calendarICS: calendarICS}
                                     }, (err, response) => {
                                         if (err) {
                                             client.close();
@@ -58,10 +57,9 @@ const funcall = module.exports = {
                                     });
                             } else {
                                 // Add new entry
-                                db.collection('weather').insertOne({
+                                db.collection('calendar').insertOne({
                                     "userId": new ObjectId(userId),
-                                    "city": city,
-                                    "weatherkey": weatherkey
+                                    "calendarICS": calendarICS
                                 }, function (err, result) {
                                     if (err) {
                                         client.close();
@@ -84,19 +82,19 @@ const funcall = module.exports = {
             } else {
                 resolve(JSON.stringify({
                     status: false,
-                    message: responseMessages.WEATHER_DATA_INVALID
+                    message: responseMessages.CALENDAR_DATA_INVALID
                 }));
             }
         });
     },
 
-    getWeatherSettings: function (userId) {
+    getCalenderSettings: function (userId) {
         return new Promise((resolve, reject) => {
             MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
                 if (err) {
                     console.log('Unable to connect to MongoDB');
                 } else {
-                    client.db('smartmirror').collection('weather').findOne({"userId": new ObjectId(userId)}, (err, res_find_weather_setup) => {
+                    client.db('smartmirror').collection('calendar').findOne({"userId": new ObjectId(userId)}, (err, res_find_calendar_settings) => {
                         if (err) {
                             client.close();
                             throw err;
@@ -104,7 +102,7 @@ const funcall = module.exports = {
                             client.close();
                             resolve(JSON.stringify({
                                 status: true,
-                                settings: res_find_weather_setup,
+                                settings: res_find_calendar_settings,
                                 message: responseMessages.DATABASE_COLLECTION_AGGREGATE_SUCCESS
                             }));
                         }
@@ -112,6 +110,30 @@ const funcall = module.exports = {
                 }
             });
         });
-    }
+    },
+
+    sendCalendar: function (userId) {
+        return new Promise((resolve, reject) => {
+            MongoClient.connect(mongoURL, {useNewUrlParser: true}, function (err, client) {
+                if (err) {
+                    console.log('Unable to connect to MongoDB');
+                } else {
+                    client.db('smartmirror').collection('calendar').findOne({"userId": new ObjectId(userId)}, (err, res_find_calendar_settings) => {
+                        if (err) {
+                            client.close();
+                            throw err;
+                        } else {
+                            client.close();
+                            resolve(JSON.stringify({
+                                status: true,
+                                settings: res_find_calendar_settings,
+                                message: responseMessages.DATABASE_COLLECTION_AGGREGATE_SUCCESS
+                            }));
+                        }
+                    });
+                }
+            });
+        });
+    },
 
 }

@@ -10,6 +10,7 @@ class WeatherWidget extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            userId: props.userId,
             city: "",
             forecast: []
         }
@@ -17,10 +18,10 @@ class WeatherWidget extends Component {
 
     componentDidMount() {
         socket.emit('send_weather_forecast', {
-            message: "send me forecast please!"
+            userId: this.state.userId
         });
 
-        socket.on('temperature_inside_data', function (data) {
+        socket.on('indoor_dht22_temperature', function (data) {
             addDataToInsideTemperature(data);
         });
 
@@ -80,7 +81,8 @@ class WeatherWidget extends Component {
         return (
             <div className="weather-container">
 
-                {forecast.length == 0 ? <h2>No forecast available for {this.state.city}</h2> : <span id="weather-city">Weather for {this.state.city}</span>}
+                {forecast.length == 0 ? <h2>No forecast available!</h2> :
+                    <h2>Weather for {this.state.city}</h2>}
 
                 <table>
                     <tr id="head-border">
@@ -120,7 +122,7 @@ class WeatherWidget extends Component {
                             <br/>
                             Outdoor: {this.state.current_outdoor_temperature} °C
                         </span>
-                    : null}
+                        : null}
                 </h3>
 
             </div>

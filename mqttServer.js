@@ -1,71 +1,148 @@
+/**
+ * MQTT Broker starting routine and topic message handlers
+ * Attaches the MQTT server to the provided http server object
+ */
+
 const jwt = require('jsonwebtoken');
 const mosca = require('mosca');
 const os = require('os');
 
-var mqttServer = new mosca.Server({});
+const utils = require('./utils'); // general utility functions
+const config = require('./config'); // config file for IP Addresses and Mirror UUID
+const usersCollectionUtils = require('./database/usersCollectionUtils'); // config file for IP Addresses and Mirror UUID
 
-const utils = require('./utils');
-const config = require('./config')
+var mqttServer = new mosca.Server({}); // Create MQTT Server instance with mosca
+
+var processingFaceRecognition = false;
 
 function start(http, io) {
     mqttServer.attachHttpServer(http);
 
-    // MQTT
-    mqttServer.on('clientConnected', function (client) {
-        console.log('client connected: ' + client.id);
-    });
-
+    /**
+     * Message: ready
+     * Parameters: -
+     * Function: Is called whenever the MQTT Broker starts running
+     */
     mqttServer.on('ready', function () {
         console.log('Mosca MQTT server is up and running');
     });
 
-    // fired when a message is received
-    mqttServer.on('published', async function (packet, client) {
-        console.log(packet.topic);
-        console.log(packet.payload.toString('utf8'));
-        switch (packet.topic) {
-            case 'temperature/inside':
-                io.emit('temperature_inside_data', packet.payload.toString('utf8'));
-                break;
-            case 'temperature/outside':
-                io.emit('temperature_outside_data', packet.payload.toString('utf8'));
-                break;
-            case 'temperature/pir':
-                // 1 = motion detected, 0 = no motion detected, take pictures and send to django server which will return the user_id of the recognized user
-                if (packet.payload.toString('utf8') == "1") {
-                    // start session
-                    let response = await utils.initializeWebcam(os.platform());
-                    response = await utils.takeImage(response.Webcam, os.platform(), 0, config.uuid);
-                    response = await utils.recognizeImage(config.uuid, response.base64);
-                    console.log(response);
-                    //res.send(JSON.stringify(response)); // coming from django server
+    /**
+     * Message: clientConnected
+     * Parameters: id: Client id of the connected client
+     * Function: Called whenever a new MQTT Client connects to this Broker
+     */
+    mqttServer.on('clientConnected', function (client) {
+        console.log('client connected: ' + client.id);
+    });
 
-                    // create no expiring session token with the user_id of the recognized user
-                    response.status = true;
-                    if (response.status) {
-                        jwt.sign({
-                            user_id: response.user_id
-                        }, process.env.secretkey, (err, token) => {
-                            client.close();
-                            io.emit('handle_session', {
-                                token: token,
-                                user_id: response.user_id,
-                                motion: packet.payload.toString('utf8')
+
+    /**
+     * Message: published
+     * Parameters: packet: Object sent to the topic containing the payload, client: client that sent the message
+     * Function: Called whenever a message is published to a topic
+     */
+    mqttServer.on('published', async function (packet, client) {
+        // Switch-Case Statement to handle incoming topic paths
+        console.log(packet.topic + ", " + packet.payload.toString('utf8'));
+
+        switch (packet.topic) {
+            // Incoming PIR motion data from the PIR
+            case 'indoor/pir/send/motion':
+                // Check if a motion has been detected
+                if (packet.payload.toString('utf8') == "1") { // If Motion detected, trigger Face Recognition Session Creation algorithms
+                    if (processingFaceRecognition) break;
+                    processingFaceRecognition = true;
+                    let response = await utils.initializeWebcam(os.platform()); // Initialize webcam object based on OS
+                    response = await utils.takeImage(response.Webcam, os.platform(), 0, config.uuid); // take an image of the current scene
+                    response = await utils.recognizeImage(config.uuid, response.base64); // send image to the external server for face recognition
+                    // Check if a user was detected on the image
+                    if (response.userId && response.userId !== 'unknown') { // If a user was detected, start session and create webtoken
+                        let user = await usersCollectionUtils.getUserData(response.userId);
+                        if (JSON.parse(user).user_data) {
+                            jwt.sign({
+                                userId: response.userId
+                            }, process.env.secretkey, (err, token) => {
+                                io.emit('handle_session', { // Send token and userId as socket message
+                                    token: token,
+                                    userId: response.userId,
+                                    motion: packet.payload.toString('utf8')
+                                });
+
+                                mqttServer.publish({
+                                    topic: 'indoor/pir/receive/timeout',
+                                    payload: 'true',
+                                    qos: 0,
+                                    retain: false
+                                })
+                                processingFaceRecognition = false
                             });
+                        } else {
+                            console.log("No real user identified. No user Profile will be loaded.")
+
+                            // If no user recognized, send empty user id as socket message
+                            io.emit('handle_session', {
+                                userId: null,
+                                motion: '0'
+                            });
+
+                            mqttServer.publish({
+                                topic: 'indoor/pir/receive/timeout',
+                                payload: 'false',
+                                qos: 0,
+                                retain: false
+                            })
+                            processingFaceRecognition = false
+                        }
+                    } else { // If no user recognized, send empty user id as socket message
+                        io.emit('handle_session', {
+                            userId: null,
+                            motion: '0'
                         });
-                    } else {
-                        console.log("Something went wrong during face recognition...");
-                        io.emit('handle_session', {user_id: "empty", motion: "0"});     // kill session because error happened, try again in 3 minutes...
+                        mqttServer.publish({
+                            topic: 'indoor/pir/receive/timeout',
+                            payload: 'false',
+                            qos: 0,
+                            retain: false
+                        })
+                        processingFaceRecognition = false
                     }
-                } else {
-                    // kill session because no one is in front of the mirror
-                    io.emit('handle_session', {user_id: "empty", motion: packet.payload.toString('utf8')});
+                } else { // If no motion detected, send empty user id as socket message
+                    io.emit('handle_session', {
+                        userId: null,
+                        motion: '0'
+                    });
                 }
+                break;
+            case 'indoor/dht22/send/temperature':
+                io.emit('indoor_temperature', {
+                    temperature: packet.payload.toString('utf8')
+                });
+                break;
+            case 'indoor/dht22/send/humidity':
+                io.emit('indoor_humidity', {
+                    humidity: packet.payload.toString('utf8')
+                });
+                break;
+            case 'outdoor/dht22/send/temperature':
+                io.emit('outdoor_temperature', {
+                    temperature: packet.payload.toString('utf8')
+                });
+                break;
+            case 'outdoor/dht22/send/humidity':
+                io.emit('outdoor_humidity', {
+                    humidity: packet.payload.toString('utf8')
+                });
                 break;
         }
     });
 }
 
+function publishMessage(packet) {
+    mqttServer.publish(packet);
+}
+
 module.exports = {
-    start
+    start,
+    publishMessage
 }

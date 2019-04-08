@@ -5,6 +5,10 @@ import NewsFeed from "./widgets/NewsFeed";
 import QuotesWidget from "./widgets/QuotesWidget";
 import ToDoWidget from "./widgets/ToDoWidget";
 import WeatherWidget from "./widgets/WeatherWidget";
+import CalendarWidget from "./widgets/CalendarWidget";
+import IndoorWidget from "./widgets/IndoorWidget";
+import OutdoorWidget from "./widgets/OutdoorWidget";
+
 import QRCode from "./QRCode";
 import {bake_cookie, delete_cookie} from 'sfcookies';
 
@@ -16,25 +20,42 @@ class App extends Component {
     state = {
         htmlElements: [],
         redirectToQRCode: true,
-        message: 'test',
-        user_id: ''
+        message: '',
+        displayMessage: false,
+        userId: ''
     };
 
     async componentDidMount() {
         const app = this;
         socket.on('handle_session', function (data) {
-            app.addCookies(data);
+            if (data.motion === "1") {
+                // set cookie & get widget allignment for this user
+                bake_cookie("token", data.token);
+                app.setState({
+                    userId: data.userId,
+                    redirectToQRCode: false
+                });
+                app.renderWidgets();
+            } else if (data.motion === "0") {
+                app.setState({
+                    userId: null,
+                    htmlElements: [],
+                    redirectToQRCode: true
+                });
+                delete_cookie('token');
+            }
         });
 
-        socket.on('web_trigger_face_id', function (data) {
-            this.setState({
-                message: data.message
+        socket.on('wait_trigger_face_id', function (data) {
+            app.setState({
+                message: data.message,
+                displayMessage: data.displayMessage
             })
         });
 
         socket.on('web_update_widgets', async function (data) {
-            if (data.user_id === app.state.user_id) {
-                let response = await getUserData(app.state.user_id);
+            if (data.userId === app.state.userId) {
+                let response = await getUserData(app.state.userId);
                 app.setState({
                     widgets: response.user_data.widgets
                 });
@@ -43,29 +64,9 @@ class App extends Component {
         });
     }
 
-    async addCookies(data) {
-        if (data) {
-            if (data.motion === "1") {
-                // set cookie & get widget allignment for this user
-                bake_cookie("token", data.token);
-                this.setState({
-                    user_id: data.user_id,
-                    redirectToQRCode: false
-                });
-                this.renderWidgets();
-            } else if (data.motion === "0") {
-                this.setState({
-                    user_id: null,
-                    htmlElements: [],
-                    redirectToQRCode: true
-                });
-                delete_cookie('token');
-            }
-        }
-    }
-
     async renderWidgets() {
-        let response = await getUserData(this.state.user_id);
+        let app = this;
+        let response = await getUserData(this.state.userId);
 
         let htmlElements = [];
         response.user_data.widgets.forEach(function (widget) {
@@ -75,16 +76,25 @@ class App extends Component {
                         htmlElements.push(<ClockWidget style={{color: 'white'}}/>);
                         break;
                     case "NewsFeed":
-                        htmlElements.push(<NewsFeed/>);
+                        htmlElements.push(<NewsFeed userId={app.state.userId}/>);
                         break;
                     case "QuotesWidget":
                         htmlElements.push(<QuotesWidget/>);
                         break;
                     case "ToDoWidget":
-                        htmlElements.push(<ToDoWidget/>);
+                        htmlElements.push(<ToDoWidget userId={app.state.userId}/>);
                         break;
                     case "WeatherWidget":
-                        htmlElements.push(<WeatherWidget/>);
+                        htmlElements.push(<WeatherWidget userId={app.state.userId}/>);
+                        break;
+                    case "CalendarWidget":
+                        htmlElements.push(<CalendarWidget userId={app.state.userId}/>);
+                        break;
+                    case "IndoorWidget":
+                        htmlElements.push(<IndoorWidget/>);
+                        break;
+                    case "OutdoorWidget":
+                        htmlElements.push(<OutdoorWidget/>);
                         break;
                     default:
                         htmlElements.push(null);
@@ -104,6 +114,8 @@ class App extends Component {
             this.state.redirectToQRCode ?
                 <QRCode/> :
                 <div className="container">
+                    {this.state.displayMessage ? <p className={'faceIdMessage'}>{this.state.message}</p> : null}
+
                     <div className="upper-row">
                         <div id="widget">
                             {this.state.htmlElements[0]}
@@ -118,7 +130,7 @@ class App extends Component {
                             {this.state.htmlElements[3]}
                         </div>
                     </div>
-                    <p>{this.state.message}</p>
+
                     <div className="lower-row">
                         <div id="widget">
                             {this.state.htmlElements[4]}
