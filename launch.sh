@@ -3,7 +3,7 @@
 echo "Starting Configuration Script for Smart Mirror..."
 
 # some sleeping time till wifi connects
-sleep 20
+sleep 15
 
 # check display rotation
 display_rotation="$(grep "display_rotate" /boot/config.txt)"
@@ -27,7 +27,6 @@ fi
 
 #change to directory where the code folder is based
 cd ~/Desktop
-
 
 if [ $(ping -q -w 1 -c 1 `ip r | grep default | cut -d ' ' -f 3` > /dev/null && echo ok || echo error) == "ok" ]
 then
@@ -78,7 +77,6 @@ then
 	sudo apt-get -y install git
 	sudo apt-get -y install mongodb
 
-
 	# check if project exists: yes = direct to that folder, no = git clone
 	if [ -d "mirrorserver" ];
 	then
@@ -99,10 +97,8 @@ then
 	# change to project directory
 	cd ~/Desktop/mirrorserver
 
-
 	echo "Setting up database"
 	node mongoWidgetScript.js
-
 
 	# check if .env for environment variables exists
 	if [ -e .env ]
@@ -117,7 +113,6 @@ then
 		echo $secretkey >> .env
 	fi
 
-
 	# check if config.json exists
 	if [ -e config.json ]
 	then
@@ -128,7 +123,6 @@ then
 		$(touch config.json)
 	fi
 
-
 	# check if config.json has content
 	if [ -z "$config" ]
 	then
@@ -138,7 +132,6 @@ then
 		echo "config.json is not empty!"
 		configIsEmpty=false
 	fi
-
 
 	if [ "$configIsEmpty" = true ]
 	then
@@ -152,7 +145,7 @@ then
 		django_address="http://"
 
 		host_address+=$ip
-		django_address+="192.169.172.20"
+		django_address+="172.20.10.2"
 
 		host_address+=:5000
 		django_address+=:8000
@@ -185,17 +178,13 @@ then
 	nohup npm start &
 	cd ~/Desktop
 
-
 	# Start Browser in fullscreen
 	echo "Opening Browser..."
-	chromium-browser --start-fullscreen --disable-session-crashed-bubble --disable-infobars http://localhost:3000 &
-	#xdg-open http://localhost:3000 &
-	sleep 30
-	xdotool key "F11" &
-
+	chromium-browser --start-fullscreen --disable-session-crashed-bubble --disable-infobars &
 
 else
 	echo "No Internet connection"
+	# try again in 60 seconds...
 	sleep 60
 	sudo reboot
 fi
