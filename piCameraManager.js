@@ -14,6 +14,7 @@ const request = require('request');
 const fs = require('fs-extra');
 const path = require('path');
 const TRAIN_IMAGE_NUMBER = 100;
+const TIMEOUT = 75000;
 
 var config = require('./config'); // config file for IP Addresses and Mirror UUID
 const responseMessages = require('./responseMessages'); // Standard response messages for HTTP requests websocket messages
@@ -38,11 +39,11 @@ var pi_opts_train = {
     width: 640,
     height: 360,
     quality: 100,
-    timeout: 75000,
+    timeout: TIMEOUT,
     verbose: false,
     nopreview: true,
     output: path.join(__dirname, '.', 'public', 'uploads', 'temporary', 'train%d.png'),
-    timelapse: 750,
+    timelapse: TIMEOUT / TRAIN_IMAGE_NUMBER,
     sh: 100,
     br: 60
 };
@@ -55,7 +56,7 @@ var pi_opts_train = {
  * @param userId to store image in correct user folder inside the mirror folder
  * @returns {Promise<any>} returns JSON object with error, response and body sent back from the external server
  */
-function sendImageToServer(base64, filename, mirror_uuid, userId) {
+function sendImageToServer(base64, filename, mirror_uuid, userId, lastImage) {
     return new Promise(async (resolve, reject) => {
         await request.post(config.django_address + '/face/storetrain', {
             json: {
@@ -63,7 +64,7 @@ function sendImageToServer(base64, filename, mirror_uuid, userId) {
                 userId: userId,
                 base64: base64,
                 filename: filename,
-                lastImage: filename.replace('.png', '').endsWith(TRAIN_IMAGE_NUMBER)
+                lastImage: lastImage
             }
         }, async (error, django_response, body) => {
             if (error) {
@@ -87,7 +88,7 @@ async function takeImage(mirror_uuid) {
         let Webcam = new RaspiCam(pi_opts_reco);
         let response;
         Webcam.on('exit', async function (timestamp) {
-            let bitmap = await fs.readFileSync(path.join(__dirname, '.', 'public', 'uploads', 'temporary', 'train%d.png'));
+            let bitmap = await fs.readFileSync(path.join(__dirname, '.', 'public', 'uploads', 'temporary', 'reco.png'));
             let data = new Buffer(bitmap).toString('base64');
             response = recognizeImage(mirror_uuid, data);
             resolve(response);
@@ -132,13 +133,15 @@ function recognizeImage(mirror_uuid, base64) {
 async function storeFaceDataset(mirror_uuid, userId) {
     let Webcam = new RaspiCam(pi_opts_train);
     let response;
+    let data;
     Webcam.on('read', async function (err, timestamp, filename) {
         let bitmap = await fs.readFileSync(path.join(__dirname, '.', 'public', 'uploads', 'temporary', filename));
-        let data = new Buffer(bitmap).toString('base64'); // Convert image to base64
-        response = await sendImageToServer(data, filename, mirror_uuid, userId);
+        data = new Buffer(bitmap).toString('base64'); // Convert image to base64
+        response = await sendImageToServer(data, filename, mirror_uuid, userId, false);
     });
 
     Webcam.on('exit', async function (timestamp) {
+        response = await sendImageToServer(data, 'lastImage.png', mirror_uuid, userId, true);
         fs.removeSync(path.join(__dirname, '.', 'public', 'uploads', 'temporary'))
     });
 
