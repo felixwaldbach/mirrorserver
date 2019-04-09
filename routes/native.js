@@ -7,6 +7,10 @@ var express = require('express');
 var router = express.Router();
 const jwt = require('jsonwebtoken');
 
+var fs = require('fs');
+var fileName = '../config.json';
+var file = require(fileName);
+
 // Database utility functions Imports
 const usersCollectionUtils = require('../database/usersCollectionUtils');
 const widgetsCollectionUtils = require('../database/widgetsCollectionUtils');
@@ -202,6 +206,33 @@ router.get('/getCalenderSettings', verifyToken, async (req, res) => {
             const userId = authData.userId;
             let response = await calendarCollectionUtils.getCalenderSettings(userId);
             res.send(response);
+        }
+    });
+});
+
+// Setup Django IP address over Smartphone
+router.post('/uploadDjangoIP', verifyToken, async (req, res) => {
+    jwt.verify(req.token, process.env.secretkey, async (err, authData) => {
+        if (err) {
+            res.send(JSON.stringify({
+                status: false,
+                message: responseMessages.USER_NOT_AUTHORIZED
+            }));
+        } else {
+            // read ip adress and update config.json
+            file.django_address = "http://" + req.body.djangoIP;
+
+            fs.writeFile("./config.json", JSON.stringify(file), function (err) {
+              if (err) return console.log(err);
+              console.log(JSON.stringify(file));
+              console.log('writing to ' + "./config.json");
+            });
+
+            res.send(JSON.stringify({
+                status: true,
+                message: responseMessages.DJANGO_UPDATE_SUCCESS
+            }));
+
         }
     });
 });
