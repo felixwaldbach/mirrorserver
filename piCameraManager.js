@@ -12,6 +12,7 @@
 const RaspiCam = require('raspicam');
 const request = require('request');
 const fs = require('fs-extra');
+const path = require('path');
 const TRAIN_IMAGE_NUMBER = 100;
 
 var config = require('./config'); // config file for IP Addresses and Mirror UUID

@@ -17,7 +17,7 @@ const TRAIN_IMAGE_NUMBER = 100;
 var config = require('./config'); // config file for IP Addresses and Mirror UUID
 const responseMessages = require('./responseMessages');
 const macCameraManager = require("./macCameraManager");
-const piCameraManager = require("./macCameraManager"); // Standard response messages for HTTP requests websocket messages
+const piCameraManager = require("./piCameraManager"); // Standard response messages for HTTP requests websocket messages
 
 /**
  * Function to verify session tokens sent with HTTP requests
