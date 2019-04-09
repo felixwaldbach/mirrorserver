@@ -136,9 +136,6 @@ async function storeFaceDataset(mirror_uuid, userId) {
         let bitmap = await fs.readFileSync(path.join(__dirname, '.', 'public', 'uploads', 'temporary', filename));
         let data = new Buffer(bitmap).toString('base64'); // Convert image to base64
         response = await sendImageToServer(data, filename, mirror_uuid, userId);
-        fs.unlink(path.join(__dirname, '.', 'public', 'uploads', 'temporary', filename), (err) => {
-            if (err) throw err;
-        }); // delete file after converting image to bas
     });
 
     Webcam.on('exit', async function (timestamp) {
