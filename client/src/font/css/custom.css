@@ -46,7 +46,7 @@ li {
     text-indent: 1em;
 }
 
-#news-feed-container {
+.news-feed-container {
     font-size: 14px;
     margin: 0 auto;
     height: 100%;
