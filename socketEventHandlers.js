@@ -210,7 +210,7 @@ module.exports = function (socket, io) {
                     data.message = "Processing images. Keep smiling!";
                     data.displayMessage = true;
                     io.emit('wait_trigger_face_id', data); // Send new status string to frontend
-                    await utils.storeFaceDataset(config.uuid, authData.userId).then(() => {
+                    await utils.triggerStoreFaceDataset(config.uuid, authData.userId).then(() => {
                         data.message = "";
                         data.displayMessage = false;
                         io.emit('wait_trigger_face_id', data); // Send new status string to frontend
