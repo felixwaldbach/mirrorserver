@@ -53,9 +53,7 @@ function start(http, io) {
                 if (packet.payload.toString('utf8') == "1") { // If Motion detected, trigger Face Recognition Session Creation algorithms
                     if (processingFaceRecognition) break;
                     processingFaceRecognition = true;
-                    let response = await utils.initializeWebcam(os.platform()); // Initialize webcam object based on OS
-                    response = await utils.takeImage(response.Webcam, os.platform(), 0, config.uuid); // take an image of the current scene
-                    response = await utils.recognizeImage(config.uuid, response.base64); // send image to the external server for face recognition
+                    let response = await utils.triggerFaceRecognition(config.uuid);
                     // Check if a user was detected on the image
                     if (response.userId && response.userId !== 'unknown') { // If a user was detected, start session and create webtoken
                         let user = await usersCollectionUtils.getUserData(response.userId);
