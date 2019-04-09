@@ -33,41 +33,41 @@ then
 	echo "Internet connection okay"
 
 	# get ip...
-	ip="$(hostname -I | awk '{print $1}')"
-	ip="${ip//[[:space:]]/}"
-	ip_router="${ip%.*}.1"
-	ip_static="${ip%.*}.200"
+	#ip="$(hostname -I | awk '{print $1}')"
+	#ip="${ip//[[:space:]]/}"
+	#ip_router="${ip%.*}.1"
+	#ip_static="${ip%.*}.200"
 
 	# setup static ip address
-	static_ip_address="$(grep "static ip_address=" /etc/dhcpcd.conf)"
-	static_routers="$(grep "static_routers=" /etc/dhcpcd.conf)"
-	static_domain_name_servers="$(grep "static domain_name_servers=" /etc/dhcpcd.conf)"
+	#static_ip_address="$(grep "static ip_address=" /etc/dhcpcd.conf)"
+	#static_routers="$(grep "static_routers=" /etc/dhcpcd.conf)"
+	#static_domain_name_servers="$(grep "static domain_name_servers=" /etc/dhcpcd.conf)"
 
-	if [[ ($static_ip_address=$ip+"/24" || $static_routers=$ip_router+"/24" || $static_domain_name_servers=$ip_router) ]]
-	then
-		sudo rm -rf /etc/dhcpcd.conf
+	#if [[ ($static_ip_address=$ip+"/24" || $static_routers=$ip_router+"/24" || $static_domain_name_servers=$ip_router) ]]
+	#then
+	#	sudo rm -rf /etc/dhcpcd.conf
 
-		echo "static ip empty or wrong, setting now."
-		static_ip_address=$ip_static
-		static_ip_address+="/24"
-		static_routers=$ip_router
-		static_domain_name_servers=$ip_router
+	#	echo "static ip empty or wrong, setting now."
+	#	static_ip_address=$ip_static
+	#	static_ip_address+="/24"
+	#	static_routers=$ip_router
+	#	static_domain_name_servers=$ip_router
 
-		echo $static_ip_address
-		echo $static_routers
-		echo $static_domain_name_servers
+	#	echo $static_ip_address
+	#	echo $static_routers
+	#	echo $static_domain_name_servers
 
-		sudo touch /etc/dhcpcd.conf
+	#	sudo touch /etc/dhcpcd.conf
 
-		sudo sh -c "echo '# Static IP' >> /etc/dhcpcd.conf"
-		sudo sh -c "echo 'static ip_address=$static_ip_address' >> /etc/dhcpcd.conf"
-		sudo sh -c "echo 'static routers=$static_routers' >> /etc/dhcpcd.conf"
-		sudo sh -c "echo 'static domain_name_servers=$static_domain_name_servers' >> /etc/dhcpcd.conf"
-	else
-		echo "static ip is fine..."
-		echo $ip_router
-		echo $ip_static
-	fi
+	#	sudo sh -c "echo '# Static IP' >> /etc/dhcpcd.conf"
+	#	sudo sh -c "echo 'static ip_address=$static_ip_address' >> /etc/dhcpcd.conf"
+	#	sudo sh -c "echo 'static routers=$static_routers' >> /etc/dhcpcd.conf"
+	#	sudo sh -c "echo 'static domain_name_servers=$static_domain_name_servers' >> /etc/dhcpcd.conf"
+	#else
+	#	echo "static ip is fine..."
+	#	echo $ip_router
+	#	echo $ip_static
+	#fi
 
 	# important package installations and updates
 	sudo apt-get -y install jq
