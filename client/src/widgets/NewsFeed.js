@@ -1,11 +1,6 @@
 import React, {Component} from 'react';
 import {socket} from '../socketConnection';
-import {
-    Link,
-    Element,
-    Events,
-    animateScroll as scroll
-} from 'react-scroll'
+
 
 class NewsFeed extends Component {
 
@@ -14,9 +9,6 @@ class NewsFeed extends Component {
         this.state = {
             userId: props.userId,
             newsFeedItems: [],
-            scrollToBottom: true,
-            durationTime: 1000,
-            containerId: 'news-feed-container'
         }
     }
 
@@ -24,43 +16,18 @@ class NewsFeed extends Component {
         socket.emit('web_set_newsFeedEmitter', {
             userId: this.state.userId
         });
-
         let app = this;
         socket.on('web_news_feed_update', function (data) {
+            console.log(data)
             if (data.userId === app.state.userId) {
                 let handleNewsFeedItems = app.state.newsFeedItems;
-                if (handleNewsFeedItems.length >= 60) {
-                    handleNewsFeedItems.splice(0, 1);
+                if (handleNewsFeedItems.length > 4) {
+                    handleNewsFeedItems.pop();
                 }
-                handleNewsFeedItems.push(data.news);
+                handleNewsFeedItems.unshift(data.news);
                 app.setState({
                     newsFeedItems: handleNewsFeedItems
-                })
-            }
-        });
-
-        scroll.scrollTo(1);
-        Events.scrollEvent.register('end', function (to, element) {
-            if (app.state.newsFeedItems.length > 15) {
-                if (app.state.scrollToBottom) {
-                    console.log('Scroll to Bottom')
-                    scroll.scrollToBottom({
-                        duration: app.state.durationTime * app.state.newsFeedItems.length,
-                        containerId: app.state.containerId
-                    });
-                    app.setState({
-                        scrollToBottom: false
-                    })
-                } else {
-                    console.log('Scroll to Top')
-                    scroll.scrollToTop({
-                        duration: app.state.durationTime * app.state.newsFeedItems.length,
-                        containerId: app.state.containerId
-                    });
-                    app.setState({
-                        scrollToBottom: true
-                    })
-                }
+                });
             }
         });
     }
@@ -71,7 +38,9 @@ class NewsFeed extends Component {
 
     render() {
         return (
-            <div id={'news-feed-container'}>
+            <div id={this.state.containerId}
+                 className={'news-feed-container'}
+            >
                 <ul id={'news-feed-list'}>
                     {
                         this.state.newsFeedItems.map(item => <li className={'news-feed-item'}>{item}</li>)
