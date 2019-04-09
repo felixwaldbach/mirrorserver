@@ -222,10 +222,10 @@ router.post('/uploadDjangoIP', verifyToken, async (req, res) => {
             // read ip adress and update config.json
             file.django_address = "http://" + req.body.djangoIP;
 
-            fs.writeFile(fileName, JSON.stringify(file), function (err) {
+            fs.writeFile("./config.json", JSON.stringify(file), function (err) {
               if (err) return console.log(err);
               console.log(JSON.stringify(file));
-              console.log('writing to ' + fileName);
+              console.log('writing to ' + "./config.json");
             });
 
             res.send(JSON.stringify({
