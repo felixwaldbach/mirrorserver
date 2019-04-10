@@ -220,7 +220,7 @@ router.post('/uploadDjangoIP', verifyToken, async (req, res) => {
             }));
         } else {
             // read ip adress and update config.json
-            file.django_address = "http://" + req.body.djangoIP;
+            file.django_address = req.body.djangoIP;
 
             fs.writeFile("./config.json", JSON.stringify(file), function (err) {
               if (err) return console.log(err);
